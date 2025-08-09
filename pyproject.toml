@@ -3,7 +3,9 @@ requires = ["hatchling>=1"]
 build-backend = "hatchling.build"
 
 [project]
-dependencies = []
+dependencies = [
+    "rich==14.1.0"
+]
 description = "Cloud Skeleton cluster recipes"
 name = "recipes"
 readme = "README.md"
@@ -13,8 +15,15 @@ version = "1.0.0"
 [project.scripts]
 deploy = "shim.__main__:deploy"
 destroy = "shim.__main__:destroy"
+list = "shim.__main__:list"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-  "src/shim",
+    "src/shim"
+]
+
+[tool.uv]
+required-environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'darwin' and platform_machine == 'x86_64'"
 ]
