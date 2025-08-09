@@ -11,9 +11,10 @@ requires-python = ">=3.13"
 version = "1.0.0"
 
 [project.scripts]
-jobs = "nomad_dtree_shim.__main__:main"
+deploy = "shim.__main__:deploy"
+destroy = "shim.__main__:destroy"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-  "src/nomad_dtree_shim",
+  "src/shim",
 ]
