@@ -1,8 +1,11 @@
 from collections.abc import Iterator
+from pathlib import Path
 from subprocess import Popen, PIPE
+from .installer import install
 
 def run(command: str) -> Iterator[str]:
-    process: Popen = Popen(command, stdout = PIPE, shell = True)
+    app: Path = install()
+    process: Popen = Popen(f"{app} {command}", stdout = PIPE, shell = True)
     while True:
         if not process.poll():
             break
