@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 dependencies = [
+    "PyYAML==6.0.2",
     "rich==14.1.0"
 ]
 description = "Cloud Skeleton cluster recipes"
