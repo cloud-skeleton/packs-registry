@@ -1,3 +1,5 @@
-description: Rocketduck CSI NFS driver
-url: https://gitlab.com/rocketduck/csi-plugin-nfs
+description: NFS CSI storage driver
+entrypoint:
+components:
+  - https://gitlab.com/rocketduck/csi-plugin-nfs
 version: 25.08.09

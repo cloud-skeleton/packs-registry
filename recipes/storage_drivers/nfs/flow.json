@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "nginx": {
+      "wait_cond": 5
+    }
+  }
+}
