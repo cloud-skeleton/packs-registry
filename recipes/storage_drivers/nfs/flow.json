@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "nginx": {
-      "wait_cond": 5
-    }
+    "csi-plugin": {}
   }
 }
