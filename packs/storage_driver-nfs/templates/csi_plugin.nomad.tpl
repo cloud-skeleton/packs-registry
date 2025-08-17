@@ -22,7 +22,7 @@ job "[[ meta "pack.name" . ]]-csi_plugin" {
                     "--allow-nested-volumes"
                 ]
                 cpu_hard_limit = true
-                image          = "registry.gitlab.com/rocketduck/csi-plugin-nfs:v[[ var "plugin_version" . ]]"
+                image          = "registry.gitlab.com/rocketduck/csi-plugin-nfs:[[ var "plugin_version" . ]]"
                 network_mode   = "host"
                 privileged     = true
             }
