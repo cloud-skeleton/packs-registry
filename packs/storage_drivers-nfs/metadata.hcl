@@ -3,7 +3,7 @@ app {
 }
 
 pack {
-  name = "Storage Drivers ::: NFS"
+  name = "storage_drivers-nfs"
   description = "NFS CSI storage driver"
   version = "1.0"
 }
