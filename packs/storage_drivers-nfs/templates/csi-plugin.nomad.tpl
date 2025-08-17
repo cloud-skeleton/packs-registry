@@ -1,5 +1,5 @@
 job "csi-plugin" {
-    namespace = "system"
+    namespace = "[[ namespace ]]"
     type      = "system"
 
     constraint {
