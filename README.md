@@ -79,7 +79,9 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
     Apply
 
     ```bash
-    nomad-pack destroy <PACK_NAME>
+    nomad-pack destroy <PACK_NAME> \
+        --var <name1>=<value1> \
+        --var <name2>=<value2>
     ```
 
 ---
