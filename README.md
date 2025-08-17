@@ -54,30 +54,24 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
     nomad-pack info <PACK_NAME>
     ```
 
-    > **Tip:** Use `nomad-pack render <PACK_NAME> -var-file=values.hcl` to see the rendered **[HashiCorp Nomad][hashicorp-nomad]** jobs without deploying.
+    > **Tip:** Use `nomad-pack render <PACK_NAME> --var <name1>=<value1> --var <name2>=<value2>` to see the rendered **[HashiCorp Nomad][hashicorp-nomad]** jobs without deploying.
 
 6. Deploy a **[Nomad Pack][hashicorp-nomad-packs]**:  
 
     Dry-run (plan)
 
     ```bash
-    cat << HCL | nomad-pack plan <PACK_NAME> -f /dev/stdin --name=<instance>
-    name        = "my-app"
-    datacenters = ["home"]
-    namespace   = "default"
-    # other pack-specific variables...  
-    HCL
+    nomad-pack plan <PACK_NAME> \
+        --var <name1>=<value1> \
+        --var <name2>=<value2>
     ```
 
     Apply
 
     ```bash
-    cat << HCL | nomad-pack run <PACK_NAME> -f /dev/stdin --name=<instance>
-    name        = "my-app"
-    datacenters = ["home"]
-    namespace   = "default"
-    # other pack-specific variables...  
-    HCL
+    nomad-pack run <PACK_NAME> \
+        --var <name1>=<value1> \
+        --var <name2>=<value2>
     ```
 
 7. Destroy a **[Nomad Pack][hashicorp-nomad-packs]**:  
@@ -85,7 +79,7 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
     Apply
 
     ```bash
-    cat << HCL | nomad-pack destroy <PACK_NAME> --name <instance>
+    nomad-pack destroy <PACK_NAME>
     ```
 
 ---

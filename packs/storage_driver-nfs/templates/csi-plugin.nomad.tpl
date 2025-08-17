@@ -1,4 +1,4 @@
-job "csi-plugin" {
+job "[[ meta "pack.name" . ]]-csi_plugin" {
     namespace = "[[ var "namespace" . ]]"
     type      = "system"
 
