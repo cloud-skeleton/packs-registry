@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich import box
+from sys import argv
 from typing import Any
 from yaml import safe_load
 from .processor import process
@@ -40,6 +41,15 @@ def destroy() -> None:
     for line in run("--help"):
         print(line)
 
+def info() -> None:
+    if len(argv) < 2:
+        raise SystemExit("Missing recipe!")
+    recipe: Path = recipes_dir / argv[1]
+    if not recipe.is_dir():
+        raise SystemExit("Invalid recipe path!")
+    meta: dict[str, Any] = safe_load((recipe / "meta.yml").read_bytes())
+
+
 def list() -> None:
     console: Console = Console()
     table: Table = Table(
@@ -53,15 +63,15 @@ def list() -> None:
     table.add_column("Description")
     table.add_column("Components")
     for recipe in recipes:
-        meta: dict[str, Any] = safe_load((recipes_dir / recipe / "meta.yml").read_bytes())
-        meta_version: str = meta['version'] or "(no version provided)"
-        meta_description: str = meta['description'] or "(no description provided)"
-        meta_components: str = "(no components provided)"
-        if meta['components']:
-            meta_components = "\n".join([
-                f"[link={component}]{component}[/link]"
-                for component in meta['components']
-            ])
+        # meta: dict[str, Any] = safe_load((recipes_dir / recipe / "meta.yml").read_bytes())
+        # meta_version: str = meta['version'] or "(no version provided)"
+        # meta_description: str = meta['description'] or "(no description provided)"
+        # meta_components: str = "(no components provided)"
+        # if meta['components']:
+        #     meta_components = "\n".join([
+        #         f"[link={component}]{component}[/link]"
+        #         for component in meta['components']
+        #     ])
         table.add_row(str(recipe), meta_version, meta_description, meta_components)
     panel: Panel = Panel.fit(table, border_style = "bright_blue")
     console.print(panel)
