@@ -1,11 +1,11 @@
-job "[[ meta "pack.name" . ]]-csi_plugin" {
-    namespace = "[[ var "namespace" . ]]"
+job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "plugin_id" . ]]" {
+    namespace = "system"
     type      = "system"
 
     constraint {
         attribute = "${node.class}"
         operator  = "="
-        value     = "[[ var "node_class" . ]]"
+        value     = "main-worker"
     }
 
     group "rocketduck/csi-plugin-nfs" {

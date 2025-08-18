@@ -4,20 +4,8 @@ variable "log_level" {
   type        = string
 }
 
-variable "namespace" {
-  default     = "system"
-  description = "Nomad namespace to submit this system job into. Use an existing namespace (e.g., 'system'); if namespaces aren't configured, use 'default'."
-  type        = string
-}
-
 variable "nfs_share" {
   description = "NFS server (hostname/IP) or export to use as the backing store, e.g., nas.lan:/export/nomad."
-  type        = string
-}
-
-variable "node_class" {
-  default     = "main-worker"
-  description = "Nomad node class to target (matches node attribute `node.class`) for scheduling this system job."
   type        = string
 }
 

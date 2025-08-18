@@ -39,7 +39,7 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
 3. Add the **[Packs Registry][packs-registry]**:  
 
     ```bash
-    nomad-pack registry add default github.com/cloud-skeleton/packs-registry
+    nomad-pack registry add cloud-skeleton github.com/cloud-skeleton/packs-registry
     ```
 
 4. Discover available packs:  
