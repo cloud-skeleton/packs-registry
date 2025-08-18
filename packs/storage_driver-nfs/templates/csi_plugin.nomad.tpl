@@ -29,7 +29,6 @@ job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
 
             csi_plugin {
                 health_timeout = "2m"
-                // id             = "[[ var "plugin_id" . ]]"
                 id             = "[[ var "id" . ]]"
                 type           = "monolith"
             }
