@@ -31,7 +31,7 @@ job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
             driver = "docker"
 
             resources {
-                cpu    = 100
+                cpu    = 50
                 memory = 32
             }
         }
