@@ -6,6 +6,8 @@
 
 ## Overview
 
+> **IMPORTANT:** Before deploying any **[Nomad Packs][hashicorp-nomad-packs]**, **you must complete all the prerequisites detailed in the **[Cloud Skeleton][cloud-skeleton]** ► **[Prerequisites][prerequisites]** repository.** This step is essential to ensure that your system meets all the required configurations, dependencies, and security measures necessary for a successful deployment.
+
 The **[Packs Registry][packs-registry]** repository provides a unified, interactive catalog of reusable **[Nomad Packs][hashicorp-nomad-packs]** for deploying and managing services on **[HashiCorp Nomad][hashicorp-nomad]**, tailored for the **[Cloud Skeleton][cloud-skeleton]** infrastructure via pack inputs, variables, and job templates.
 
 ## Usage
@@ -102,7 +104,8 @@ This project is licensed under the [GNU General Public License v3.0](LICENSE).
 *This repository is maintained exclusively by the **[Cloud Skeleton][cloud-skeleton]** project, and it was developed by EU citizens who are strong proponents of the European Federation. 🇪🇺*
 
 <!-- Reference -->
-[cloud-skeleton]: https://github.com/cloud-skeleton/  
-[hashicorp-nomad]: https://developer.hashicorp.com/nomad/tutorials/get-started 
+[cloud-skeleton]: https://github.com/cloud-skeleton/
+[hashicorp-nomad]: https://developer.hashicorp.com/nomad/tutorials/get-started
 [hashicorp-nomad-packs]: https://developer.hashicorp.com/nomad/tools/nomad-pack
-[packs-registry]: https://github.com/cloud-skeleton/packs-registry/  
+[packs-registry]: https://github.com/cloud-skeleton/packs-registry/
+[prerequisites]: https://github.com/cloud-skeleton/prerequisites
