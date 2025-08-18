@@ -1,4 +1,4 @@
-job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "plugin_id" . ]]" {
+job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
     namespace = "system"
     type      = "system"
 
@@ -29,7 +29,8 @@ job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "plugin_id" . ]]" {
 
             csi_plugin {
                 health_timeout = "2m"
-                id             = "[[ var "plugin_id" . ]]"
+                // id             = "[[ var "plugin_id" . ]]"
+                id             = "[[ var "id" . ]]"
                 type           = "monolith"
             }
 

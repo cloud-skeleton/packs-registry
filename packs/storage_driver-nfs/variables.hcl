@@ -1,3 +1,8 @@
+variable "id" {
+  description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
+  type        = string
+}
+
 variable "log_level" {
   default     = "INFO"
   description = "Log verbosity for the CSI plugin process (e.g., TRACE, DEBUG, INFO, WARN, ERROR)."
@@ -9,11 +14,11 @@ variable "nfs_share" {
   type        = string
 }
 
-variable "plugin_id" {
-  default     = "nfs.csi.cloudskeleton.eu"
-  description = "Cluster-unique CSI plugin ID referenced by Nomad volumes (must be stable across upgrades)."
-  type        = string
-}
+// variable "plugin_id" {
+//   default     = "nfs.csi.cloudskeleton.eu"
+//   description = "Cluster-unique CSI plugin ID referenced by Nomad volumes (must be stable across upgrades)."
+//   type        = string
+// }
 
 variable "plugin_version" {
   default     = "1.1.0"
