@@ -1,10 +1,4 @@
 job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
-    constraint {
-        attribute = "${node.class}"
-        operator  = "="
-        value     = "main-worker"
-    }
-
     group "rocketduck/csi-plugin-nfs" {
         task "plugin" {
             config {

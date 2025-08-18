@@ -1,7 +1,7 @@
 CSI volumes can be created with the Nomad CLI:
 
 ```
-cat << VOL | nomad volume create -
+cat << VOL | nomad volume create --namespace {{ nomad_namespace }} -
 id        = "{{ csi_volume_name }}"
 name      = "{{ csi_volume_name }}"
 plugin_id = "[[ var "id" . ]]"
@@ -16,10 +16,10 @@ VOL
 
 They can be destroyed with:
 ```
-nomad volume delete "{{ csi_volume_name }}"
+nomad volume delete --namespace {{ nomad_namespace }} "{{ csi_volume_name }}"
 ```
 
 Or deregistered (to retain the underlying data) with:
 ```
-nomad volume deregister "{{ csi_volume_name }}"
+nomad volume deregister --namespace {{ nomad_namespace }} "{{ csi_volume_name }}"
 ```

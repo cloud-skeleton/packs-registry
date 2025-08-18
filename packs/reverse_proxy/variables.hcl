@@ -9,8 +9,8 @@ variable "traefik_version" {
   type        = string
 }
 
-variable "certificates_volume" {
-  default     = "certificates"
-  description = "Name of the CSI volume used to store and share TLS certificates for the ingress load balancer (Traefik)."
+variable "certificates_volume_id" {
+  default     = "reverse_proxy-certificates"
+  description = "ID of the CSI volume used to store and share TLS certificates for the ingress load balancer (Traefik)."
   type        = string
 }
