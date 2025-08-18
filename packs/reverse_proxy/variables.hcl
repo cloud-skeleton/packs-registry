@@ -1,22 +1,16 @@
-// variable "log_level" {
-//   default     = "INFO"
-//   description = "Log verbosity for the CSI plugin process (e.g., TRACE, DEBUG, INFO, WARN, ERROR)."
-//   type        = string
-// }
+variable "id" {
+  description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
+  type        = string
+}
 
-// variable "nfs_share" {
-//   description = "NFS server (hostname/IP) or export to use as the backing store, e.g., nas.lan:/export/nomad."
-//   type        = string
-// }
+variable "traefik_version" {
+  default     = "3.5.0"
+  description = "Container image version tag for the Traefik (maps to `traefik:v<version>`)."
+  type        = string
+}
 
-// variable "plugin_id" {
-//   default     = "nfs.csi.cloudskeleton.eu"
-//   description = "Cluster-unique CSI plugin ID referenced by Nomad volumes (must be stable across upgrades)."
-//   type        = string
-// }
-
-// variable "plugin_version" {
-//   default     = "1.1.0"
-//   description = "Container image version tag for the CSI plugin (maps to `registry.gitlab.com/rocketduck/csi-plugin-nfs:v<version>`)."
-//   type        = string
-// }
+variable "certificates_volume" {
+  default     = "certificates"
+  description = "Name of the CSI volume used to store and share TLS certificates for the ingress load balancer (Traefik)."
+  type        = string
+}

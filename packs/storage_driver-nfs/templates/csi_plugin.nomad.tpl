@@ -10,8 +10,6 @@ job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
 
     group "rocketduck/csi-plugin-nfs" {
         task "plugin" {
-            driver = "docker"
-
             config {
                 args = [
                     "--node-id=${attr.unique.hostname}",
@@ -32,6 +30,8 @@ job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
                 id             = "[[ var "id" . ]]"
                 type           = "monolith"
             }
+
+            driver = "docker"
 
             resources {
                 cpu    = 50
