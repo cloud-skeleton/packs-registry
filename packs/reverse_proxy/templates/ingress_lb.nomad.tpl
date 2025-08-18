@@ -1,7 +1,4 @@
 job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
-    namespace = "system"
-    type      = "system"
-
     constraint {
         attribute = "${node.class}"
         operator  = "="
@@ -24,11 +21,14 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
         }
 
         volume "certificates" {
-            type            = "csi"
-            source          = "[[ var "certificates_volume" . ]]"
-            read_only       = false
             access_mode     = "multi-node-multi-writer"
             attachment_mode = "file-system"
+            read_only       = false
+            source          = "[[ var "certificates_volume" . ]]"
+            type            = "csi"
         }
     }
+
+    namespace = "system"
+    type      = "system"
 }

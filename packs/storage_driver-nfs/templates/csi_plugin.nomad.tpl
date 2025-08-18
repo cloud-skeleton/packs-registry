@@ -1,7 +1,4 @@
 job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
-    namespace = "system"
-    type      = "system"
-
     constraint {
         attribute = "${node.class}"
         operator  = "="
@@ -39,4 +36,7 @@ job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
             }
         }
     }
+
+    namespace = "system"
+    type      = "system"
 }
