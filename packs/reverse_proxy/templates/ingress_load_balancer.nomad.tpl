@@ -63,7 +63,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
 
             resources {
                 cpu    = 100
-                memory = 32
+                memory = 64
             }
 
             [[- with var "dns_challenge" . ]]
@@ -191,36 +191,28 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                             middlewares:
                                 - success-response
                             priority: 1000
-                            rule: >-
-                                Host("[[ var "traefik_hostname" . ]]")
-                                    && ClientIP("64.41.200.0/24")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("64.41.200.0/24")
                             service: noop@internal
 
                         traefik-dashboard:
                             middlewares:
                                 - admin-ip-only
                             priority: 1000
-                            rule: >-
-                                Host("[[ var "traefik_hostname" . ]]")
-                                    && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
+                            rule: Host("[[ var "traefik_hostname" . ]]") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
                         traefik-dashboard-redirect:
                             middlewares:
                                 - traefik-dashboard-redirect
                             priority: 1000
-                            rule: >-
-                                Host("[[ var "traefik_hostname" . ]]")
-                                    && Path("/")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && Path("/")
                             service: noop@internal
 
                         traefik-ping:
                             middlewares:
                                 - local-ip-only
                             priority: 1000
-                            rule: >-
-                                Host("[[ var "traefik_hostname" . ]]")
-                                    && Path("/ping")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && Path("/ping")
                             service: ping@internal
 
                     serversTransports:
