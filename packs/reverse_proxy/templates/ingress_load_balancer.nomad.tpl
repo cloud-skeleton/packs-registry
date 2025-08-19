@@ -47,7 +47,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
             driver = "docker"
 
             resources {
-                cpu    = 1000
+                cpu    = 100
                 memory = 32
             }
 
@@ -65,7 +65,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 #      storage: /certificates/acme.json
                 entrypoints:
                 http:
-                    address: :{{ env "NOMAD_ADDR_http" }}
+                    address: {{ env "NOMAD_ADDR_http" }}
                     http:
                     encodeQuerySemicolons: true
                     redirections:
@@ -75,7 +75,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                     http3: {}
                     reusePort: true
                 https:
-                    address: :{{ env "NOMAD_ADDR_https" }}
+                    address: {{ env "NOMAD_ADDR_https" }}
                     asDefault: true
                     http:
                     encodeQuerySemicolons: true
@@ -109,94 +109,97 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 data = <<-EOF
                 ---
                 http:
-                middlewares:
-                    admin-ip-only:
-                    IPAllowList:
-                        sourceRange:
-                        - ${ADMIN_ALLOW_IP_CIDR_1}
-                        - ${ADMIN_ALLOW_IP_CIDR_2}
-
-                    local-ip-only:
-                    IPAllowList:
-                        sourceRange:
-                        - 127.0.0.0/8
-                        - ::1/128
-                        - ${TRAEFIK_PRIVATE_IP}
-
-                    security-headers:
-                    headers:
-                        browserXssFilter: true
-                        contentTypeNosniff: true
-                        forceStsHeader: true
-                        frameDeny: true
-                        stsIncludeSubdomains: true
-                        stsPreload: true
-                        stsSeconds: 31536000
-
-                    success-response:
-                    plugin:
-                        static-response:
-                        fallback:
-                            statusCode: 200
-
-                    traefik-dashboard-redirect:
-                    redirectRegex:
-                        permanent: true
-                        regex: "^(.+)/$"
-                        replacement: "$${1}/dashboard/"
-
-                routers:
-                    ssllabs-certificate-validation:
                     middlewares:
-                        - success-response
-                    priority: 1000
-                    rule: >
-                        Host("${TRAEFIK_HOSTNAME}") && ClientIP("${SSL_LABS_CIDR}")
-                    service: noop@internal
+                        admin-ip-only:
+                            IPAllowList:
+                                sourceRange: [[ if eq (len (var "admin_ip_cidrs" .)) 0 ]][][[ end ]]
+                                [[- if gt (len (var "admin_ip_cidrs" .)) 0 ]]
+                                [[- range $cidr := var "admin_ip_cidrs" . ]]
+                                    - [[ $cidr ]]
+                                [[- end ]]
+                                [[- end ]]
 
-                    traefik-dashboard:
-                    middlewares:
-                        - admin-ip-only
-                    priority: 1000
-                    rule: >
-                        Host("${TRAEFIK_HOSTNAME}") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
-                    service: api@internal
+                        local-ip-only:
+                            IPAllowList:
+                                sourceRange:
+                                - 127.0.0.0/8
+                                - ::1/128
+                                - {{ env "NOMAD_IP_http" }}
 
-                    traefik-dashboard-redirect:
-                    middlewares:
-                        - traefik-dashboard-redirect
-                    priority: 1000
-                    rule: Host("${TRAEFIK_HOSTNAME}") && Path("/")
-                    service: noop@internal
+                        security-headers:
+                            headers:
+                                browserXssFilter: true
+                                contentTypeNosniff: true
+                                forceStsHeader: true
+                                frameDeny: true
+                                stsIncludeSubdomains: true
+                                stsPreload: true
+                                stsSeconds: 31536000
 
-                    traefik-ping:
-                    middlewares:
-                        - local-ip-only
-                    priority: 1000
-                    rule: Host("${TRAEFIK_HOSTNAME}") && Path("/ping")
-                    service: ping@internal
+                        success-response:
+                            plugin:
+                                static-response:
+                                fallback:
+                                    statusCode: 200
 
-                serversTransports:
-                    self-signed:
-                    insecureSkipVerify: true
+                        traefik-dashboard-redirect:
+                            redirectRegex:
+                                permanent: true
+                                regex: "^(.+)/$"
+                                replacement: "$${1}/dashboard/"
 
-                tls:
-                options:
-                    default:
-                    cipherSuites:
-                        - TLS_AES_256_GCM_SHA384
-                        - TLS_CHACHA20_POLY1305_SHA256
-                        - TLS_AES_128_GCM_SHA256
-                        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
-                        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-                        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
-                    curvePreferences:
-                        - secp521r1
-                        - secp384r1
-                        - x25519
-                        - secp256r1
-                    minVersion: VersionTLS12
-                    sniStrict: true
+                    routers:
+                        ssllabs-certificate-validation:
+                            middlewares:
+                                - success-response
+                            priority: 1000
+                            rule: >
+                                Host("${TRAEFIK_HOSTNAME}") && ClientIP("64.41.200.0/24")
+                            service: noop@internal
+
+                        traefik-dashboard:
+                            middlewares:
+                                - admin-ip-only
+                            priority: 1000
+                            rule: >
+                                Host("${TRAEFIK_HOSTNAME}") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
+                            service: api@internal
+
+                        traefik-dashboard-redirect:
+                            middlewares:
+                                - traefik-dashboard-redirect
+                            priority: 1000
+                            rule: Host("${TRAEFIK_HOSTNAME}") && Path("/")
+                            service: noop@internal
+
+                        traefik-ping:
+                            middlewares:
+                                - local-ip-only
+                            priority: 1000
+                            rule: Host("${TRAEFIK_HOSTNAME}") && Path("/ping")
+                            service: ping@internal
+
+                    serversTransports:
+                        self-signed:
+                            insecureSkipVerify: true
+
+                    tls:
+                        options:
+                            default:
+                                cipherSuites:
+                                    - TLS_AES_256_GCM_SHA384
+                                    - TLS_CHACHA20_POLY1305_SHA256
+                                    - TLS_AES_128_GCM_SHA256
+                                    - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+                                    - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+                                    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+                                curvePreferences:
+                                    - secp521r1
+                                    - secp384r1
+                                    - x25519
+                                    - secp256r1
+                                minVersion: VersionTLS12
+                                sniStrict: true
                 ...
                 EOF
                 destination = "local/traefik_dynamic.yml"

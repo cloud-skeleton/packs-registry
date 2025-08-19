@@ -14,3 +14,9 @@ variable "certificates_volume_id" {
   description = "ID of the CSI volume used to store and share TLS certificates for the ingress load balancer (Traefik)."
   type        = string
 }
+
+variable "admin_ip_cidrs" {
+  default     = []
+  description = "List of CIDR ranges allowed to access the Traefik admin/dashboard endpoints."
+  type        = set(string)
+}
