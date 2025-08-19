@@ -11,12 +11,10 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
 
             port "http" {
                 static = 80
-                to     = 80
             }
 
             port "https" {
                 static = 443
-                to     = 443
             }
         }
 
@@ -67,7 +65,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 #      storage: /certificates/acme.json
                 entrypoints:
                 http:
-                    address: :80
+                    address: :{{ env "NOMAD_ADDR_http" }}
                     http:
                     encodeQuerySemicolons: true
                     redirections:
@@ -77,7 +75,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                     http3: {}
                     reusePort: true
                 https:
-                    address: :443
+                    address: :{{ env "NOMAD_ADDR_https" }}
                     asDefault: true
                     http:
                     encodeQuerySemicolons: true
