@@ -24,6 +24,11 @@ variable "id" {
     type        = string
 }
 
+variable "traefik_hostname" {
+    description = "The hostname (FQDN) used to access the Traefik dashboard. This is the domain that Traefik will serve its web UI on."
+    type        = string
+}
+
 variable "traefik_version" {
     default     = "3.5.0"
     description = "Container image version tag for the Traefik (maps to `traefik:v<version>`)."
