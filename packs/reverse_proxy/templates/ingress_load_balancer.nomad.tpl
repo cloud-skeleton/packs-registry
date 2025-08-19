@@ -65,7 +65,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                             storage: /certificates/acme.json
                 entrypoints:
                     http:
-                        address: {{ env "NOMAD_ADDR_http" }}
+                        address: :{{ env "NOMAD_PORT_http" }}
                         http:
                             encodeQuerySemicolons: true
                             redirections:
@@ -75,7 +75,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                         http3: {}
                         reusePort: true
                     https:
-                        address: {{ env "NOMAD_ADDR_https" }}
+                        address: :{{ env "NOMAD_PORT_https" }}
                         asDefault: true
                         http:
                             encodeQuerySemicolons: true
@@ -124,7 +124,6 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 sourceRange:
                                     - 127.0.0.0/8
                                     - ::1/128
-                                    - {{ env "NOMAD_IP_http" }}/32
 
                         security-headers:
                             headers:
@@ -154,7 +153,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 - success-response
                             priority: 1000
                             rule: >
-                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                Host("{{ env "NOMAD_IP_http" }}")
                                     && ClientIP("64.41.200.0/24")
                             service: noop@internal
 
@@ -163,7 +162,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 - admin-ip-only
                             priority: 1000
                             rule: >
-                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                Host("{{ env "NOMAD_IP_http" }}")
                                     && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
@@ -172,7 +171,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 - traefik-dashboard-redirect
                             priority: 1000
                             rule: >
-                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                Host("{{ env "NOMAD_IP_http" }}")
                                     && Path("/")
                             service: noop@internal
 
@@ -181,7 +180,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 - local-ip-only
                             priority: 1000
                             rule: >
-                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                Host("{{ env "NOMAD_IP_http" }}")
                                     && Path("/ping")
                             service: ping@internal
 
