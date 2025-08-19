@@ -46,6 +46,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
 
             driver = "docker"
 
+            // @TODO: To be removed once https://github.com/hashicorp/nomad/issues/15459 is fixed!
             [[- with var "dns_challenge" . ]]
             [[- if gt (len (.variables)) 0 ]]
             env {
@@ -60,6 +61,19 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 cpu    = 100
                 memory = 32
             }
+
+            // @TODO: Can't use variables until https://github.com/hashicorp/nomad/issues/15459 is fixed!
+            // template {
+            //     data = <<-EOF
+            //     {{- with nomadVar "nomad/jobs/[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]/traefik/service/dns_challenge_provider_vars" }}
+            //     {{- range $name, $value := . }}
+            //     {{ $name }}={{ $value }}
+            //     {{- end }}
+            //     {{- end }}
+            //     EOF
+            //     destination = "local/env"
+            //     env = true
+            // }
 
             template {
                 data = <<-EOF
