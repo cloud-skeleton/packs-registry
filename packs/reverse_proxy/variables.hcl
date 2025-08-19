@@ -10,6 +10,15 @@ variable "certificates_volume_id" {
     type        = string
 }
 
+variable "dns_challenge" {
+    description = "Configuration for DNS-01 ACME challenge used by Traefik"
+    type = object({
+        email     = string
+        provider  = string
+        variables = map(string)
+    })
+}
+
 variable "id" {
     description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
     type        = string

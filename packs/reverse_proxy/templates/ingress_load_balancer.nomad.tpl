@@ -58,9 +58,11 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 certificatesResolvers:
                     lets-encrypt:
                         acme:
+                            [[- with var "dns_challenge" . ]]
                             dnsChallenge:
-                                provider: ${DNS_PROVIDER}
-                            email: ${CERTIFICATE_EMAIL}
+                                provider: [[ .provider ]]
+                            email: [[ .email ]]
+                            [[- end ]]
                             keyType: EC384
                             storage: /certificates/acme.json
                 entrypoints:
