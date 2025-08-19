@@ -75,6 +75,19 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
             [[- end ]]
             [[- end ]]
 
+            // @TODO: Can't be used as variables are broken https://github.com/hashicorp/nomad/issues/15459
+            // template {
+            //     data = <<-EOF
+            //     {{- with nomadVar "nomad/jobs/reverse_proxy-ingress_load_balancer-main/traefik/service/dns_challenge_provider_vars" }}
+            //     {{- range $name, $value := . }}
+            //     {{ $name }}={{ $value }}
+            //     {{- end }}
+            //     {{- end }}
+            //     EOF
+            //     destination = "secrets/env"
+            //     env         = true
+            // }
+
             template {
                 data = <<-EOF
                 ---
