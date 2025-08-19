@@ -133,7 +133,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                     checkNewVersion: false
                     sendAnonymousUsage: false
                 log:
-                    level: INFO
+                    level: [[ var "log_level" . ]]
                 ping:
                     manualRouting: true
                 providers:

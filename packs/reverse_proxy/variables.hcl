@@ -24,6 +24,12 @@ variable "id" {
     type        = string
 }
 
+variable "log_level" {
+    default     = "INFO"
+    description = "Log verbosity for the Traefik process (e.g., PANIC, FATAL, ERROR, WARN, INFO, DEBUG)."
+    type        = string
+}
+
 variable "traefik_hostname" {
     description = "The hostname (FQDN) used to access the Traefik dashboard. This is the domain that Traefik will serve its web UI on."
     type        = string
