@@ -7,12 +7,16 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
 
     group "traefik" {
         network {
+            mode = "cni/bridge"
+
             port "http" {
                 static = 80
+                to     = 80
             }
 
             port "https" {
                 static = 443
+                to     = 443
             }
         }
 
@@ -32,7 +36,6 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
             config {
                 cpu_hard_limit = true
                 image          = "traefik:v[[ var "traefik_version" . ]]"
-                network_mode   = "host"
                 ports = [
                     "http",
                     "https"
@@ -202,8 +205,8 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
             }
 
             volume_mount {
-                volume      = "certificates"
                 destination = "/certificates"
+                volume      = "certificates"
             }
         }
 
