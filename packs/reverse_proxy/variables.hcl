@@ -11,7 +11,7 @@ variable "certificates_volume_id" {
 }
 
 variable "dns_challenge" {
-    description = "Configuration for DNS-01 ACME challenge used by Traefik"
+    description = "Configuration for DNS-01 ACME challenge used by Traefik. More info @ https://go-acme.github.io/lego/dns/."
     type = object({
         email     = string
         provider  = string
