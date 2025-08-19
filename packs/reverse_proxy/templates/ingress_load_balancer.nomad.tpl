@@ -55,51 +55,51 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 data = <<-EOF
                 ---
                 api: {}
-                #certificatesResolvers:
-                #  lets-encrypt:
-                #    acme:
-                #      dnsChallenge:
-                #        provider: ${DNS_PROVIDER}
-                #      email: ${CERTIFICATE_EMAIL}
-                #      keyType: EC384
-                #      storage: /certificates/acme.json
+                certificatesResolvers:
+                    lets-encrypt:
+                        acme:
+                            dnsChallenge:
+                                provider: ${DNS_PROVIDER}
+                            email: ${CERTIFICATE_EMAIL}
+                            keyType: EC384
+                            storage: /certificates/acme.json
                 entrypoints:
-                http:
-                    address: {{ env "NOMAD_ADDR_http" }}
                     http:
-                    encodeQuerySemicolons: true
-                    redirections:
-                        entryPoint:
-                        permanent: true
-                        to: https
-                    http3: {}
-                    reusePort: true
-                https:
-                    address: {{ env "NOMAD_ADDR_https" }}
-                    asDefault: true
-                    http:
-                    encodeQuerySemicolons: true
-                    middlewares:
-                    - security-headers@file
-                    tls:
-                        certResolver: lets-encrypt
-                    http3: {}
-                    reusePort: true
+                        address: {{ env "NOMAD_ADDR_http" }}
+                        http:
+                            encodeQuerySemicolons: true
+                            redirections:
+                                entryPoint:
+                                    permanent: true
+                                    to: https
+                        http3: {}
+                        reusePort: true
+                    https:
+                        address: {{ env "NOMAD_ADDR_https" }}
+                        asDefault: true
+                        http:
+                            encodeQuerySemicolons: true
+                            middlewares:
+                                - security-headers@file
+                            tls:
+                                certResolver: lets-encrypt
+                        http3: {}
+                        reusePort: true
                 experimental:
-                plugins:
-                static-response:
-                    moduleName: github.com/tuxgal/traefik_inline_response
-                    version: v0.1.2
+                    plugins:
+                        static-response:
+                            moduleName: github.com/tuxgal/traefik_inline_response
+                            version: v0.1.2
                 global:
-                checkNewVersion: false
-                sendAnonymousUsage: false
+                    checkNewVersion: false
+                    sendAnonymousUsage: false
                 log:
-                level: INFO
+                    level: INFO
                 ping:
-                manualRouting: true
-                #providers:
-                #  file:
-                #    filename: /etc/traefik/dynamic.yml
+                    manualRouting: true
+                providers:
+                    file:
+                        filename: /etc/traefik/dynamic.yml
                 ...
                 EOF
                 destination = "local/traefik_static.yml"
@@ -124,7 +124,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 sourceRange:
                                 - 127.0.0.0/8
                                 - ::1/128
-                                - {{ env "NOMAD_IP_http" }}
+                                - {{ env "NOMAD_IP_http" }}/32
 
                         security-headers:
                             headers:
@@ -154,7 +154,8 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 - success-response
                             priority: 1000
                             rule: >
-                                Host("${TRAEFIK_HOSTNAME}") && ClientIP("64.41.200.0/24")
+                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                    && ClientIP("64.41.200.0/24")
                             service: noop@internal
 
                         traefik-dashboard:
@@ -162,21 +163,26 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                                 - admin-ip-only
                             priority: 1000
                             rule: >
-                                Host("${TRAEFIK_HOSTNAME}") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
+                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                    && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
                         traefik-dashboard-redirect:
                             middlewares:
                                 - traefik-dashboard-redirect
                             priority: 1000
-                            rule: Host("${TRAEFIK_HOSTNAME}") && Path("/")
+                            rule: >
+                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                    && Path("/")
                             service: noop@internal
 
                         traefik-ping:
                             middlewares:
                                 - local-ip-only
                             priority: 1000
-                            rule: Host("${TRAEFIK_HOSTNAME}") && Path("/ping")
+                            rule: >
+                                Host("{{ env "NOMAD_HOST_IP_http" }}")
+                                    && Path("/ping")
                             service: ping@internal
 
                     serversTransports:
