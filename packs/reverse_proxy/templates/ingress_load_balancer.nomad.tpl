@@ -122,9 +122,9 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                         local-ip-only:
                             IPAllowList:
                                 sourceRange:
-                                - 127.0.0.0/8
-                                - ::1/128
-                                - {{ env "NOMAD_IP_http" }}/32
+                                    - 127.0.0.0/8
+                                    - ::1/128
+                                    - {{ env "NOMAD_IP_http" }}/32
 
                         security-headers:
                             headers:
@@ -139,8 +139,8 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                         success-response:
                             plugin:
                                 static-response:
-                                fallback:
-                                    statusCode: 200
+                                    fallback:
+                                        statusCode: 200
 
                         traefik-dashboard-redirect:
                             redirectRegex:
@@ -189,23 +189,23 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                         self-signed:
                             insecureSkipVerify: true
 
-                    tls:
-                        options:
-                            default:
-                                cipherSuites:
-                                    - TLS_AES_256_GCM_SHA384
-                                    - TLS_CHACHA20_POLY1305_SHA256
-                                    - TLS_AES_128_GCM_SHA256
-                                    - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
-                                    - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-                                    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
-                                curvePreferences:
-                                    - secp521r1
-                                    - secp384r1
-                                    - x25519
-                                    - secp256r1
-                                minVersion: VersionTLS12
-                                sniStrict: true
+                tls:
+                    options:
+                        default:
+                            cipherSuites:
+                                - TLS_AES_256_GCM_SHA384
+                                - TLS_CHACHA20_POLY1305_SHA256
+                                - TLS_AES_128_GCM_SHA256
+                                - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+                                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+                                - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+                            curvePreferences:
+                                - secp521r1
+                                - secp384r1
+                                - x25519
+                                - secp256r1
+                            minVersion: VersionTLS12
+                            sniStrict: true
                 ...
                 EOF
                 destination = "local/traefik_dynamic.yml"
