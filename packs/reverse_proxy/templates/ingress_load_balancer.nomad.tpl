@@ -46,6 +46,16 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
 
             driver = "docker"
 
+            [[- with var "dns_challenge" . ]]
+            [[- if gt (len (.variables)) 0 ]]
+            env {
+                [[- range $name, $value := .variables ]]
+                [[ $name ]] = "[[ $value ]]"
+                [[- end ]]
+            }
+            [[- end ]]
+            [[- end ]]
+
             resources {
                 cpu    = 100
                 memory = 32
