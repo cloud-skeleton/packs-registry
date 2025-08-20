@@ -7,7 +7,8 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
 
     group "traefik" {
         network {
-            mode = "cni/bridge"
+            // @TODO: Can't use any other name because of https://github.com/hashicorp/nomad/issues/16455
+            mode = "cni/nomad"
 
             port "http" {
                 static = 80
