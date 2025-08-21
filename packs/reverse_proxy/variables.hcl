@@ -10,13 +10,9 @@ variable "certificates_volume_id" {
     type        = string
 }
 
-variable "dns_challenge" {
-    description = "Configuration for DNS-01 ACME challenge used by Traefik. More info @ https://go-acme.github.io/lego/dns/."
-    type = object({
-        email     = string
-        provider  = string
-        variables = map(string)
-    })
+variable "dns_provider" {
+    description = "DNS-01 ACME challenge provider used by Traefik. More info @ https://go-acme.github.io/lego/dns/."
+    type = string
 }
 
 variable "id" {

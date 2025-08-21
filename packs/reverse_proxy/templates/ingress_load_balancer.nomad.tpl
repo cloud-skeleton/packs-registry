@@ -41,53 +41,28 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 ]
                 volumes = [
                     "local/traefik_dynamic.yml:/etc/traefik/dynamic.yml",
-                    "local/traefik_static.yml:/etc/traefik/traefik.yml",
-                    [[- with var "dns_challenge" . ]]
-                    [[- range $name, $_ := .variables ]]
-                    "secrets/dns_challenge/[[ $name ]]:/run/secrets/dns_challenge/[[ $name ]]",
-                    [[- end ]]
-                    [[- end ]]
+                    "local/traefik_static.yml:/etc/traefik/traefik.yml"
                 ]
             }
 
             driver = "docker"
-
-            [[- with var "dns_challenge" . ]]
-            [[- if gt (len (.variables)) 0 ]]
-            env {
-                [[- range $name, $value := .variables ]]
-                [[ $name ]]_FILE = "/run/secrets/dns_challenge/[[ $name ]]"
-                [[- end ]]
-            }
-            [[- end ]]
-            [[- end ]]
 
             resources {
                 cpu    = 100
                 memory = 64
             }
 
-            [[- with var "dns_challenge" . ]]
-            [[- range $name, $value := .variables ]]
             template {
-                data        = "[[ $value ]]"
-                destination = "secrets/dns_challenge/[[ $name ]]"
+                data = <<-EOF
+                {{- with nomadVar "nomad/jobs/[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]/traefik/service" }}
+                {{- range $name, $value := . }}
+                {{ $name }}={{ $value }}
+                {{- end }}
+                {{- end }}
+                EOF
+                destination = "secrets/env"
+                env         = true
             }
-            [[- end ]]
-            [[- end ]]
-
-            // @TODO: Can't be used as variables are broken https://github.com/hashicorp/nomad/issues/15459
-            // template {
-            //     data = <<-EOF
-            //     {{- with nomadVar "nomad/jobs/reverse_proxy-ingress_load_balancer-main/traefik/service/dns_challenge_provider_vars" }}
-            //     {{- range $name, $value := . }}
-            //     {{ $name }}={{ $value }}
-            //     {{- end }}
-            //     {{- end }}
-            //     EOF
-            //     destination = "secrets/env"
-            //     env         = true
-            // }
 
             template {
                 data = <<-EOF
@@ -96,11 +71,8 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 certificatesResolvers:
                     lets-encrypt:
                         acme:
-                            [[- with var "dns_challenge" . ]]
                             dnsChallenge:
-                                provider: [[ .provider ]]
-                            email: [[ .email ]]
-                            [[- end ]]
+                                provider: [[ var "dns_provider" . ]]
                             keyType: EC384
                             storage: /certificates/acme.json
                 entrypoints:
