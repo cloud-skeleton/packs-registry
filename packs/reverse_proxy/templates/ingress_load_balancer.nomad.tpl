@@ -23,6 +23,11 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             address = "[[ var "traefik_hostname" . ]]"
 
             check {
+                check_restart {
+                    limit = 3
+                    grace = "2m"
+                }
+
                 interval = "30s"
                 path     = "/ping" 
                 port     = "https"
@@ -34,7 +39,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             name     = "[[ template "service_name" (list . "ingress_load_balancer") ]]"
             port     = "https"
             provider = "nomad"
-            tags     = []
+            task     = "service"
         }
 
         task "service" {
