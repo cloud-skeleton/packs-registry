@@ -1,4 +1,4 @@
-job "[[ meta "pack.name" . ]]-csi_plugin-[[ var "id" . ]]" {
+job "[[ template "job_name" (list . "csi_plugin") ]]" {
     group "rocketduck/csi-plugin-nfs" {
         task "plugin" {
             config {
