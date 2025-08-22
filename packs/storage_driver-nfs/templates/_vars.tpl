@@ -1,1 +1,11 @@
-../../../shared/_vars.tpl
+[[- define "job_name" -]]
+[[- $root := index . 0 -]]
+[[- $name  := index . 1 -]]
+[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
+[[- end -]]
+
+[[- define "service_name" -]]
+[[- $root := index . 0 -]]
+[[- $name  := index . 1 -]]
+[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" | trunc 63 ]]
+[[- end -]]
