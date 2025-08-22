@@ -19,6 +19,24 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
         }
 
+        service {
+            address = "[[ var "traefik_hostname" . ]]"
+
+            check {
+                interval = "30s"
+                path     = "/ping" 
+                port     = "https"
+                protocol = "https"
+                timeout  = "5s"
+                type     = "http"
+            }
+
+            name     = "[[ template "service_name" (list . "ingress_load_balancer") ]]"
+            port     = "https"
+            provider = "nomad"
+            tags     = []
+        }
+
         task "service" {
             config {
                 cpu_hard_limit = true
@@ -49,24 +67,6 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             resources {
                 cpu    = 100
                 memory = 64
-            }
-
-            service {
-                address = "[[ var "traefik_hostname" . ]]"
-
-                check {
-                    interval        = "30s"
-                    path            = "/ping" 
-                    port            = "https"
-                    protocol        = "https"
-                    timeout         = "5s"
-                    type            = "http"
-                }
-
-                name = "[[ template "service_name" (list . "ingress_load_balancer") ]]"
-                port = "https"
-                provider = "nomad"
-                tags = []
             }
 
             template {
