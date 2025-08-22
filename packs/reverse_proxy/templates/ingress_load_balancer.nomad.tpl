@@ -1,4 +1,4 @@
-job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
+job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
     constraint {
         attribute = "${node.class}"
         operator  = "="
@@ -19,29 +19,28 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
             }
         }
 
-        // service {
-        //     name = "traefik"
-
-        //     check {
-        //         interval = "10s"
-        //         name     = "alive"
-        //         port     = "http"
-        //         timeout  = "2s"
-        //         type     = "tcp"
-        //     }
-        // }
-
         task "service" {
             config {
                 cpu_hard_limit = true
                 image          = "traefik:v[[ var "traefik_version" . ]]"
+
+                mount {
+                    type     = "bind"
+                    target   = "/etc/traefik/dynamic.yml"
+                    source   = "local/traefik_dynamic.yml"
+                    readonly = true
+                }
+
+                mount {
+                    type     = "bind"
+                    target   = "/etc/traefik/traefik.yml"
+                    source   = "local/traefik_static.yml"
+                    readonly = true
+                }
+
                 ports = [
                     "http",
                     "https"
-                ]
-                volumes = [
-                    "local/traefik_dynamic.yml:/etc/traefik/dynamic.yml",
-                    "local/traefik_static.yml:/etc/traefik/traefik.yml"
                 ]
             }
 
@@ -52,9 +51,27 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                 memory = 64
             }
 
+            service {
+                address = "[[ var "traefik_hostname" . ]]"
+
+                check {
+                    interval        = "30s"
+                    path            = "/ping" 
+                    port            = "https"
+                    protocol        = "https"
+                    timeout         = "5s"
+                    type            = "http"
+                }
+
+                name = "[[ template "service_name" (list . "ingress_load_balancer") ]]"
+                port = "https"
+                provider = "nomad"
+                tags = []
+            }
+
             template {
                 data = <<-EOF
-                {{- with nomadVar "nomad/jobs/[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]/traefik/service" }}
+                {{- with nomadVar "nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}
                 {{- end }}
@@ -134,8 +151,7 @@ job "[[ meta "pack.name" . ]]-ingress_load_balancer-[[ var "id" . ]]" {
                         local-ip-only:
                             IPAllowList:
                                 sourceRange:
-                                    - 127.0.0.0/8
-                                    - ::1/128
+                                    - {{ env "NOMAD_HOST_IP_https" }}
 
                         security-headers:
                             headers:
