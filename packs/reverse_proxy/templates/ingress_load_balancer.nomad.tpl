@@ -76,7 +76,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             template {
                 data = <<-EOF
-                {{- with nomadVar "nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service" }}
+                {{- with nomadVar "nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service/dns" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}
                 {{- end }}
