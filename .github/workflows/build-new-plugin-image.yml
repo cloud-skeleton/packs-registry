@@ -1,0 +1,104 @@
+# jobs:
+#   build-new-plugin-image:
+#     if: needs.check-latest-tag.outputs.is-new == '1'
+#     name: Build new plugin image
+#     needs:
+#       - check-latest-tag
+#     permissions:
+#       contents: read
+#       packages: write
+#     runs-on: ubuntu-24.04
+#     steps:
+#       - id: checkout-repository-code
+#         name: Checkout repository code
+#         uses: actions/checkout@v3
+
+#       - id: log-in-to-github-container-registry
+#         name: Log in to GitHub Container Registry
+#         uses: docker/login-action@v2
+#         with:
+#           password: ${{ secrets.GITHUB_TOKEN }}
+#           registry: ghcr.io
+#           username: ${{ github.actor }}
+
+#       - id: extract-original-docker-image
+#         name: Extract original Docker image
+#         uses: shrink/actions-docker-extract@v3
+#         with:
+#           destination: rootfs
+#           image: democraticcsi/democratic-csi:${{ needs.check-latest-tag.outputs.latest-in-docker-hub }}
+#           path: .
+
+#       - id: copy-override-files
+#         name: Copy override files
+#         run: >
+#           cp -rvf override/. rootfs/
+
+#       - id: create-docker-plugin
+#         name: Create Docker Plugin
+#         run: >
+#           docker plugin create
+#           ghcr.io/cloud-skeleton/democratic-csi-swarm:${{ needs.check-latest-tag.outputs.latest-in-docker-hub }}
+#           .
+
+#       - id: push-docker-plugin
+#         name: Push Docker plugin
+#         run: >
+#           docker plugin push
+#           ghcr.io/cloud-skeleton/democratic-csi-swarm:${{ needs.check-latest-tag.outputs.latest-in-docker-hub }}
+
+#       - id: remove-docker-plugin
+#         name: Remove Docker plugin
+#         run: >
+#           docker plugin rm
+#           ghcr.io/cloud-skeleton/democratic-csi-swarm:${{ needs.check-latest-tag.outputs.latest-in-docker-hub }}
+
+#       - id: create-docker-plugin-latest
+#         name: Create Docker Plugin (Latest)
+#         run: >
+#           docker plugin create
+#           ghcr.io/cloud-skeleton/democratic-csi-swarm:latest
+#           .
+
+#       - id: push-docker-plugin-latest
+#         name: Push Docker plugin (latest)
+#         run: >
+#           docker plugin push
+#           ghcr.io/cloud-skeleton/democratic-csi-swarm:latest
+
+jobs:
+  detect-images:
+    # outputs:
+    #   matrix: ${{ steps.collect.outputs.matrix }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout-repository-code
+        name: Checkout repository code
+        uses: actions/checkout@v5
+
+      - id: get-changed-files
+        name: Get changed files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            images/*
+
+      - name: List all changed files markdown files
+        run: |
+          for file in ${{ steps.get-changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
+
+name: Build new Docker images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "images/**"
+  workflow_dispatch:
+
+# permissions:
+#     contents: read
+#     packages: write
