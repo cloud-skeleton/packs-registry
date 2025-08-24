@@ -24,6 +24,7 @@ if (socket := getenv("NOMAD_UNIX_ADDR")):
         host = "http+unix://" + quote(socket, safe = ""),
         session = Session()
     )
+    nomad.get_uri = lambda: nomad.host
 else:
     nomad: Nomad = Nomad()
 
