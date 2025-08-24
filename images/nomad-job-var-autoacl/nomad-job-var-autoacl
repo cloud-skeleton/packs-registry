@@ -20,14 +20,10 @@ LOCK_VAR_PATH: str = "system/scripts/nomad-job-autoacl/lock"
 LAST_EVENT_VAR_PATH: str = "system/scripts/nomad-job-autoacl/last_event"
 
 if (socket := getenv("NOMAD_UNIX_ADDR")):
-    class NomadSocket(Nomad):
-        def __init__(self, *args, **kwargs):
-            kwargs.update({
-                "address": "http+unix://" + quote(cast(str, socket), safe = ""),
-                "session": Session()
-            })
-            super().__init__(*args, **kwargs)
-    nomad: Nomad = NomadSocket()
+    nomad: Nomad = Nomad(
+        address = "http+unix://" + quote(cast(str, socket), safe = ""),
+        session = Session()
+    )
 else:
     nomad: Nomad = Nomad()
 
