@@ -18,6 +18,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
 
+      - id: read-version-file
+        name: Read version file
+        run: |
+          echo "version=$(cat images/${{ matrix.image }}/.version)" >> $GITHUB_OUTPUT
+
       - id: build-and-push-image
         name: Build & Push image
         uses: docker/build-push-action@v6
@@ -25,7 +30,7 @@ jobs:
           context: ./images/${{ matrix.image }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:sha-${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:v${{ steps.read-version-file.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
     strategy:
       fail-fast: false
