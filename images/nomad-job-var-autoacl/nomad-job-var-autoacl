@@ -8,6 +8,7 @@ from argparse import ArgumentParser, Namespace
 from json import dumps
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException, VariableConflict
+from os import getenv
 from queue import Queue
 from socket import getfqdn
 from threading import Thread, Event
@@ -106,6 +107,7 @@ def _process_event(event: dict[str, Any]) -> None:
     _set_var(LAST_EVENT_VAR_PATH, {"LAST_EVENT": str(event["Index"])}, last_event_var_index)
 
 def lock() -> None:
+    raise SystemExit(getenv("NOMAD_UNIX_ADDR"))
     if _is_var(LOCK_VAR_PATH):
         lock_index, lock_value = _get_var(LOCK_VAR_PATH)
         print(f"Current lock has been found! {lock_index} -> {lock_value['OWNER']}")

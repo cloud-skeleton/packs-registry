@@ -37,7 +37,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
             driver = "docker"
 
             env {
-                NOMAD_ADDR = "unix://${NOMAD_SECRETS_DIR}/api.sock"
+                NOMAD_UNIX_ADDR = "${NOMAD_SECRETS_DIR}/api.sock"
             }
 
             identity {
