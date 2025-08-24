@@ -67,7 +67,7 @@
 #           ghcr.io/cloud-skeleton/democratic-csi-swarm:latest
 
 jobs:
-  detect-images:
+  detect-changed-images:
     # outputs:
     #   matrix: ${{ steps.collect.outputs.matrix }}
     runs-on: ubuntu-latest
@@ -85,8 +85,9 @@ jobs:
 
       - name: List all changed files markdown files
         run: |
-          for file in ${{ steps.get-changed-files.outputs.all_changed_files }}; do
-            echo "$file was changed"
+          IMAGES=()
+          for FILE in ${{ steps.get-changed-files.outputs.all_changed_files }}; do
+            echo "$(echo $FILE | cut -d/ -f2) image was changed"
           done
 
 name: Build new Docker images
