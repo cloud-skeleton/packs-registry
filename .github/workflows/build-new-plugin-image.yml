@@ -83,7 +83,8 @@ jobs:
           files: |
             images/**
 
-      - name: List all changed files markdown files
+      - id: construct-changed-docker-images-matrix
+        name: Construct changed Docker images matrix
         run: |
           IMAGES=()
           for FILE in ${{ steps.get-changed-files.outputs.all_changed_files }}; do
@@ -92,8 +93,8 @@ jobs:
               IMAGES+=("$IMAGE")
             fi
           done
-
-          echo ${IMAGES[*]}
+          json=$(printf '%s\n' "${IMAGES[@]}" | jq -R . | jq -s .)
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
 
 name: Build new Docker images
 
@@ -103,8 +104,3 @@ on:
       - main
     paths:
       - "images/**"
-  workflow_dispatch:
-
-# permissions:
-#     contents: read
-#     packages: write
