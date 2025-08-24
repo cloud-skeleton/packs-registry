@@ -4,20 +4,18 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
-from argparse import ArgumentParser, Namespace
 from json import dumps
 from nomad import Nomad
-from nomad.api.exceptions import URLNotFoundNomadException, VariableConflict
+from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
 from requests_unixsocket import Session
-from socket import getfqdn
 from threading import Thread, Event
 from urllib.parse import quote
-from typing import cast, Any, Callable
+from typing import cast, Any
 
-LOCK_VAR_PATH: str = "system/scripts/nomad-job-autoacl/lock"
 LAST_EVENT_VAR_PATH: str = "system/scripts/nomad-job-autoacl/last_event"
+PARAMS_VAR_BASE_PATH: str = getenv("PARAMS_VAR_BASE_PATH", "params")
 
 if (socket := getenv("NOMAD_UNIX_ADDR")):
     nomad: Nomad = Nomad(
@@ -27,15 +25,9 @@ if (socket := getenv("NOMAD_UNIX_ADDR")):
 else:
     nomad: Nomad = Nomad()
 
-def _is_owner(lock_value: dict[str, str]) -> bool:
-    return lock_value['OWNER'] == getfqdn()
-
 def _get_var(path: str) -> tuple[int, dict[str, str]]:
     var: dict[str, Any] = nomad.variable.get_variable(path, "system")
     return var["ModifyIndex"], var["Items"]
-
-def _delete_var(path: str, index: int | None = None) -> None:
-    nomad.variable.delete_variable(path, "system", index)
 
 def _is_var(path: str) -> bool:
     try:
@@ -65,16 +57,7 @@ def _attach_acl(data: dict[str, Any]) -> None:
                     "policy": "read",
                     "variables": {
                         "path": {
-                            f"nomad/jobs/{data['job']}/*": var_capabilities,
-                            **{
-                                f"nomad/jobs/{data['job']}/{group}/*": var_capabilities
-                                for group in data["tasks"]
-                            },
-                            **{
-                                f"nomad/jobs/{data['job']}/{group}/{task}/*": var_capabilities
-                                for group, tasks in data["tasks"].items()
-                                for task in tasks
-                            }
+                            f"{PARAMS_VAR_BASE_PATH}/{data['job']}/*": var_capabilities
                         }
                     }
                 }
@@ -99,55 +82,19 @@ def _process_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Events"][0]["Payload"]["Job"]
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
-        "job": job["Name"],
-        "tasks": {
-            group["Name"]: [
-                task["Name"]
-                for task in group["Tasks"]
-            ]
-            for group in job["TaskGroups"]
-        }
+        "job": job["Name"]
     }
     if event["Events"][0]["Type"] == "JobRegistered":
         _attach_acl(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
-    _set_var(LAST_EVENT_VAR_PATH, {"LAST_EVENT": str(event["Index"])}, last_event_var_index)
-
-def lock() -> None:
-    if _is_var(LOCK_VAR_PATH):
-        lock_index, lock_value = _get_var(LOCK_VAR_PATH)
-        print(f"Current lock has been found! {lock_index} -> {lock_value['OWNER']}")
-        return
-    try:
-        lock_index, lock_value = _set_var(LOCK_VAR_PATH, {'OWNER': getfqdn()}, 0)
-        print(f"NEW lock has been set! {lock_index} -> {lock_value['OWNER']}")
-    except VariableConflict:
-        lock_index, lock_value = _get_var(LOCK_VAR_PATH)
-        print(f"Current lock has been found! {lock_index} -> {lock_value['OWNER']}")
-
-def unlock() -> None:
-    if not _is_var(LOCK_VAR_PATH):
-        print("Skipping as lock has been already released!")
-        return
-    lock_index, lock_value = _get_var(LOCK_VAR_PATH)
-    if not _is_owner(lock_value):
-        print("Skipping as lock has been created by another agent!")
-        return
-    try:
-        _delete_var(LOCK_VAR_PATH, lock_index)
-        print(f"Lock has been RELEASED! {lock_index} -> {lock_value['OWNER']}")
-    except VariableConflict:
-        print("Skipping unlock as variable has been during operation!")
+    _set_var(
+        LAST_EVENT_VAR_PATH,
+        {"LAST_EVENT": str(event["Index"])},
+        last_event_var_index
+    )
 
 def start() -> None:
-    if not _is_var(LOCK_VAR_PATH):
-        print("Stopping as no lock has been set!")
-        return
-    lock_index, lock_value = _get_var(LOCK_VAR_PATH)
-    if not _is_owner(lock_value):
-        print(f"Stopping as lock of another agent has been found! {lock_index} -> {lock_value['OWNER']}")
-        return
     stream, _, events = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
@@ -161,10 +108,4 @@ def start() -> None:
         events.task_done()
 
 if __name__ == "__main__":
-    parser: ArgumentParser = ArgumentParser()
-    parser.add_argument("method", choices = ["start", "lock", "unlock"])
-    arguments: Namespace = parser.parse_args()
-    fn: Callable[[], None] | None = globals().get(arguments.method)
-    if not fn:
-        raise ValueError(f"Unknown function {arguments.method}")
-    fn()
+    start()
