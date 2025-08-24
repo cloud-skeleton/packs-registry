@@ -68,8 +68,8 @@
 
 jobs:
   detect-changed-images:
-    # outputs:
-    #   matrix: ${{ steps.collect.outputs.matrix }}
+    outputs:
+      matrix: ${{ steps.construct-changed-docker-images-matrix.outputs.matrix }}
     runs-on: ubuntu-latest
     steps:
       - id: checkout-repository-code
@@ -93,8 +93,8 @@ jobs:
               IMAGES+=("$IMAGE")
             fi
           done
-          json=$(printf '%s\n' "${IMAGES[@]}" | jq -R . | jq -s .)
-          echo "matrix=$json" >> "$GITHUB_OUTPUT"
+          matrix=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${IMAGES[@]}")
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
 name: Build new Docker images
 
