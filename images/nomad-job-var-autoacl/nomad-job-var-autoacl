@@ -14,7 +14,7 @@ from threading import Thread, Event
 from urllib.parse import quote
 from typing import cast, Any
 
-LAST_EVENT_VAR_PATH: str = "system/scripts/nomad-job-autoacl/last_event"
+LAST_EVENT_VAR_PATH: str = "system/tools/nomad-job-var-autoacl/last_event"
 PARAMS_VAR_BASE_PATH: str = getenv("PARAMS_VAR_BASE_PATH", "params")
 
 if (socket := getenv("NOMAD_UNIX_ADDR")):

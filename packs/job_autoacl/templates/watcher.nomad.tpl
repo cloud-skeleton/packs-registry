@@ -15,13 +15,21 @@ job "[[ template "job_name" (list . "watcher") ]]" {
                 NOMAD_UNIX_ADDR = "${NOMAD_SECRETS_DIR}/api.sock"
             }
 
-            identity {
-                env = true
-            }
-
             resources {
                 cpu    = 500
                 memory = 128
+            }
+
+            template {
+                data = <<-EOF
+                {{- with nomadVar "system/tools/nomad-job-var-autoacl/token" }}
+                {{- range $name, $value := . }}
+                {{ $name }}={{ $value }}
+                {{- end }}
+                {{- end }}
+                EOF
+                destination = "secrets/env"
+                env         = true
             }
         }
     }
