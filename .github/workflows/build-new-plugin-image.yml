@@ -87,8 +87,13 @@ jobs:
         run: |
           IMAGES=()
           for FILE in ${{ steps.get-changed-files.outputs.all_changed_files }}; do
-            echo "$(echo $FILE | cut -d/ -f2) image was changed"
+            IMAGE="$(echo $FILE | cut -d/ -f2)"
+            if [[ ! " ${IMAGES[*]} " =~ " ${IMAGE} " ]]; then
+              IMAGES+=("$IMAGE")
+            fi
           done
+
+          echo ${IMAGES[*]}
 
 name: Build new Docker images
 
