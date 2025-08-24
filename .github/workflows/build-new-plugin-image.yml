@@ -79,9 +79,9 @@ jobs:
       - id: get-changed-files
         name: Get changed files
         uses: tj-actions/changed-files@v46
-        # with:
-        #   files: |
-        #     images/*
+        with:
+          files: |
+            images/**
 
       - name: List all changed files markdown files
         run: |
