@@ -1,5 +1,24 @@
 ```
-nomad acl policy apply -namespace system -job job_autoacl-watcher-main test policy.json
+cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "watcher") ]] -description "Allow Nomad job AutoACL variables access" allow-autoacl-var-read -
+{
+    "namespace": {
+        "*": {
+            "policy": "read",
+            "variables": {
+                "path": {
+                    "system/tools/nomad-job-var-autoacl/*": {
+                        "capabilities": [
+                            "list",
+                            "read",
+                            "write"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+POLICY
 ```
 ```
 nomad acl token create -type management -name "nomad-job-var-autoacl"

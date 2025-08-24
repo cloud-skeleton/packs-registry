@@ -2,9 +2,6 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     group "cloud-skeleton/nomad-job-var-autoacl" {
         task "service" {
             config {
-                args = [
-                    "start"
-                ]
                 cpu_hard_limit = true
                 image          = "ghcr.io/cloud-skeleton/nomad-job-var-autoacl:v[[ var "autoacl_version" . ]]"
             }
@@ -16,8 +13,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
             }
 
             resources {
-                cpu    = 500
-                memory = 128
+                cpu    = 50
+                memory = 32
             }
 
             template {
