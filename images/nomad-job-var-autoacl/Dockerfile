@@ -1,4 +1,4 @@
 FROM python:3.13.7-alpine
 ENTRYPOINT ["/bin/nomad-job-var-autoacl"]
-RUN pip install --no-cache-dir python-nomad
+RUN pip install --no-cache-dir python-nomad requests-unixsocket
 COPY ./nomad-job-var-autoacl /bin/nomad-job-var-autoacl
