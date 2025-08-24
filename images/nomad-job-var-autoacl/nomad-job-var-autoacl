@@ -17,6 +17,7 @@ from typing import cast, Any, Callable
 LOCK_VAR_PATH: str = "system/scripts/nomad-job-autoacl/lock"
 LAST_EVENT_VAR_PATH: str = "system/scripts/nomad-job-autoacl/last_event"
 
+raise SystemExit(getenv("NOMAD_UNIX_ADDR"))
 nomad: Nomad = Nomad()
 
 def _is_owner(lock_value: dict[str, str]) -> bool:
@@ -107,7 +108,6 @@ def _process_event(event: dict[str, Any]) -> None:
     _set_var(LAST_EVENT_VAR_PATH, {"LAST_EVENT": str(event["Index"])}, last_event_var_index)
 
 def lock() -> None:
-    raise SystemExit(getenv("NOMAD_UNIX_ADDR"))
     if _is_var(LOCK_VAR_PATH):
         lock_index, lock_value = _get_var(LOCK_VAR_PATH)
         print(f"Current lock has been found! {lock_index} -> {lock_value['OWNER']}")
