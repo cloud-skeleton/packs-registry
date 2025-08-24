@@ -67,6 +67,18 @@
 #           ghcr.io/cloud-skeleton/democratic-csi-swarm:latest
 
 jobs:
+  build-images:
+    needs: detect-changed-images
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout-repository-code
+        name: Checkout repository code
+        uses: actions/checkout@v5
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.detect-changed-images.outputs.matrix) }}
+
   detect-changed-images:
     outputs:
       matrix: ${{ steps.construct-changed-docker-images-matrix.outputs.matrix }}
