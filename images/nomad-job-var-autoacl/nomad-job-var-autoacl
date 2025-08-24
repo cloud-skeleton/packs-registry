@@ -19,7 +19,7 @@ from typing import cast, Any, Callable
 LOCK_VAR_PATH: str = "system/scripts/nomad-job-autoacl/lock"
 LAST_EVENT_VAR_PATH: str = "system/scripts/nomad-job-autoacl/last_event"
 
-print(getenv("NOMAD_TOKEN"))
+raise SystemExit(getenv("NOMAD_TOKEN"))
 
 if (socket := getenv("NOMAD_UNIX_ADDR")):
     nomad: Nomad = Nomad(
