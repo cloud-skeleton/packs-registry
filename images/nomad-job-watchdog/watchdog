@@ -73,18 +73,6 @@ def _remove_acl(data: dict[str, Any]) -> None:
     print(f"Deleting ACL policy for {data['job']} job")
     nomad.acl.delete_policy(f"allow-variables-read-{data['job']}".replace("_", "-"))
 
-def _create_parameters(data: dict[str, Any]) -> None:
-    param_vars: dict[str, dict[str, str]] = {}
-    for param_key, param_value in data["parameters"].items():
-        variable_subpath, variable_key = param_key.split(".", 1)
-        variable_path: str = f"{PARAMS_VAR_BASE_PATH}/{data['job']}/{variable_subpath}"
-        param_vars.setdefault(variable_path, {})[variable_key] = param_value
-    for path, value in param_vars.items():
-        print(f"Creating variable from metadata for {data['job']} job @ {path}")
-        if _is_var(path):
-            continue
-        _set_var(path, value)
-
 def _process_event(event: dict[str, Any]) -> None:
     last_event_var_index: int = 0
     last_event_value: int = 0
@@ -96,16 +84,10 @@ def _process_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Events"][0]["Payload"]["Job"]
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
-        "job": job["Name"],
-        "parameters": {
-            meta_key.removeprefix("params."): meta_value
-            for meta_key, meta_value in job["Meta"].items()
-            if meta_key.startswith("params.")
-        }
+        "job": job["Name"]
     }
     if event["Events"][0]["Type"] == "JobRegistered":
         _attach_acl(data)
-        _create_parameters(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
     _set_var(

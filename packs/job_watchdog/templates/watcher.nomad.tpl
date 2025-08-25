@@ -33,10 +33,5 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         }
     }
 
-    meta = {
-        "params.test/test.a" = "a"
-        "params.test/test.b" = "a"
-    }
-
     namespace = "system"
 }
