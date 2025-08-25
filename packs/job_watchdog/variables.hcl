@@ -3,6 +3,12 @@ variable "id" {
     type        = string
 }
 
+variable "defaults_meta_prefix" {
+    default     = "defaults"
+    description = "Metadata prefix to be used as parameter defaults."
+    type        = string
+}
+
 variable "parameters_root_path" {
     default     = "params"
     description = "Root path in Nomad variables (e.g. params/...) managed by the watchdog service."
