@@ -4,7 +4,6 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
-# from json import dumps
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
@@ -44,9 +43,6 @@ def _set_var(path: str, data: dict[str, str], index: int | None = None) -> tuple
     return var["ModifyIndex"], var["Items"]
 
 def _attach_acl(data: dict[str, Any]) -> None:
-    # var_capabilities: dict[str, list[str]] = {
-    #     "capabilities": ["list", "read"]
-    # }
     rules: str = f"""\
     namespace "{data["namespace"]}" {{
         policy = "read"
@@ -69,18 +65,6 @@ def _attach_acl(data: dict[str, Any]) -> None:
             "JobID": data['job']
         },
         "Rules": rules
-        # "Rules": dumps({
-        #     "namespace": {
-        #         data["namespace"]: {
-        #             "policy": "read",
-        #             "variables": {
-        #                 "path": {
-        #                     f"{PARAMS_VAR_BASE_PATH}/{data['job']}/*": var_capabilities
-        #                 }
-        #             }
-        #         }
-        #     }
-        # }, indent = 4)
     }
     print(f"Creating ACL policy for {data['job']} job")
     nomad.acl.create_policy(f"allow-variables-read-{data['job']}".replace("_", "-"), policy)

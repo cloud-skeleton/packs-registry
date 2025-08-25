@@ -1,6 +1,6 @@
-variable "autoacl_version" {
+variable "watchdog_version" {
     default     = "1.0"
-    description = "Container image version tag for the autoACL (maps to `ghcr.io/cloud-skeleton/nomad-job-var-autoacl:v<version>`)."
+    description = "Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`)."
     type        = string
 }
 
