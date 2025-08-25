@@ -1,11 +1,11 @@
-variable "id" {
-    description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
-    type        = string
-}
-
 variable "defaults_meta_prefix" {
     default     = "defaults"
     description = "Metadata prefix to be used as parameter defaults."
+    type        = string
+}
+
+variable "id" {
+    description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
     type        = string
 }
 
