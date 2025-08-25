@@ -1,4 +1,10 @@
 job "[[ template "job_name" (list . "watcher") ]]" {
+    constraint {
+        attribute = "${node.class}"
+        operator  = "="
+        value     = "main-worker"
+    }
+
     group "cloud-skeleton/nomad-job-watchdog" {
         task "service" {
             config {
@@ -27,7 +33,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         }
     }
 
-    meta {
+    meta = {
         "params.test/test.a" = "a"
         "params.test/test.b" = "a"
     }
