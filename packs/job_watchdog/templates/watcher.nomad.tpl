@@ -21,6 +21,18 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             template {
                 data = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/config" }}
+                {{- range $name, $value := . }}
+                {{ $name }}={{ $value }}
+                {{- end }}
+                {{- end }}
+                EOF
+                destination = "secrets/config"
+                env         = true
+            }
+
+            template {
+                data = <<-EOF
                 {{- with nomadVar "system/tools/nomad-job-watchdog/secrets" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}
@@ -34,7 +46,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     }
 
     meta = {
-        "cloudskeleton.eu/pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
+        "defaults.config.PARAMS_VAR_ROOT_PATH" = "[[ var "parameters_root_path" . ]]"
+        "pack.src"                             = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
     }
     namespace = "system"
 }
