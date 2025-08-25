@@ -18,9 +18,10 @@ if not (secrets_dir := getenv("NOMAD_SECRETS_DIR", "")):
 if not (namespace := getenv("NOMAD_NAMESPACE", "")):
     raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
 
+DEFAULTS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "defaults")
+PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 NOMAD_SOCKET: str = f"{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
-PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 
 nomad: Nomad = Nomad(
     address = "http+unix://" + quote(NOMAD_SOCKET, safe = ""),
@@ -101,9 +102,9 @@ def _process_event(event: dict[str, Any]) -> None:
         "namespace": job["Namespace"],
         "job": job["Name"],
         "defaults": {
-            meta_key.removeprefix("defaults."): meta_value
+            meta_key.removeprefix(f"{DEFAULTS_META_PREFIX}."): meta_value
             for meta_key, meta_value in job["Meta"].items()
-            if meta_key.startswith("defaults.")
+            if meta_key.startswith(f"{DEFAULTS_META_PREFIX}.")
         }
     }
     if event["Events"][0]["Type"] == "JobRegistered":
