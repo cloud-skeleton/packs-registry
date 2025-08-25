@@ -8,9 +8,9 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             driver = "docker"
 
-            env {
-                NOMAD_UNIX_ADDR = "${NOMAD_SECRETS_DIR}/api.sock"
-            }
+            // env {
+            //     NOMAD_UNIX_ADDR = "${NOMAD_SECRETS_DIR}/api.sock"
+            // }
 
             resources {
                 cpu    = 50

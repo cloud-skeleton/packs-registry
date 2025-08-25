@@ -3,7 +3,7 @@ app {
 }
 
 pack {
-    name        = "job_autoacl"
-    description = "Nomad job variable autoACL watcher"
-    version     = "25.8.24"
+    name        = "job_watchdog"
+    description = "Nomad job watchdog"
+    version     = "25.8.25"
 }

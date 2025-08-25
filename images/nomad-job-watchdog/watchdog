@@ -4,7 +4,7 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
-from json import dumps
+# from json import dumps
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
@@ -14,19 +14,22 @@ from threading import Thread, Event
 from urllib.parse import quote
 from typing import cast, Any
 
-LAST_EVENT_VAR_PATH: str = "system/tools/nomad-job-var-autoacl/last_event"
+if not (secrets_dir := getenv("NOMAD_SECRETS_DIR", "")):
+    raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
+if not (namespace := getenv("NOMAD_NAMESPACE", "")):
+    raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
+
+NOMAD_SOCKET: str = f"{secrets_dir}/api.sock"
+LAST_EVENT_VAR_PATH: str = "system/tools/nomad-job-watchdog/last_event"
 PARAMS_VAR_BASE_PATH: str = getenv("PARAMS_VAR_BASE_PATH", "params")
 
-if (socket := getenv("NOMAD_UNIX_ADDR")):
-    nomad: Nomad = Nomad(
-        address = "http+unix://" + quote(cast(str, socket), safe = ""),
-        session = Session()
-    )
-else:
-    nomad: Nomad = Nomad()
+nomad: Nomad = Nomad(
+    address = "http+unix://" + quote(NOMAD_SOCKET, safe = ""),
+    session = Session()
+)
 
 def _get_var(path: str) -> tuple[int, dict[str, str]]:
-    var: dict[str, Any] = nomad.variable.get_variable(path, "system")
+    var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
     return var["ModifyIndex"], var["Items"]
 
 def _is_var(path: str) -> bool:
@@ -37,13 +40,27 @@ def _is_var(path: str) -> bool:
         return False
 
 def _set_var(path: str, data: dict[str, str], index: int | None = None) -> tuple[int, dict[str, str]]:
-    var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, "system", index)
+    var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, namespace, index)
     return var["ModifyIndex"], var["Items"]
 
 def _attach_acl(data: dict[str, Any]) -> None:
-    var_capabilities: dict[str, list[str]] = {
-        "capabilities": ["list", "read"]
-    }
+    # var_capabilities: dict[str, list[str]] = {
+    #     "capabilities": ["list", "read"]
+    # }
+    rules: str = f"""\
+    namespace "{data["namespace"]}" {{
+        policy = "read"
+
+        variables {{
+            path "{PARAMS_VAR_BASE_PATH}/{data['job']}/*": {{
+                "capabilities": [
+                    "list",
+                    "read"
+                ]
+            }}
+        }}
+    }}
+    """
     policy: dict[str, Any] = {
         "Name": f"allow-variables-read-{data['job']}".replace("_", "-"),
         "Description": f"AutoACL: Allow read variables for {data['job']} job",
@@ -51,18 +68,19 @@ def _attach_acl(data: dict[str, Any]) -> None:
             "Namespace": data["namespace"],
             "JobID": data['job']
         },
-        "Rules": dumps({
-            "namespace": {
-                data["namespace"]: {
-                    "policy": "read",
-                    "variables": {
-                        "path": {
-                            f"{PARAMS_VAR_BASE_PATH}/{data['job']}/*": var_capabilities
-                        }
-                    }
-                }
-            }
-        }, indent = 4)
+        "Rules": rules
+        # "Rules": dumps({
+        #     "namespace": {
+        #         data["namespace"]: {
+        #             "policy": "read",
+        #             "variables": {
+        #                 "path": {
+        #                     f"{PARAMS_VAR_BASE_PATH}/{data['job']}/*": var_capabilities
+        #                 }
+        #             }
+        #         }
+        #     }
+        # }, indent = 4)
     }
     print(f"Creating ACL policy for {data['job']} job")
     nomad.acl.create_policy(f"allow-variables-read-{data['job']}".replace("_", "-"), policy)
