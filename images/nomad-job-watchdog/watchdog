@@ -48,8 +48,8 @@ def _attach_acl(data: dict[str, Any]) -> None:
         policy = "read"
 
         variables {{
-            path "{PARAMS_VAR_BASE_PATH}/{data['job']}/*": {{
-                "capabilities": [
+            path "{PARAMS_VAR_BASE_PATH}/{data['job']}/*" {{
+                "capabilities" = [
                     "list",
                     "read"
                 ]
