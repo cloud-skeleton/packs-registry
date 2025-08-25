@@ -73,6 +73,21 @@ def _remove_acl(data: dict[str, Any]) -> None:
     print(f"Deleting ACL policy for {data['job']} job")
     nomad.acl.delete_policy(f"allow-variables-read-{data['job']}".replace("_", "-"))
 
+def _create_defaults(data: dict[str, Any]) -> None:
+    param_vars: dict[str, dict[str, str]] = {}
+    for param_key, param_value in data["defaults"].items():
+        variable_subpath, variable_key = param_key.split(".", 1)
+        variable_path: str = f"{PARAMS_VAR_BASE_PATH}/{data['job']}/{variable_subpath}"
+        param_vars.setdefault(variable_path, {})[variable_key] = param_value
+    for path, value in param_vars.items():
+        print(f"Creating variable from defaults metadata for {data['job']} job @ {path}")
+        current_value: dict[str, str] = {}
+        index: int | None = None
+        if _is_var(path):
+            index, current_value = _get_var(path)
+            value |= current_value
+        _set_var(path, value, index)
+
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
     last_event_value: int = 0
@@ -84,10 +99,16 @@ def _process_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Events"][0]["Payload"]["Job"]
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
-        "job": job["Name"]
+        "job": job["Name"],
+        "defaults": {
+            meta_key.removeprefix("defaults."): meta_value
+            for meta_key, meta_value in job["Meta"].items()
+            if meta_key.startswith("defaults.")
+        }
     }
     if event["Events"][0]["Type"] == "JobRegistered":
         _attach_acl(data)
+        _create_defaults(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
     _set_var(
