@@ -14,6 +14,10 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             driver = "docker"
 
+            env {
+                PARAMS_VAR_ROOT_PATH = "[[ var "parameters_root_path" . ]]"
+            }
+
             resources {
                 cpu    = 50
                 memory = 32
@@ -46,8 +50,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     }
 
     meta = {
-        "defaults.config.PARAMS_VAR_ROOT_PATH" = "[[ var "parameters_root_path" . ]]"
-        "pack.src"                             = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
+        "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
     }
     namespace = "system"
 }
