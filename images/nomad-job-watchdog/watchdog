@@ -20,7 +20,7 @@ if not (namespace := getenv("NOMAD_NAMESPACE", "")):
 
 NOMAD_SOCKET: str = f"{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
-PARAMS_VAR_BASE_PATH: str = getenv("PARAMS_VAR_BASE_PATH", "params")
+PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 
 nomad: Nomad = Nomad(
     address = "http+unix://" + quote(NOMAD_SOCKET, safe = ""),
@@ -48,7 +48,7 @@ def _attach_acl(data: dict[str, Any]) -> None:
         policy = "read"
 
         variables {{
-            path "{PARAMS_VAR_BASE_PATH}/{data['job']}/*" {{
+            path "{PARAMS_VAR_ROOT_PATH}/{data['job']}/*" {{
                 "capabilities" = [
                     "list",
                     "read"
@@ -77,7 +77,7 @@ def _create_defaults(data: dict[str, Any]) -> None:
     param_vars: dict[str, dict[str, str]] = {}
     for param_key, param_value in data["defaults"].items():
         variable_subpath, variable_key = param_key.split(".", 1)
-        variable_path: str = f"{PARAMS_VAR_BASE_PATH}/{data['job']}/{variable_subpath}"
+        variable_path: str = f"{PARAMS_VAR_ROOT_PATH}/{data['job']}/{variable_subpath}"
         param_vars.setdefault(variable_path, {})[variable_key] = param_value
     for path, value in param_vars.items():
         print(f"Creating variable from defaults metadata for {data['job']} job @ {path}")

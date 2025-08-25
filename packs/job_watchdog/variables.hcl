@@ -1,10 +1,16 @@
-variable "watchdog_version" {
-    default     = "1.0"
-    description = "Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`)."
+variable "id" {
+    description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
     type        = string
 }
 
-variable "id" {
-    description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
+variable "parameters_root_path" {
+    default     = "params"
+    description = "Root path in Nomad variables (e.g. params/...) managed by the watchdog service."
+    type        = string
+}
+
+variable "watchdog_version" {
+    default     = "1.0"
+    description = "Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`)."
     type        = string
 }
