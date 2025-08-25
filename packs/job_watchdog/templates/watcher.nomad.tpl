@@ -25,18 +25,6 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             template {
                 data = <<-EOF
-                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/config" }}
-                {{- range $name, $value := . }}
-                {{ $name }}={{ $value }}
-                {{- end }}
-                {{- end }}
-                EOF
-                destination = "secrets/config"
-                env         = true
-            }
-
-            template {
-                data = <<-EOF
                 {{- with nomadVar "system/tools/nomad-job-watchdog/secrets" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}
