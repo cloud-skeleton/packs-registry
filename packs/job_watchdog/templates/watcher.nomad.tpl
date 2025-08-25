@@ -21,7 +21,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             template {
                 data = <<-EOF
-                {{- with nomadVar "system/tools/nomad-job-watchdog/token" }}
+                {{- with nomadVar "system/tools/nomad-job-watchdog/secrets" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}
                 {{- end }}
