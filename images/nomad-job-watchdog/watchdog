@@ -79,7 +79,10 @@ def _create_parameters(data: dict[str, Any]) -> None:
         variable_subpath, variable_key = param_key.split(".", 1)
         variable_path: str = f"{PARAMS_VAR_BASE_PATH}/{data['job']}/{variable_subpath}"
         param_vars.setdefault(variable_path, {})[variable_key] = param_value
-    print(param_vars)
+    for path, value in param_vars.items():
+        if _is_var(path):
+            continue
+        _set_var(path, value)
 
 def _process_event(event: dict[str, Any]) -> None:
     last_event_var_index: int = 0
