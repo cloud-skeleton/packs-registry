@@ -39,9 +39,11 @@
 
 ### Variables
 
+<!-- BEGIN_AUTO:VARIABLES_TABLE -->
 | Variable                | Type                    | Default                    | Required                    | Description                    |
 |-------------------------|-------------------------|----------------------------|-----------------------------|--------------------------------|
 | {{VARIABLE_ROW_1_NAME}} | {{VARIABLE_ROW_1_TYPE}} | {{VARIABLE_ROW_1_DEFAULT}} | {{VARIABLE_ROW_1_REQUIRED}} | {{VARIABLE_ROW_1_DESCRIPTION}} |
+<!-- END_AUTO:VARIABLES_TABLE -->
 
 ### Example `vars.hcl`
 
@@ -60,20 +62,26 @@ packs/{{PACK_HANDLE}}/
 ├─ templates/
 │  ├─ {{JOBFILE_NAME}}.nomad.tpl
 │  └─ {{ADDITIONAL_TPL_FILES}}
-└─ variables.hcl
+├─ variables.hcl
+└─ vars/
+   └─ example.var.hcl
 ```
 
 ## Services & Ports
 
+<!-- BEGIN_AUTO:SERVICES_TABLE -->
 | Service Name           | Port Var / Static      | Target (in-task)         | Ingress                   | Notes                   |
 |------------------------|------------------------|--------------------------|---------------------------|-------------------------|
 | {{SERVICE_ROW_1_NAME}} | {{SERVICE_ROW_1_PORT}} | {{SERVICE_ROW_1_TARGET}} | {{SERVICE_ROW_1_INGRESS}} | {{SERVICE_ROW_1_NOTES}} |
+<!-- END_AUTO:SERVICES_TABLE -->
 
 ## Storage
 
+<!-- BEGIN_AUTO:VOLUMES_TABLE -->
 | Volume ID       | Mount Path         | Access Mode              | Attachment Mode          | Notes              |
 |-----------------|--------------------|--------------------------|--------------------------|--------------------|
 | {{VOLUME_1_ID}} | {{VOLUME_1_MOUNT}} | {{VOLUME_1_ACCESS_MODE}} | {{VOLUME_1_ATTACH_MODE}} | {{VOLUME_1_NOTES}} |
+<!-- END_AUTO:VOLUMES_TABLE -->
 
 ## Networking
 
