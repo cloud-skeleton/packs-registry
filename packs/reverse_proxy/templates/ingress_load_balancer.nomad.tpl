@@ -7,8 +7,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
     group "traefik" {
         network {
-            // @TODO: Can't use any other name because of https://github.com/hashicorp/nomad/issues/16455
-            mode = "cni/nomad"
+            mode = "bridge"
 
             port "http" {
                 static = 80
