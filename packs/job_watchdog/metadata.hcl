@@ -4,6 +4,6 @@ app {
 
 pack {
     name        = "job_watchdog"
-    description = "Nomad job watchdog for automated variable ACL policies"
+    description = "Nomad watchdog that auto-provisions variable access and defaults."
     version     = "25.8.27"
 }

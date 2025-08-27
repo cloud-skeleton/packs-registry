@@ -49,14 +49,12 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 
 ### Pack Variables
 
-<!-- BEGIN_AUTO:VARIABLES_TABLE -->
 | Variable               | Type     | Default      | Required | Description                                                                                                    |
 |------------------------|----------|--------------|----------|----------------------------------------------------------------------------------------------------------------|
 | `defaults_meta_prefix` | *string* | `"defaults"` | ❌       | Metadata prefix to be used as parameter defaults.                                                              |
 | `id`                   | *string* |              | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
 | `parameters_root_path` | *string* | `"params"`   | ❌       | Root Nomad variables path that the watchdog manages (e.g., params/...).                                        |
 | `watchdog_version`     | *string* | `"1.0"`      | ❌       | Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`). |
-<!-- END_AUTO:VARIABLES_TABLE -->
 
 ### Example `vars.hcl`
 
@@ -91,17 +89,13 @@ packs/job_watchdog/
 
 ## Services & Ports
 
-<!-- BEGIN_AUTO:SERVICES_TABLE -->
 | Service Name | Port Var / Static | Target (in-task) | Ingress | Notes |
 |--------------|-------------------|------------------|---------|-------|
-<!-- END_AUTO:SERVICES_TABLE -->
 
 ## Storage
 
-<!-- BEGIN_AUTO:VOLUMES_TABLE -->
 | Volume ID | Mount Path | Access Mode | Attachment Mode | Notes |
 |-----------|------------|-------------|-----------------|-------|
-<!-- END_AUTO:VOLUMES_TABLE -->
 
 ## Contributing
 
