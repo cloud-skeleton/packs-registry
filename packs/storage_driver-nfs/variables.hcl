@@ -5,12 +5,12 @@ variable "id" {
 
 variable "log_level" {
     default     = "INFO"
-    description = "Log verbosity for the CSI plugin process (e.g., CRITICAL, ERROR, WARNING, INFO, DEBUG)."
+    description = "Log verbosity for the CSI plugin process (e.g., `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`)."
     type        = string
 }
 
 variable "nfs_share" {
-    description = "NFS server (hostname/IP) or export to use as the backing store, e.g., nas.lan:/export/nomad."
+    description = "NFS server (hostname/IP) or export to use as the backing store, e.g., `nas.lan:/export/nomad`."
     type        = string
 }
 
