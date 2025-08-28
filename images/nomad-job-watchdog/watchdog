@@ -20,10 +20,10 @@ if not (namespace := getenv("NOMAD_NAMESPACE", "")):
 PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
-NOMAD_SOCKET: str = f"{secrets_dir}/api.sock"
+NOMAD_SOCKET: str = f"unix://{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
 
-nomad: Nomad = Nomad()
+nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 
 def _get_var(path: str) -> tuple[int, dict[str, str]]:
     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
