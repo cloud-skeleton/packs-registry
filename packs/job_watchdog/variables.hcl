@@ -1,5 +1,5 @@
-variable "defaults_meta_prefix" {
-    default     = "defaults"
+variable "params_meta_prefix" {
+    default     = "params"
     description = "Metadata prefix to be used as parameter defaults."
     type        = string
 }

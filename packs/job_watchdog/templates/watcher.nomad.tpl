@@ -15,7 +15,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
             driver = "docker"
 
             env {
-                DEFAULTS_META_PREFIX = "[[ var "defaults_meta_prefix" . ]]"
+                PARAMS_META_PREFIX   = "[[ var "params_meta_prefix" . ]]"
                 PARAMS_VAR_ROOT_PATH = "[[ var "parameters_root_path" . ]]"
             }
 
