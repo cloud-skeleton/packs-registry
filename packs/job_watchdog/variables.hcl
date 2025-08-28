@@ -16,7 +16,7 @@ variable "parameters_root_path" {
 }
 
 variable "watchdog_version" {
-    default     = "1.0"
+    default     = "1.1"
     description = "Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`)."
     type        = string
 }

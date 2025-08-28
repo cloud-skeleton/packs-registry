@@ -8,10 +8,8 @@ from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
-# from requests_unixsocket import Session
 from threading import Thread, Event
 from time import sleep
-# from urllib.parse import quote
 from typing import cast, Any
 
 if not (secrets_dir := getenv("NOMAD_SECRETS_DIR", "")):
@@ -25,10 +23,6 @@ PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 NOMAD_SOCKET: str = f"{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
 
-# nomad: Nomad = Nomad(
-#     address = "http+unix://" + quote(NOMAD_SOCKET, safe = ""),
-#     session = Session()
-# )
 nomad: Nomad = Nomad()
 
 def _get_var(path: str) -> tuple[int, dict[str, str]]:
