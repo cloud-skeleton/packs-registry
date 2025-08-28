@@ -8,9 +8,10 @@ from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
-from requests_unixsocket import Session
+# from requests_unixsocket import Session
 from threading import Thread, Event
-from urllib.parse import quote
+from time import sleep
+# from urllib.parse import quote
 from typing import cast, Any
 
 if not (secrets_dir := getenv("NOMAD_SECRETS_DIR", "")):
@@ -18,15 +19,17 @@ if not (secrets_dir := getenv("NOMAD_SECRETS_DIR", "")):
 if not (namespace := getenv("NOMAD_NAMESPACE", "")):
     raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
 
-DEFAULTS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "defaults")
+PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
+VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 NOMAD_SOCKET: str = f"{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
 
-nomad: Nomad = Nomad(
-    address = "http+unix://" + quote(NOMAD_SOCKET, safe = ""),
-    session = Session()
-)
+# nomad: Nomad = Nomad(
+#     address = "http+unix://" + quote(NOMAD_SOCKET, safe = ""),
+#     session = Session()
+# )
+nomad: Nomad = Nomad()
 
 def _get_var(path: str) -> tuple[int, dict[str, str]]:
     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
@@ -74,20 +77,37 @@ def _remove_acl(data: dict[str, Any]) -> None:
     print(f"Deleting ACL policy for {data['job']} job")
     nomad.acl.delete_policy(f"allow-variables-read-{data['job']}".replace("_", "-"))
 
-def _create_defaults(data: dict[str, Any]) -> None:
+def _create_params(data: dict[str, Any]) -> None:
     param_vars: dict[str, dict[str, str]] = {}
-    for param_key, param_value in data["defaults"].items():
+    for param_key, param_value in data["params"].items():
         variable_subpath, variable_key = param_key.split(".", 1)
         variable_path: str = f"{PARAMS_VAR_ROOT_PATH}/{data['job']}/{variable_subpath}"
         param_vars.setdefault(variable_path, {})[variable_key] = param_value
     for path, value in param_vars.items():
-        print(f"Creating variable from defaults metadata for {data['job']} job @ {path}")
+        print(f"Creating variable from params metadata for {data['job']} job @ {path}")
         current_value: dict[str, str] = {}
         index: int | None = None
         if _is_var(path):
             index, current_value = _get_var(path)
             value |= current_value
         _set_var(path, value, index)
+
+# def _create_volumes(data: dict[str, Any]) -> None:
+#     volume_config: dict[str, Any] = {
+#         "type": "csi",
+#         "capability": {
+#             "access_mode": "multi-node-multi-writer",
+#             "attachment_mode": "file-system"
+#         }
+#     }
+#     volume_vars: dict[str, dict[str, str]] = {}
+#     for volume_key, volume_value in data["volumes"].items():
+#         volume_id, volume_subconfig = volume_key.split(".", 1)
+
+#         # if volume_config.startswith("capability."):
+#         #     volume_config, capability_subconfig =  volume_config.split(".", 1)
+
+#     print(volume_config)
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
@@ -101,15 +121,21 @@ def _process_event(event: dict[str, Any]) -> None:
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
         "job": job["Name"],
-        "defaults": {
-            meta_key.removeprefix(f"{DEFAULTS_META_PREFIX}."): meta_value
+        "params": {
+            meta_key.removeprefix(f"{PARAMS_META_PREFIX}."): meta_value
             for meta_key, meta_value in job["Meta"].items()
-            if meta_key.startswith(f"{DEFAULTS_META_PREFIX}.")
-        }
+            if meta_key.startswith(f"{PARAMS_META_PREFIX}.")
+        },
+        # "volumes": {
+        #     meta_key.removeprefix(f"{VOLUMES_META_PREFIX}."): meta_value
+        #     for meta_key, meta_value in job["Meta"].items()
+        #     if meta_key.startswith(f"{VOLUMES_META_PREFIX}.")
+        # }
     }
     if event["Events"][0]["Type"] == "JobRegistered":
         _attach_acl(data)
-        _create_defaults(data)
+        _create_params(data)
+        # _create_volumes(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
     _set_var(
@@ -128,8 +154,16 @@ def start() -> None:
     )
     stream.start()
     while True:
-        _process_event(events.get())
-        events.task_done()
+        event: dict[str, Any] = events.get()
+        try:
+            _process_event(event)
+            events.task_done()
+        except Exception as exception:
+            print(
+                f"While processing {event['Index']} ({event['Events'][0]['Key']} "
+                f"-> {event['Events'][0]['Type']}) exception was thrown {exception}"
+            )
+            sleep(1)
 
 if __name__ == "__main__":
     start()

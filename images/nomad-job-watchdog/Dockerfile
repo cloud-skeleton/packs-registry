@@ -1,6 +1,8 @@
 FROM python:3.13.7-alpine
 ENTRYPOINT ["/bin/watchdog"]
 ENV PARAMS_VAR_ROOT_PATH=params
-ENV DEFAULTS_META_PREFIX=defaults
-RUN pip install --no-cache-dir python-nomad requests-unixsocket
+ENV PARAMS_META_PREFIX=params
+ENV VOLUMES_META_PREFIX=volumes
+# RUN pip install --no-cache-dir python-nomad requests-unixsocket
+RUN pip install --no-cache-dir git+https://github.com/masterjg/python-nomad.git
 COPY ./watchdog /bin/watchdog
