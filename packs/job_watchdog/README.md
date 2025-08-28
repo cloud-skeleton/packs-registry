@@ -49,21 +49,21 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 
 ### Pack Variables
 
-| Variable               | Type     | Default    | Required | Description                                                                                                    |
-|------------------------|----------|------------|----------|----------------------------------------------------------------------------------------------------------------|
-| `params_meta_prefix`   | *string* | `"params"` | ❌       | Metadata prefix to be used as parameter defaults.                                                              |
-| `id`                   | *string* |            | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
-| `parameters_root_path` | *string* | `"params"` | ❌       | Root Nomad variables path that the watchdog manages (e.g., params/...).                                        |
-| `watchdog_version`     | *string* | `"1.1"`    | ❌       | Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`). |
+| Variable                 | Type     | Default    | Required | Description                                                                                                    |
+|--------------------------|----------|------------|----------|----------------------------------------------------------------------------------------------------------------|
+| `id`                     | *string* |            | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
+| `parameters_meta_prefix` | *string* | `"params"` | ❌       | Metadata prefix to be used as parameter defaults.                                                              |
+| `parameters_root_path`   | *string* | `"params"` | ❌       | Root Nomad variables path that the watchdog manages (e.g., params/...).                                        |
+| `watchdog_version`       | *string* | `"1.1"`    | ❌       | Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`). |
 
 ### Example `vars.hcl`
 
 ```hcl
-# Metadata prefix to be used as parameter defaults.
-params_meta_prefix = "params"
-
 # Unique identifier used to distinguish multiple deployments of this pack.
 id = "<REQUIRED>"
+
+# Metadata prefix to be used as parameter defaults.
+parameters_meta_prefix = "params"
 
 # Root Nomad variables path that the watchdog manages (e.g., params/...).
 parameters_root_path = "params"
