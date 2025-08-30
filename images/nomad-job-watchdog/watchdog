@@ -86,22 +86,34 @@ def _create_params(data: dict[str, Any]) -> None:
             value |= current_value
         _set_var(path, value, index)
 
-# def _create_volumes(data: dict[str, Any]) -> None:
-#     volume_config: dict[str, Any] = {
-#         "type": "csi",
-#         "capability": {
-#             "access_mode": "multi-node-multi-writer",
-#             "attachment_mode": "file-system"
-#         }
-#     }
-#     volume_vars: dict[str, dict[str, str]] = {}
-#     for volume_key, volume_value in data["volumes"].items():
-#         volume_id, volume_subconfig = volume_key.split(".", 1)
+def _create_volumes(data: dict[str, Any]) -> None:
+    print(data)
+    volume_config: dict[str, Any] = {
+        "capability": {
+            "access_mode": "multi-node-multi-writer",
+            "attachment_mode": "file-system"
+        }
+    }
+    volume_vars: dict[str, dict[str, str]] = {}
+    for volume_key, volume_value in data["volumes"].items():
+        volume_id, volume_subconfig = volume_key.split(".", 1)
 
-#         # if volume_config.startswith("capability."):
-#         #     volume_config, capability_subconfig =  volume_config.split(".", 1)
+        # if volume_config.startswith("capability."):
+        #     volume_config, capability_subconfig =  volume_config.split(".", 1)
 
-#     print(volume_config)
+    print(volume_config)
+    # nomad.volume.create_volume("abc", {
+    #     "ID": "test",
+    #     "Name": "test",
+    #     "Namespace": "system",
+    #     "PluginID": "nas",
+    #     "RequestedCapabilities": [
+    #         {
+    #         "AccessMode": "multi-node-multi-writer",
+    #         "AttachmentMode": "file-system"
+    #         }
+    #     ]
+    # })
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
@@ -120,16 +132,16 @@ def _process_event(event: dict[str, Any]) -> None:
             for meta_key, meta_value in job["Meta"].items()
             if meta_key.startswith(f"{PARAMS_META_PREFIX}.")
         },
-        # "volumes": {
-        #     meta_key.removeprefix(f"{VOLUMES_META_PREFIX}."): meta_value
-        #     for meta_key, meta_value in job["Meta"].items()
-        #     if meta_key.startswith(f"{VOLUMES_META_PREFIX}.")
-        # }
+        "volumes": {
+            meta_key.removeprefix(f"{VOLUMES_META_PREFIX}."): meta_value
+            for meta_key, meta_value in job["Meta"].items()
+            if meta_key.startswith(f"{VOLUMES_META_PREFIX}.")
+        }
     }
     if event["Events"][0]["Type"] == "JobRegistered":
         _attach_acl(data)
         _create_params(data)
-        # _create_volumes(data)
+        _create_volumes(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
     _set_var(
