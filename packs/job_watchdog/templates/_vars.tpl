@@ -9,3 +9,11 @@
 [[- $name  := index . 1 -]]
 [[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" | trunc 63 ]]
 [[- end -]]
+
+[[- define "variables_backup_meta" -]]
+[[- $max := 0 -]]
+[[- range $k, $_ := vars . -]][[- $max = max $max (len $k) -]][[- end ]]
+[[- range $name, $value := vars . -]]
+    [[ printf "\"pack.variables.%s\"%*s= \"%v\"\n" $name (add 1 (sub $max (len $name))) "" $value ]]
+[[- end -]]
+[[- end -]]
