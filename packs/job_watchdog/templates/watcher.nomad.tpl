@@ -42,7 +42,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     meta = {
         // Backup pack variables values
         [[- range $name, $value := vars . ]]
-        "params.nomad_pack.backup_variables.[[ $name ]]" = "[[ printf "%v" $value ]]"
+        "params.nomad_pack_vars.[[ $name ]]" = "[[ printf "%v" $value ]]"
         [[- end ]]
         // "params.backup_variables.id"                     = "[[ var "id" . ]]"
         // "params.backup_variables.parameters_meta_prefix" = "[[ var "parameters_meta_prefix" . ]]"
