@@ -41,13 +41,16 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
     meta = {
         // Backup pack variables values
-        "variables.backup.id"                     = "[[ var "id" . ]]"
-        "variables.backup.parameters_meta_prefix" = "[[ var "parameters_meta_prefix" . ]]"
-        "variables.backup.parameters_root_path"   = "[[ var "parameters_root_path" . ]]"
-        "variables.backup.volumes_meta_prefix"    = "[[ var "volumes_meta_prefix" . ]]"
-        "variables.backup.watchdog_version"       = "[[ var "watchdog_version" . ]]"
+        [[- range $name, $value := vars . ]]
+        "params.backup_variables.{{ $name }}" = "[[ printf "%v" $value ]]"
+        [[- end ]]
+        // "params.backup_variables.id"                     = "[[ var "id" . ]]"
+        // "params.backup_variables.parameters_meta_prefix" = "[[ var "parameters_meta_prefix" . ]]"
+        // "params.backup_variables.parameters_root_path"   = "[[ var "parameters_root_path" . ]]"
+        // "params.backup_variables.volumes_meta_prefix"    = "[[ var "volumes_meta_prefix" . ]]"
+        // "params.backup_variables.watchdog_version"       = "[[ var "watchdog_version" . ]]"
         // Set additional pack source URL
-        "pack.src"                                = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
+        "pack.src"                             = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
     }
     namespace = "system"
 }
