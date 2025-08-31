@@ -46,7 +46,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- end ]]
 
         // Set additional pack source URL
-        // "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
+        "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
     }
     namespace = "system"
 }
