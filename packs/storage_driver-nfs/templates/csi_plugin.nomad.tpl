@@ -32,7 +32,7 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
     }
 
     meta = {
-        "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/storage_driver-nfs"
+        [[- template "extra_pack_meta" (list . "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog") ]]
     }
     namespace = "system"
     type      = "system"
