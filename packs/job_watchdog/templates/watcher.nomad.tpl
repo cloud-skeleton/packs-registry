@@ -40,7 +40,14 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     }
 
     meta = {
-        "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
+        // Backup pack variables values
+        "variables.backup.id"                     = "[[ var "id" . ]]"
+        "variables.backup.parameters_meta_prefix" = "[[ var "parameters_meta_prefix" . ]]"
+        "variables.backup.parameters_root_path"   = "[[ var "parameters_root_path" . ]]"
+        "variables.backup.volumes_meta_prefix"    = "[[ var "volumes_meta_prefix" . ]]"
+        "variables.backup.watchdog_version"       = "[[ var "watchdog_version" . ]]"
+        // Set additional pack source URL
+        "pack.src"                                = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
     }
     namespace = "system"
 }

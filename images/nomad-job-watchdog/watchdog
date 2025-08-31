@@ -85,7 +85,7 @@ def _remove_acl(data: dict[str, Any]) -> None:
     print(f"Deleting ACL policy for {data['job']} job")
     nomad.acl.delete_policy(f"allow-variables-read-{data['job']}".replace("_", "-"))
 
-def _create_params(data: dict[str, Any]) -> None:
+def _create_variables(data: dict[str, Any]) -> None:
     param_vars: dict[str, dict[str, str]] = {}
     for param_key, param_value in data["params"].items():
         variable_subpath, variable_key = param_key.split(".", 1)
@@ -147,7 +147,7 @@ def _process_event(event: dict[str, Any]) -> None:
     }
     if event["Events"][0]["Type"] == "JobRegistered":
         _attach_acl(data)
-        _create_params(data)
+        _create_variables(data)
         _create_volumes(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
