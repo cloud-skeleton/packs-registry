@@ -25,13 +25,19 @@ NOMAD_SOCKET: str = f"unix://{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
 
 VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
-    "capability": {
-        "access_mode": "multi-node-multi-writer",
-        "attachment_mode": "file-system"
+    "RequestedCapabilities": {
+        "AccessMode": "multi-node-multi-writer",
+        "AttachmentMode": "file-system"
     }
 }
 
 nomad: Nomad = Nomad(address = NOMAD_SOCKET)
+
+def _snake_to_pascal(name: str) -> str:
+    return "".join(
+        "ID" if word.lower() == "id" else word.capitalize()
+        for word in name.split("_")
+    )
 
 def _get_var(path: str) -> tuple[int, dict[str, str]]:
     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
@@ -100,11 +106,11 @@ def _create_volumes(data: dict[str, Any]) -> None:
         volume_id, volume_param = volume_key.split(".", 1)
         volume_config: dict[str, Any] = volumes.setdefault(volume_id, deepcopy(VOLUME_DEFAULT_CONFIG))
         if "." not in volume_param:
-            volume_config[volume_param] = volume_value
+            volume_config[_snake_to_pascal(volume_param)] = volume_value
             continue
         volume_param, volume_subparam = volume_param.split(".", 1)
-        volume_subconfig: dict[str, Any] = volume_config.setdefault(volume_param, {})
-        volume_subconfig[volume_subparam] = volume_value
+        volume_subconfig: dict[str, Any] = volume_config.setdefault(_snake_to_pascal(volume_param), {})
+        volume_subconfig[_snake_to_pascal(volume_subparam)] = volume_value
     print(volumes)
     # nomad.volume.create_volume("abc", {
     #     "ID": "test",
