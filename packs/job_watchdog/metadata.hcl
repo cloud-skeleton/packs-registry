@@ -5,5 +5,6 @@ app {
 pack {
     name        = "job_watchdog"
     description = "Nomad watchdog that auto-provisions variable access, parameter defaults and volumes."
+    src         = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
     version     = "25.8.31"
 }
