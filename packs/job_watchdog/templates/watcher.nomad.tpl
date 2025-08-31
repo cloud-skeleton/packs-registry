@@ -41,8 +41,12 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
     meta = {
         // Backup nomad-pack variables values
+        [[- $max_var_name_length := 0 -]]
+        [[- range $name, $_ := vars . -]]
+            [[- $max_var_name_length = max $max_var_name_length (len $name) -]]
+        [[- end ]]
         [[- range $name, $value := vars . ]]
-        "params.nomad_pack_vars.[[ $name ]]" = "[[ printf "%v" $value ]]"
+            [[ printf "\"params.nomad_pack_vars.%-*s\" = \"%v\"" (add $max_var_name_length 1) $name $value ]]
         [[- end ]]
 
         // Set additional pack source URL
