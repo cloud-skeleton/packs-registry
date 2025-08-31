@@ -44,7 +44,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
 
         // Backup nomad-pack variables values
-        [[ template "variables_backup_meta" . -]]
+        [[- template "variables_backup_meta" . ]]
     }
     namespace = "system"
 }
