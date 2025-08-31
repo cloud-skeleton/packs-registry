@@ -244,9 +244,18 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             access_mode     = "multi-node-multi-writer"
             attachment_mode = "file-system"
             read_only       = false
-            source          = "[[ var "certificates_volume_id" . ]]"
+            source          = "[[ var "certificates_volume.id" . ]]"
             type            = "csi"
         }
+    }
+
+    meta = {
+        [[- template "extra_pack_meta" (list . "https://github.com/cloud-skeleton/packs-registry/tree/main/packs/reverse_proxy") ]]
+
+        // Certificates volume auto-creation (job watchdog)
+        "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"
+        "volumes.[[ var "certificates_volume.id" . ]].name"      = "[[ var "certificates_volume.name" . ]]"
+        "volumes.[[ var "certificates_volume.id" . ]].plugin_id" = "[[ var "certificates_volume.plugin_id" . ]]"
     }
 
     namespace = "system"

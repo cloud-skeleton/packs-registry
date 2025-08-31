@@ -4,15 +4,18 @@ variable "admin_ip_cidrs" {
     type        = set(string)
 }
 
-variable "certificates_volume_id" {
-    default     = "reverse_proxy-certificates"
-    description = "ID of the CSI volume used to store and share TLS certificates for the ingress load balancer (Traefik)."
-    type        = string
+variable "certificates_volume" {
+    description = "CSI volume object used to store and share TLS certificates for the ingress load balancer (Traefik)."
+    type = object({
+        id        = string
+        name      = string
+        plugin_id = string
+    })
 }
 
 variable "dns_provider" {
     description = "DNS-01 ACME challenge provider used by Traefik. More info @ https://go-acme.github.io/lego/dns/."
-    type = string
+    type        = string
 }
 
 variable "id" {
