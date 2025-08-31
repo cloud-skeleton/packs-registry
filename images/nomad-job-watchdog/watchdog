@@ -4,6 +4,7 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
+from copy import deepcopy
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
@@ -22,6 +23,13 @@ VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 NOMAD_SOCKET: str = f"unix://{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
+
+VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
+    "capability": {
+        "access_mode": "multi-node-multi-writer",
+        "attachment_mode": "file-system"
+    }
+}
 
 nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 
@@ -87,21 +95,17 @@ def _create_params(data: dict[str, Any]) -> None:
         _set_var(path, value, index)
 
 def _create_volumes(data: dict[str, Any]) -> None:
-    print(data)
-    volume_config: dict[str, Any] = {
-        "capability": {
-            "access_mode": "multi-node-multi-writer",
-            "attachment_mode": "file-system"
-        }
-    }
-    volume_vars: dict[str, dict[str, str]] = {}
+    volumes: dict[str, dict[str, Any]] = {}
     for volume_key, volume_value in data["volumes"].items():
-        volume_id, volume_subconfig = volume_key.split(".", 1)
-
-        # if volume_config.startswith("capability."):
-        #     volume_config, capability_subconfig =  volume_config.split(".", 1)
-
-    print(volume_config)
+        volume_id, volume_param = volume_key.split(".", 1)
+        volume_config: dict[str, Any] = volumes.setdefault(volume_id, deepcopy(VOLUME_DEFAULT_CONFIG))
+        if "." not in volume_param:
+            volume_config[volume_param] = volume_value
+            continue
+        volume_param, volume_subparam = volume_param.split(".", 1)
+        volume_subconfig: dict[str, Any] = volume_config.setdefault(volume_param, {})
+        volume_subconfig[volume_subparam] = volume_value
+    print(volumes)
     # nomad.volume.create_volume("abc", {
     #     "ID": "test",
     #     "Name": "test",
