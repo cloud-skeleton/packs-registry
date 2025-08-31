@@ -8,8 +8,8 @@
 
 > **IMPORTANT:** Before deploying any **[Nomad Packs][hashicorp-nomad-packs]**, **you must complete all the prerequisites detailed in the **[Cloud Skeleton][cloud-skeleton]** ► **[Prerequisites][prerequisites]** repository.** This step is essential to ensure that your system meets all the required configurations, dependencies, and security measures necessary for a successful deployment.
 
-**Nomad watchdog that auto-provisions variable access and parameter defaults.**  
-Automatically creates read/list ACL policies so job workloads can access variables under `/params/{job_name}`. It also inspects job metadata to pre-create Nomad Variables with sensible default values, reducing manual bootstrap and keeping configurations consistent.
+**Nomad watchdog that auto-provisions variable access, parameter defaults and volumes.**  
+Automatically creates read/list ACL policies so job workloads can access variables under `/params/{job_name}`. It also inspects job metadata to pre-create Nomad Variables and initialize volumes, reducing manual bootstrap and keeping configurations consistent.
 
 ## Table of Contents
 
@@ -49,12 +49,13 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 
 ### Pack Variables
 
-| Variable                 | Type     | Default    | Required | Description                                                                                                    |
-|--------------------------|----------|------------|----------|----------------------------------------------------------------------------------------------------------------|
-| `id`                     | *string* |            | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
-| `parameters_meta_prefix` | *string* | `"params"` | ❌       | Metadata prefix to be used as parameter defaults.                                                              |
-| `parameters_root_path`   | *string* | `"params"` | ❌       | Root Nomad variables path that the watchdog manages (e.g., params/...).                                        |
-| `watchdog_version`       | *string* | `"1.1"`    | ❌       | Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`). |
+| Variable                 | Type     | Default     | Required | Description                                                                                                    |
+|--------------------------|----------|-------------|----------|----------------------------------------------------------------------------------------------------------------|
+| `id`                     | *string* |             | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
+| `parameters_meta_prefix` | *string* | `"params"`  | ❌       | Metadata prefix to be used as parameter defaults.                                                              |
+| `parameters_root_path`   | *string* | `"params"`  | ❌       | Root Nomad variables path that the watchdog manages (e.g., params/...).                                        |
+| `volumes_meta_prefix`    | *string* | `"volumes"` | ❌       | Metadata prefix to be used as volumes configuration.                                                           |
+| `watchdog_version`       | *string* | `"1.1"`     | ❌       | Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`). |
 
 ### Example `vars.hcl`
 
@@ -67,6 +68,9 @@ parameters_meta_prefix = "params"
 
 # Root Nomad variables path that the watchdog manages (e.g., params/...).
 parameters_root_path = "params"
+
+# Metadata prefix to be used as volumes configuration.
+volumes_meta_prefix = "volumes"
 
 # Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`).
 watchdog_version = "1.1"

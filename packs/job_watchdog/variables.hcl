@@ -15,6 +15,12 @@ variable "parameters_root_path" {
     type        = string
 }
 
+variable "volumes_meta_prefix" {
+    default     = "volumes"
+    description = "Metadata prefix to be used as volumes configuration."
+    type        = string
+}
+
 variable "watchdog_version" {
     default     = "1.1"
     description = "Container image version tag for job watchdog (maps to `ghcr.io/cloud-skeleton/nomad-job-watchdog:v<version>`)."

@@ -17,6 +17,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
             env {
                 PARAMS_META_PREFIX   = "[[ var "parameters_meta_prefix" . ]]"
                 PARAMS_VAR_ROOT_PATH = "[[ var "parameters_root_path" . ]]"
+                VOLUMES_META_PREFIX  = "[[ var "volumes_meta_prefix" . ]]"
             }
 
             resources {

@@ -4,6 +4,6 @@ app {
 
 pack {
     name        = "job_watchdog"
-    description = "Nomad watchdog that auto-provisions variable access and parameter defaults."
-    version     = "25.8.28"
+    description = "Nomad watchdog that auto-provisions variable access, parameter defaults and volumes."
+    version     = "25.8.31"
 }
