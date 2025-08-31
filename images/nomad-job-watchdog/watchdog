@@ -111,19 +111,28 @@ def _create_volumes(data: dict[str, Any]) -> None:
         volume_param, volume_subparam = volume_param.split(".", 1)
         volume_subconfig: dict[str, Any] = volume_config.setdefault(_snake_to_pascal(volume_param), {})
         volume_subconfig[_snake_to_pascal(volume_subparam)] = volume_value
-    print(volumes)
-    # nomad.volume.create_volume("abc", {
-    #     "ID": "test",
-    #     "Name": "test",
-    #     "Namespace": "system",
-    #     "PluginID": "nas",
-    #     "RequestedCapabilities": [
-    #         {
-    #         "AccessMode": "multi-node-multi-writer",
-    #         "AttachmentMode": "file-system"
-    #         }
-    #     ]
-    # })
+    # print(volumes)
+    for volume_id, volume_config in volumes.items():
+        print(volume_id)
+        print(volume_config | {
+            "ID": volume_id,
+            "Namespace": data["namespace"],
+            "RequestedCapabilities": [
+                volume_config["RequestedCapabilities"]
+            ]
+        })
+    #     nomad.volume.create_volume("abc", {
+    #         "ID": "test",
+    #         "Name": "test",
+    #         "Namespace": "system",
+    #         "PluginID": "nas",
+    #         "RequestedCapabilities": [
+    #             {
+    #             "AccessMode": "multi-node-multi-writer",
+    #             "AttachmentMode": "file-system"
+    #             }
+    #         ]
+    #     })
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
