@@ -170,13 +170,14 @@ def start() -> None:
         event: dict[str, Any] = events.get()
         try:
             _process_event(event)
-            events.task_done()
         except Exception as exception:
             print(
                 f"While processing {event['Index']} ({event['Events'][0]['Key']} "
-                f"-> {event['Events'][0]['Type']}) exception was thrown {exception}"
+                f"-> {event['Events'][0]['Type']}) exception was thrown: {exception}"
             )
             sleep(1)
+        finally:
+            events.task_done()
 
 if __name__ == "__main__":
     start()
