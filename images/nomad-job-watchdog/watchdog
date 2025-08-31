@@ -119,8 +119,8 @@ def _create_volumes(data: dict[str, Any]) -> None:
                 volume_config["RequestedCapabilities"]
             ]
         }
-        print(f"Creating volume '{volume_id}' with payload: ${volume_payload}")
-        nomad.volume.create_volume(volume_id, volume_payload)
+        print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
+        nomad.volume.create_csi_volume(volume_id, volume_payload)
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
