@@ -41,8 +41,6 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
     meta = {
         "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
-        "volumes.abc.name"      = "data_test"
-        "volumes.abc.plugin_id" = "nas"
     }
     namespace = "system"
 }
