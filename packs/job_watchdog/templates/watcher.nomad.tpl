@@ -41,6 +41,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
     meta = {
         "pack.src" = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
+
+        "ttt" = "abc"
     }
     namespace = "system"
 }
