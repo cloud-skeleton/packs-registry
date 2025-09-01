@@ -111,6 +111,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
         volume_param, volume_subparam = volume_param.split(".", 1)
         volume_subconfig: dict[str, Any] = volume_config.setdefault(_snake_to_pascal(volume_param), {})
         volume_subconfig[_snake_to_pascal(volume_subparam)] = volume_value
+    results = []
     for volume_id, volume_config in volumes.items():
         volume_payload: dict[str, Any] = volume_config | {
             "ID": volume_id,
@@ -120,7 +121,9 @@ def _create_volumes(data: dict[str, Any]) -> None:
             ]
         }
         print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
-        nomad.volume.create_csi_volume(volume_id, volume_payload)
+        results.append(nomad.volume.create_csi_volume(volume_id, volume_payload))
+    if any(result["CreateIndex"] == 0 for result in results):
+        nomad.job.evaluate_job(data["job"])
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
