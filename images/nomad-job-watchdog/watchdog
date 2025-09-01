@@ -111,7 +111,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
         volume_param, volume_subparam = volume_param.split(".", 1)
         volume_subconfig: dict[str, Any] = volume_config.setdefault(_snake_to_pascal(volume_param), {})
         volume_subconfig[_snake_to_pascal(volume_subparam)] = volume_value
-    results = []
+    should_reevaluate: bool = False
     for volume_id, volume_config in volumes.items():
         volume_payload: dict[str, Any] = volume_config | {
             "ID": volume_id,
@@ -120,9 +120,13 @@ def _create_volumes(data: dict[str, Any]) -> None:
                 volume_config["RequestedCapabilities"]
             ]
         }
-        print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
-        results.append(nomad.volume.create_csi_volume(volume_id, volume_payload))
-    if any(result["CreateIndex"] == result["ModifyIndex"] for result in results):
+        try:
+            nomad.volume.get_csi_volume(volume_id, data["namespace"])
+        except URLNotFoundNomadException:
+            print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
+            nomad.volume.create_csi_volume(volume_id, volume_payload)
+            should_reevaluate = True
+    if should_reevaluate:
         print(f"Triggering scheduling re-evaluation for job '{data['job']}'")
         nomad.job.evaluate_job(data["job"])
 
