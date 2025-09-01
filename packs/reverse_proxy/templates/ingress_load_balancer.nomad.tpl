@@ -197,7 +197,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             middlewares:
                                 - success-response
                             priority: 1000
-                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("64.41.200.0/24")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("69.67.183.0/24")
                             service: noop@internal
 
                         traefik-dashboard:
