@@ -122,6 +122,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
         }
         print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
         results.append(nomad.volume.create_csi_volume(volume_id, volume_payload))
+    print(results)
     print([result["CreateIndex"] for result in results])
     print([result["CreateIndex"] == 0 for result in results])
     print(any(result["CreateIndex"] == 0 for result in results))
