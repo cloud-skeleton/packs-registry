@@ -122,13 +122,9 @@ def _create_volumes(data: dict[str, Any]) -> None:
         }
         print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
         results.append(nomad.volume.create_csi_volume(volume_id, volume_payload))
-    print(results)
-    print([result["CreateIndex"] for result in results])
-    print([result["CreateIndex"] == 0 for result in results])
-    print(any(result["CreateIndex"] == 0 for result in results))
-    if any(result["CreateIndex"] == 0 for result in results):
-        print(f"Triggering scheduling re-evaluation for job '{data['job']}' because new volumes have been created!")
-        print(nomad.job.evaluate_job(data["job"]))
+    if any(result["CreateIndex"] == result["ModifyIndex"] for result in results):
+        print(f"Triggering scheduling re-evaluation for job '{data['job']}'")
+        nomad.job.evaluate_job(data["job"])
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
