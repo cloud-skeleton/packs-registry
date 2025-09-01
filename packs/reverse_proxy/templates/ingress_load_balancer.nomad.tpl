@@ -159,10 +159,8 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         admin-ip-only:
                             IPAllowList:
                                 sourceRange: [[ if eq (len (var "admin_ip_cidrs" .)) 0 ]][][[ end ]]
-                                [[- if gt (len (var "admin_ip_cidrs" .)) 0 ]]
                                 [[- range $cidr := var "admin_ip_cidrs" . ]]
                                     - [[ $cidr ]]
-                                [[- end ]]
                                 [[- end ]]
 
                         local-ip-only:
