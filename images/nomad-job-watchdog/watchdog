@@ -127,7 +127,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
     print(any(result["CreateIndex"] == 0 for result in results))
     if any(result["CreateIndex"] == 0 for result in results):
         print(f"Triggering scheduling re-evaluation for job '{data['job']}' because new volumes have been created!")
-        nomad.job.evaluate_job(data["job"])
+        print(nomad.job.evaluate_job(data["job"]))
 
 def _process_event(event: dict[str, Any]) -> None:
     state_var_index: int = 0
