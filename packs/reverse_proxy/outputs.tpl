@@ -1,3 +1,11 @@
+Allow Traefik to access Nomad Task API:
+---
+cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "ingress_load_balancer") ]] -description "Allow Traefik read access to Jobs" allow-traefik-jobs-read -
+namespace "*" {
+    capabilities = ["read-job"]
+}
+POLICY
+
 Configure your DNS-01 challenge provider credentials via nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service/dns variable:
 ---
 nomad var put -force -namespace=system nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service/dns \

@@ -13,15 +13,14 @@ from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
 
-if not (secrets_dir := getenv("NOMAD_SECRETS_DIR", "")):
-    raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
+if not (NOMAD_SOCKET := getenv("NOMAD_UNIX_ADDR", "")):
+    raise ValueError("NOMAD_UNIX_ADDR environment variable is not set.")
 if not (namespace := getenv("NOMAD_NAMESPACE", "")):
     raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
 
 PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
-NOMAD_SOCKET: str = f"unix://{secrets_dir}/api.sock"
 STATE_VAR_PATH: str = "system/tools/nomad-job-watchdog/state"
 
 VOLUME_DEFAULT_CONFIG: dict[str, Any] = {

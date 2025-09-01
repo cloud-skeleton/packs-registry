@@ -68,6 +68,11 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             driver = "docker"
 
+            identity {
+                env         = true
+                change_mode = "restart"
+            }
+
             resources {
                 cpu    = 100
                 memory = 64
@@ -133,6 +138,14 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                 providers:
                     file:
                         filename: /etc/traefik/dynamic.yml
+                    nomad:
+                        defaultRule: "Host(`{{"{{"}} normalize .Name {{"}}"}}`)"
+                        endpoint:
+                            address: {{ env "NOMAD_UNIX_ADDR" }}
+                        exposedByDefault: false
+                        prefix: expose
+                        stale: true
+                        watch: true
                 ...
                 EOF
                 destination = "local/traefik_static.yml"
