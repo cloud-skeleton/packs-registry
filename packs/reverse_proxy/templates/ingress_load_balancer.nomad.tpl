@@ -194,28 +194,28 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         ssllabs-certificate-validation:
                             middlewares:
                                 - success-response
-                            priority: 1000
+                            priority: 10001
                             rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("69.67.183.0/24")
                             service: noop@internal
 
                         traefik-dashboard:
                             middlewares:
                                 - admin-ip-only
-                            priority: 1000
+                            priority: 10000
                             rule: Host("[[ var "traefik_hostname" . ]]") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
                         traefik-dashboard-redirect:
                             middlewares:
                                 - traefik-dashboard-redirect
-                            priority: 1000
+                            priority: 10000
                             rule: Host("[[ var "traefik_hostname" . ]]") && Path("/")
                             service: noop@internal
 
                         traefik-ping:
                             middlewares:
                                 - local-ip-only
-                            priority: 1000
+                            priority: 10000
                             rule: Host("[[ var "traefik_hostname" . ]]") && Path("/ping")
                             service: ping@internal
 
