@@ -43,4 +43,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- template "extra_pack_meta" (list . "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog") ]]
     }
     namespace = "system"
+
+    update {
+        auto_revert = true
+    }
 }

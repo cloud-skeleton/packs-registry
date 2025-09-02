@@ -128,6 +128,9 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         static-response:
                             moduleName: github.com/tuxgal/traefik_inline_response
                             version: v0.1.2
+                        statiq:
+                            moduleName: github.com/hhftechnology/statiq
+                            version: v1.0.1
                 global:
                     checkNewVersion: false
                     sendAnonymousUsage: false
@@ -271,4 +274,8 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
     namespace = "system"
     type      = "system"
+
+    update {
+        auto_revert = true
+    }
 }

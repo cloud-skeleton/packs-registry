@@ -36,4 +36,8 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
     }
     namespace = "system"
     type      = "system"
+
+    update {
+        auto_revert = true
+    }
 }
