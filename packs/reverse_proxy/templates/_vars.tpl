@@ -23,5 +23,10 @@
         // Nomad pack variables used during deployment
 [[- range $name, $value := vars $root ]]
         [[ printf "\"pack.vars.%s\"%*s= \"%v\"" $name (add 1 (sub $max_var_name_length (len $name))) "" $value -]]
+[[- end ]]
+
+        // Create parameter variables with default values
+[[- range $name, $value := omit (vars $root) "id" ]]
+        [[ printf "\"params.config.%s\"%*s= \"%v\"" $name (add 1 (sub $max_var_name_length (len $name))) "" $value -]]
 [[- end -]]
 [[- end -]]

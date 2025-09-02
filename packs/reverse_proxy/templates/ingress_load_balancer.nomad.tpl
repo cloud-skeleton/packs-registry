@@ -44,7 +44,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         task "service" {
             config {
                 cpu_hard_limit = true
-                image          = "traefik:v[[ var "traefik_version" . ]]"
+                image          = "traefik:v${TRAEFIK_VERSION}"
 
                 mount {
                     type     = "bind"
@@ -80,6 +80,9 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             template {
                 data = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
+                TRAEFIK_VERSION={{ .traefik_version }}
+                {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/dns" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}

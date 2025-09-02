@@ -35,7 +35,7 @@ variable "traefik_hostname" {
 }
 
 variable "traefik_version" {
-    default     = "3.5.0"
+    default     = "3.5.1"
     description = "Container image version tag for the Traefik (maps to `traefik:v<version>`)."
     type        = string
 }
