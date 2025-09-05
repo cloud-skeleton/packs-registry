@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
 
             resources {
                 cpu    = 50
-                memory = 32
+                memory = 64
             }
         }
     }

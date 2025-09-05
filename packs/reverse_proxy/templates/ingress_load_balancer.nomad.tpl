@@ -169,10 +169,11 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     middlewares:
                         admin-ip-only:
                             IPAllowList:
-                                sourceRange: [[ if eq (len (var "admin_ip_cidrs" .)) 0 ]][][[ end ]]
-                                [[- range $cidr := var "admin_ip_cidrs" . ]]
-                                    - [[ $cidr ]]
-                                [[- end ]]
+                                {{- $admin_ip_cidrs := .admin_ip_cidrs.Value | parseJSON -}}
+                                sourceRange: {{ if eq (len $admin_ip_cidrs) 0 }}[]{{ end }}
+                                {{- range $admin_ip_cidr := $admin_ip_cidrs }}
+                                    - {{ $admin_ip_cidr }}
+                                {{- end }}
 
                         local-ip-only:
                             IPAllowList:
@@ -276,10 +277,11 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         [[- template "extra_pack_meta" (list . "https://github.com/cloud-skeleton/packs-registry/tree/main/packs/reverse_proxy") ]]
 
         // Docker images used in job
-        "params.images.traefik" = "v[[ var "traefik_version" . ]]"
+        "params.images.traefik" = "v3.5.1"
 
         // Dynamic configuration
-        "params.config.log_level" = "[[ var "log_level" . ]]"
+        "params.config.admin_ip_cidrs" = "[]"
+        "params.config.log_level"      = "INFO"
 
         // Certificates volume auto-creation (job watchdog)
         "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"
