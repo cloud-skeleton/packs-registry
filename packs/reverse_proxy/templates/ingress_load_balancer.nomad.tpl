@@ -44,7 +44,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         task "service" {
             config {
                 cpu_hard_limit = true
-                image          = "traefik:v${TRAEFIK_VERSION}"
+                image          = "${DOCKER_IMAGE}"
 
                 mount {
                     type     = "bind"
@@ -80,8 +80,8 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             template {
                 data = <<-EOF
-                {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
-                TRAEFIK_VERSION={{ .traefik_version }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/images" }}
+                DOCKER_IMAGE="traefik:{{ index . "traefik" }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/dns" }}
                 {{- range $name, $value := . }}
@@ -95,13 +95,16 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             template {
                 data = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
                 ---
                 api: {}
                 certificatesResolvers:
                     lets-encrypt:
                         acme:
                             dnsChallenge:
-                                provider: [[ var "dns_provider" . ]]
+                                {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/dns" }}
+                                provider: {{ .CODE }}
+                                {{- end }}
                             keyType: EC384
                             storage: /certificates/acme.json
                 entrypoints:
@@ -138,7 +141,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     checkNewVersion: false
                     sendAnonymousUsage: false
                 log:
-                    level: [[ var "log_level" . ]]
+                    level: {{ .log_level }}
                 ping:
                     manualRouting: true
                 providers:
@@ -153,6 +156,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         stale: true
                         watch: true
                 ...
+                {{- end }}
                 EOF
                 destination = "local/traefik_static.yml"
             }
@@ -202,28 +206,28 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             middlewares:
                                 - success-response
                             priority: 10001
-                            rule: Host("{{ .traefik_hostname }}") && ClientIP("69.67.183.0/24")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("69.67.183.0/24")
                             service: noop@internal
 
                         traefik-dashboard:
                             middlewares:
                                 - admin-ip-only
                             priority: 10000
-                            rule: Host("{{ .traefik_hostname }}") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
+                            rule: Host("[[ var "traefik_hostname" . ]]") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
                         traefik-dashboard-redirect:
                             middlewares:
                                 - traefik-dashboard-redirect
                             priority: 10000
-                            rule: Host("{{ .traefik_hostname }}") && Path("/")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && Path("/")
                             service: noop@internal
 
                         traefik-ping:
                             middlewares:
                                 - local-ip-only
                             priority: 10000
-                            rule: Host("{{ .traefik_hostname }}") && Path("/ping")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && Path("/ping")
                             service: ping@internal
 
                     serversTransports:
@@ -270,6 +274,12 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
     meta = {
         [[- template "extra_pack_meta" (list . "https://github.com/cloud-skeleton/packs-registry/tree/main/packs/reverse_proxy") ]]
+
+        // Docker images used in job
+        "params.images.traefik" = "v[[ var "traefik_version" . ]]"
+
+        // Dynamic configuration
+        "params.config.log_level" = "[[ var "log_level" . ]]"
 
         // Certificates volume auto-creation (job watchdog)
         "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"

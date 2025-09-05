@@ -1,15 +1,3 @@
-[[- define "job_name" -]]
-[[- $root := index . 0 -]]
-[[- $name  := index . 1 -]]
-[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
-[[- end -]]
-
-[[- define "service_name" -]]
-[[- $root := index . 0 -]]
-[[- $name  := index . 1 -]]
-[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" | trunc 63 ]]
-[[- end -]]
-
 [[- define "extra_pack_meta" -]]
 [[- $root := index . 0 -]]
 [[- $src := index . 1 -]]
@@ -23,10 +11,17 @@
         // Nomad pack variables used during deployment
 [[- range $name, $value := vars $root ]]
         [[ printf "\"pack.vars.%s\"%*s= \"%v\"" $name (add 1 (sub $max_var_name_length (len $name))) "" $value -]]
-[[- end ]]
-
-        // Create parameter variables with default values
-[[- range $name, $value := omit (vars $root) "id" ]]
-        [[ printf "\"params.config.%s\"%*s= \"%v\"" $name (add 1 (sub $max_var_name_length (len $name))) "" $value -]]
 [[- end -]]
+[[- end -]]
+
+[[- define "job_name" -]]
+[[- $root := index . 0 -]]
+[[- $name  := index . 1 -]]
+[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
+[[- end -]]
+
+[[- define "service_name" -]]
+[[- $root := index . 0 -]]
+[[- $name  := index . 1 -]]
+[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" | trunc 63 ]]
 [[- end -]]

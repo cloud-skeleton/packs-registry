@@ -1,4 +1,4 @@
-Allow Traefik to access Nomad Task API:
+Allow Traefik to access Nomad job information:
 ---
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "ingress_load_balancer") ]] -description "Allow Traefik read access to Jobs" allow-traefik-jobs-read -
 namespace "*" {
@@ -6,9 +6,10 @@ namespace "*" {
 }
 POLICY
 
-Configure your DNS-01 challenge provider credentials via nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service/dns variable:
+Configure DNS-01 challenge provider credentials (more info @ https://go-acme.github.io/lego/dns/):
 ---
-nomad var put -force -namespace=system nomad/jobs/[[ template "job_name" (list . "ingress_load_balancer") ]]/traefik/service/dns \
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "ingress_load_balancer") ]]/dns \
+    CODE="route53" \
     AWS_ACCESS_KEY_ID="your_key_id" \
     AWS_SECRET_ACCESS_KEY="your_secret_access_key" \
     AWS_REGION="aws-region" \

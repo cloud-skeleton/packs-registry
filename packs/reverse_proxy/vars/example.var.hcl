@@ -4,7 +4,6 @@ certificates_volume = {
     name      = "reverse_proxy/certificates"
     plugin_id = "nas"
 }
-dns_provider     = "cloudflare"
 id               = "main"
 log_level        = "INFO"
 traefik_hostname = "lb.cluster.domain.com"
