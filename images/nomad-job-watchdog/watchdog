@@ -17,13 +17,13 @@ if not (NOMAD_SOCKET := getenv("NOMAD_UNIX_ADDR", "")):
     raise ValueError("NOMAD_UNIX_ADDR environment variable is not set.")
 if not (NAMESPACE := getenv("NOMAD_NAMESPACE", "")):
     raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
-if not (job_name := getenv("NOMAD_JOB_NAME", "")):
+if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
     raise ValueError("NOMAD_JOB_NAME environment variable is not set.")
 
 PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
-STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{job_name}/state"
+STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{JOB_NAME}/state"
 
 VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
     "RequestedCapabilities": {
