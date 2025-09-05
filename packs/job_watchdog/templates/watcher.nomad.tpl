@@ -9,7 +9,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         task "service" {
             config {
                 cpu_hard_limit = true
-                image          = "ghcr.io/cloud-skeleton/nomad-job-watchdog:v[[ var "watchdog_version" . ]]"
+                image          = "${DOCKER_IMAGE}"
             }
 
             driver = "docker"
@@ -27,6 +27,9 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             template {
                 data = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/images" }}
+                DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog" }}"
+                {{- end }}
                 {{- with nomadVar "system/tools/nomad-job-watchdog/secrets" }}
                 {{- range $name, $value := . }}
                 {{ $name }}={{ $value }}
@@ -41,6 +44,14 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
     meta = {
         [[- template "extra_pack_meta" (list . "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog") ]]
+
+        // Docker images used in job
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.1"
+
+        // Dynamic configuration
+        // "params.config.admin_ip_cidrs" = "[]"
+        // "params.config.log_level"      = "INFO"
+        // "params.config.ssllabs_cidr"   = "69.67.183.0/24"
     }
     namespace = "system"
 

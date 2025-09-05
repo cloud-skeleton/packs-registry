@@ -15,7 +15,7 @@ from typing import cast, Any
 
 if not (NOMAD_SOCKET := getenv("NOMAD_UNIX_ADDR", "")):
     raise ValueError("NOMAD_UNIX_ADDR environment variable is not set.")
-if not (namespace := getenv("NOMAD_NAMESPACE", "")):
+if not (NAMESPACE := getenv("NOMAD_NAMESPACE", "")):
     raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
 if not (job_name := getenv("NOMAD_JOB_NAME", "")):
     raise ValueError("NOMAD_JOB_NAME environment variable is not set.")
@@ -23,7 +23,7 @@ if not (job_name := getenv("NOMAD_JOB_NAME", "")):
 PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
-STATE_VAR_PATH: str = f"params/{job_name}/state"
+STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{job_name}/state"
 
 VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
     "RequestedCapabilities": {
@@ -40,18 +40,23 @@ def _snake_to_pascal(name: str) -> str:
         for word in name.split("_")
     )
 
-def _get_var(path: str) -> tuple[int, dict[str, str]]:
+def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
     return var["ModifyIndex"], var["Items"]
 
-def _is_var(path: str) -> bool:
+def _is_var(path: str, namespace: str = NAMESPACE) -> bool:
     try:
-        _get_var(path)
+        _get_var(path, namespace)
         return True
     except URLNotFoundNomadException:
         return False
 
-def _set_var(path: str, data: dict[str, str], index: int | None = None) -> tuple[int, dict[str, str]]:
+def _set_var(
+    path: str,
+    data: dict[str, str],
+    index: int | None = None,
+    namespace: str = NAMESPACE
+) -> tuple[int, dict[str, str]]:
     var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, namespace, index)
     return var["ModifyIndex"], var["Items"]
 
@@ -96,10 +101,10 @@ def _create_variables(data: dict[str, Any]) -> None:
         print(f"Creating variable from params metadata for {data['job']} job @ {path}")
         current_value: dict[str, str] = {}
         index: int | None = None
-        if _is_var(path):
-            index, current_value = _get_var(path)
+        if _is_var(path, data["namespace"]):
+            index, current_value = _get_var(path, data["namespace"])
             value |= current_value
-        _set_var(path, value, index)
+        _set_var(path, value, index, data["namespace"])
 
 def _create_volumes(data: dict[str, Any]) -> None:
     volumes: dict[str, dict[str, Any]] = {}
