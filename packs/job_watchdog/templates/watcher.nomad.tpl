@@ -30,10 +30,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/images" }}
                 DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog" }}"
                 {{- end }}
-                {{- with nomadVar "system/tools/nomad-job-watchdog/secrets" }}
-                {{- range $name, $value := . }}
-                {{ $name }}={{ $value }}
-                {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/secrets" }}
+                NOMAD_TOKEN="{{ .nomad_token }}"
                 {{- end }}
                 EOF
                 destination = "secrets/env"
@@ -46,9 +44,10 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- template "extra_pack_meta" (list . "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog") ]]
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.1"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.2"
 
         // Dynamic configuration
+        // "params.secrets.nomad_token" = ""
         // "params.config.admin_ip_cidrs" = "[]"
         // "params.config.log_level"      = "INFO"
         // "params.config.ssllabs_cidr"   = "69.67.183.0/24"

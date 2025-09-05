@@ -284,7 +284,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         "params.config.log_level"      = "INFO"
         "params.config.ssllabs_cidr"   = "69.67.183.0/24"
 
-        // Certificates volume auto-creation (job watchdog)
+        // Volumes
         "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"
         "volumes.[[ var "certificates_volume.id" . ]].name"      = "[[ var "certificates_volume.name" . ]]"
         "volumes.[[ var "certificates_volume.id" . ]].plugin_id" = "[[ var "certificates_volume.plugin_id" . ]]"

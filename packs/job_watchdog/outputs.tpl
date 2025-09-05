@@ -2,18 +2,28 @@
 TOKEN=$(nomad acl token create -type management -name "nomad-job-watchdog" | grep "Secret ID" | grep -oP "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
 2. Set it as variable:
-nomad var put -force -namespace=system system/tools/nomad-job-watchdog/secrets NOMAD_TOKEN=${TOKEN}
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/secrets \
+    nomad_token=${TOKEN}
 
-3. Create ACL policy to allow access to token (& other) variables:
-cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "watcher") ]] -description "Allow Nomad job watchdog variables read & write access" allow-watchdog-variables-read-write -
+3. Set images variable:
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/images \
+    ghcr.io/cloud-skeleton/nomad-job-watchdog=v1.2
+
+4. Create ACL policy to allow access to token (& other) variables:
+cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "watcher") ]] -description "Allow job watchdog initial access to variables" allow-watchdog-variables-read-write -
 namespace "system" {
     policy = "read"
 
     variables {
-        path "system/tools/nomad-job-watchdog/*" {
+        path "params/[[ template "job_name" (list . "watcher") ]]/*" {
             "capabilities" = [
                 "list",
-                "read",
+                "read"
+            ]
+        }
+
+        path "params/[[ template "job_name" (list . "watcher") ]]/state" {
+            "capabilities" = [
                 "write"
             ]
         }
