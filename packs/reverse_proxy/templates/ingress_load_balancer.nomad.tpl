@@ -169,7 +169,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     middlewares:
                         admin-ip-only:
                             IPAllowList:
-                                {{- $admin_ip_cidrs := .admin_ip_cidrs.Value | parseJSON -}}
+                                {{- $admin_ip_cidrs := .admin_ip_cidrs.Value | parseJSON }}
                                 sourceRange: {{ if eq (len $admin_ip_cidrs) 0 }}[]{{ end }}
                                 {{- range $admin_ip_cidr := $admin_ip_cidrs }}
                                     - {{ $admin_ip_cidr }}

@@ -31,7 +31,7 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 
 | Component      | Requirement / Note                        |
 |----------------|-------------------------------------------|
-| Resources      | **CPU:** 100 MHz <br> **RAM:** 64 MB      |
+| Resources      | **CPU:** 100 MHz <br> **RAM:** 128 MB     |
 | Namespace(s)   | `system`                                  |
 | Node class(es) | `ingress-worker`, `main-worker`           |
 | CSI volumes    | ❌                                        |
