@@ -207,7 +207,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             middlewares:
                                 - success-response
                             priority: 10001
-                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("69.67.183.0/24")
+                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("{{ .ssllabs_cidr }}")
                             service: noop@internal
 
                         traefik-dashboard:
@@ -282,6 +282,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         // Dynamic configuration
         "params.config.admin_ip_cidrs" = "[]"
         "params.config.log_level"      = "INFO"
+        "params.config.ssllabs_cidr"   = "69.67.183.0/24"
 
         // Certificates volume auto-creation (job watchdog)
         "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"
