@@ -13,13 +13,14 @@ from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
 
-if not (NOMAD_SOCKET := getenv("NOMAD_UNIX_ADDR", "")):
-    raise ValueError("NOMAD_UNIX_ADDR environment variable is not set.")
+if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
+    raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
 if not (NAMESPACE := getenv("NOMAD_NAMESPACE", "")):
     raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
 if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
     raise ValueError("NOMAD_JOB_NAME environment variable is not set.")
 
+NOMAD_SOCKET: str = f"{NOMAD_SECRETS_DIR}/api.sock"
 PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
