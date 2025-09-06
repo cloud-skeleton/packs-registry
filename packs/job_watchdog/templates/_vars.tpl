@@ -4,7 +4,7 @@
 [[- $max_var_name_length = max $max_var_name_length (len $name) -]]
 [[- end ]]
         // Nomad pack source URL
-        [[ printf "\"pack.src\"%*s= \"%v\"" (add 3 $max_var_name_length) "" (meta "app.url" .) ]]
+        [[ printf "\"pack.src\" = \"%v\"" (meta "app.url" .) ]]
 
         // Nomad pack variables used during deployment
 [[- range $name, $value := vars . ]]
