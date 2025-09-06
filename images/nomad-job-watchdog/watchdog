@@ -148,7 +148,7 @@ def _process_event(event: dict[str, Any]) -> None:
     last_event_value: int = 0
     if _is_var(STATE_VAR_PATH):
         state_var_index, state_value = _get_var(STATE_VAR_PATH)
-        last_event_value = int(state_value["LAST_EVENT"])
+        last_event_value = int(state_value["last_event"])
     if event["Index"] <= last_event_value:
         return
     job: dict[str, Any] = event["Events"][0]["Payload"]["Job"]
@@ -174,7 +174,7 @@ def _process_event(event: dict[str, Any]) -> None:
         _remove_acl(data)
     _set_var(
         STATE_VAR_PATH,
-        {"LAST_EVENT": str(event["Index"])},
+        {"last_event": str(event["Index"])},
         state_var_index
     )
 
