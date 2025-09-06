@@ -1,5 +1,5 @@
 app {
-    url = "https://www.cloudskeleton.eu/packs-registry/tree/main/images/nomad-job-watchdog"
+    url = "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog"
 }
 
 pack {

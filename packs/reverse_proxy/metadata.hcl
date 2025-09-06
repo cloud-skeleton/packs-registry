@@ -1,5 +1,5 @@
 app {
-    url = "https://github.com/traefik/traefik"
+    url = "https://www.cloudskeleton.eu/packs-registry/tree/main/packs/reverse_proxy"
 }
 
 pack {

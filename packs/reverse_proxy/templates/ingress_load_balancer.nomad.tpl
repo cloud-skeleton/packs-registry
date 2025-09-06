@@ -274,7 +274,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
     }
 
     meta = {
-        [[- template "extra_pack_meta" (list . "https://www.cloudskeleton.eu/packs-registry/tree/main/packs/reverse_proxy") ]]
+        [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
         "params.images.traefik" = "v3.5.1"

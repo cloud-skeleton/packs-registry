@@ -1,5 +1,5 @@
 app {
-    url = "https://gitlab.com/rocketduck/csi-plugin-nfs"
+    url = "https://www.cloudskeleton.eu/packs-registry/tree/main/packs/storage_driver-nfs"
 }
 
 pack {

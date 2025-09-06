@@ -48,7 +48,7 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
     }
 
     meta = {
-        [[- template "extra_pack_meta" (list . "https://www.cloudskeleton.eu/packs-registry/tree/main/packs/storage_driver-nfs") ]]
+        [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
         "params.images.registry.gitlab.com/rocketduck/csi-plugin-nfs" = "1.1.0"

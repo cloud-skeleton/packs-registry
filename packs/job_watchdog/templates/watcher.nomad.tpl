@@ -40,7 +40,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     }
 
     meta = {
-        [[- template "extra_pack_meta" (list . "https://cloudskeleton.eu/packs-registry/tree/main/packs/job_watchdog") ]]
+        [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
         "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.2"
