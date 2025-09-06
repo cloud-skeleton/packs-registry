@@ -117,8 +117,7 @@ def _create_variables(data: dict[str, Any]) -> None:
         index: int | None = None
         if _is_var(path, data["namespace"]):
             index, current_value = _get_var(path, data["namespace"])
-            print(f"{current_value} vs {value}")
-            if current_value == value:
+            if current_value == value | current_value:
                 continue
             value |= current_value
         print(f"Creating variable from params metadata for {data['job']} job @ {path}")
