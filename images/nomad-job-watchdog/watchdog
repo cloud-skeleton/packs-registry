@@ -91,8 +91,15 @@ def _attach_acl(data: dict[str, Any]) -> None:
         },
         "Rules": rules
     }
-    print(f"Creating ACL policy for {data['job']} job")
-    nomad.acl.create_policy(f"allow-variables-read-{data['job']}".replace("_", "-"), policy)
+    policy_id: str = f"allow-variables-read-{data['job']}".replace("_", "-")
+    try:
+        print(nomad.acl.get_policy(policy_id))
+        if (nomad.acl.get_policy(policy_id) != policy):
+            print(f"Updating ACL policy for {data['job']} job")
+            nomad.acl.update_policy(policy_id, policy)
+    except URLNotFoundNomadException:
+        print(f"Creating ACL policy for {data['job']} job")
+        nomad.acl.create_policy(policy_id, policy)
 
 def _remove_acl(data: dict[str, Any]) -> None:
     print(f"Deleting ACL policy for {data['job']} job")
