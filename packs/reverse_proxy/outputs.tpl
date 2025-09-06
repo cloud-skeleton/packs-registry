@@ -1,13 +1,12 @@
-Allow Traefik to access Nomad job information:
----
-cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "ingress_load_balancer") ]] -description "Allow Traefik read access to Jobs" allow-traefik-jobs-read -
+1. Allow Traefik to access Nomad job information:
+cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "ingress_load_balancer") ]] \
+    -description "Allow Traefik read access to Jobs" allow-traefik-jobs-read -
 namespace "*" {
     capabilities = ["read-job"]
 }
 POLICY
 
-Configure DNS-01 challenge provider credentials (more info @ https://go-acme.github.io/lego/dns/):
----
+2. Configure DNS-01 challenge provider credentials:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "ingress_load_balancer") ]]/dns \
     CODE="route53" \
     AWS_ACCESS_KEY_ID="your_key_id" \
