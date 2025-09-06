@@ -79,7 +79,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
 
             template {
-                data = <<-EOF
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/images" }}
                 DOCKER_IMAGE="traefik:{{ index . "traefik" }}"
                 {{- end }}
@@ -94,7 +94,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
 
             template {
-                data = <<-EOF
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
                 ---
                 api: {}
@@ -162,7 +162,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
 
             template {
-                data = <<-EOF
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
                 ---
                 http:
