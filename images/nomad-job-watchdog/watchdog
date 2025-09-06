@@ -110,6 +110,8 @@ def _create_variables(data: dict[str, Any]) -> None:
         index: int | None = None
         if _is_var(path, data["namespace"]):
             index, current_value = _get_var(path, data["namespace"])
+            if current_value == value:
+                continue
             value |= current_value
         _set_var(path, value, index, data["namespace"])
 
