@@ -49,16 +49,26 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 
 ### Pack Variables
 
-| Variable                 | Type     | Default     | Required | Description                                                                                                    |
-|--------------------------|----------|-------------|----------|----------------------------------------------------------------------------------------------------------------|
-| `id`                     | *string* |             | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
+| Variable | Type     | Default | Required | Description                                                                                       |
+|----------|----------|---------|----------|---------------------------------------------------------------------------------------------------|
+| `id`     | *string* |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables. |
 
-### Example `vars.hcl`
+#### Example `vars.hcl`
 
 ```hcl
 # Unique identifier used to distinguish multiple deployments of this pack.
 id = "<REQUIRED>"
 ```
+
+### Nomad Variables (Parameters)
+
+| Variable  | Key                                         | Default  | Description                                                                  |
+|-----------|---------------------------------------------|----------|------------------------------------------------------------------------------|
+| `config`  | `parameters_meta_prefix`                    | "params" | Prefix for job meta keys holding default parameter values.                   |
+| `config`  | `parameters_root_path`                      | "params" | Base path in Nomad Variables (KV) that the watchdog manages (e.g., params/). |
+| `config`  | `volumes_meta_prefix`                       | "volumes"| Prefix for job meta keys used for **volume** configuration.                  |
+| `images`  | `ghcr.io/cloud-skeleton/nomad-job-watchdog` | "v1.2"   | Container image tag for the job watchdog.                                    |
+| `secrets` | `nomad_token`                               |          | Nomad management token used by the watchdog.                                 |
 
 ## Pack Layout
 
