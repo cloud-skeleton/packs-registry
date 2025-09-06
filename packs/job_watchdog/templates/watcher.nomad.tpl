@@ -14,12 +14,6 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             driver = "docker"
 
-            env {
-                PARAMS_META_PREFIX   = "[[ var "parameters_meta_prefix" . ]]"
-                PARAMS_VAR_ROOT_PATH = "[[ var "parameters_root_path" . ]]"
-                VOLUMES_META_PREFIX  = "[[ var "volumes_meta_prefix" . ]]"
-            }
-
             resources {
                 cpu    = 50
                 memory = 32
@@ -32,6 +26,11 @@ job "[[ template "job_name" (list . "watcher") ]]" {
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/secrets" }}
                 NOMAD_TOKEN="{{ .nomad_token }}"
+                {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/config" }}
+                PARAMS_META_PREFIX = "{{ .parameters_meta_prefix }}"
+                PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"
+                VOLUMES_META_PREFIX = "{{ .volumes_meta_prefix }}"
                 {{- end }}
                 EOF
                 destination = "secrets/env"
@@ -47,10 +46,12 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.2"
 
         // Dynamic configuration
-        // "params.secrets.nomad_token" = ""
-        // "params.config.admin_ip_cidrs" = "[]"
-        // "params.config.log_level"      = "INFO"
-        // "params.config.ssllabs_cidr"   = "69.67.183.0/24"
+        "params.config.parameters_meta_prefix" = "params"
+        "params.config.parameters_root_path"   = "params"
+        "params.config.volumes_meta_prefix"    = "volumes"
+
+        // State
+        "params.state.last_event" = "0"
     }
     namespace = "system"
 

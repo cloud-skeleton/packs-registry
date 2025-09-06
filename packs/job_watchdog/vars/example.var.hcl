@@ -1,4 +1,1 @@
-id                     = "main"
-parameters_meta_prefix = "params"
-parameters_root_path   = "params"
-volumes_meta_prefix    = "volumes"
+id = "main"

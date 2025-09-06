@@ -52,24 +52,12 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 | Variable                 | Type     | Default     | Required | Description                                                                                                    |
 |--------------------------|----------|-------------|----------|----------------------------------------------------------------------------------------------------------------|
 | `id`                     | *string* |             | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.              |
-| `parameters_meta_prefix` | *string* | `"params"`  | ❌       | Metadata prefix to be used as parameter defaults.                                                              |
-| `parameters_root_path`   | *string* | `"params"`  | ❌       | Root Nomad variables path that the watchdog manages (e.g., params/...).                                        |
-| `volumes_meta_prefix`    | *string* | `"volumes"` | ❌       | Metadata prefix to be used as volumes configuration.                                                           |
 
 ### Example `vars.hcl`
 
 ```hcl
 # Unique identifier used to distinguish multiple deployments of this pack.
 id = "<REQUIRED>"
-
-# Metadata prefix to be used as parameter defaults.
-parameters_meta_prefix = "params"
-
-# Root Nomad variables path that the watchdog manages (e.g., params/...).
-parameters_root_path = "params"
-
-# Metadata prefix to be used as volumes configuration.
-volumes_meta_prefix = "volumes"
 ```
 
 ## Pack Layout

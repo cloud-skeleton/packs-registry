@@ -172,6 +172,7 @@ def _process_event(event: dict[str, Any]) -> None:
         _create_volumes(data)
     elif event["Events"][0]["Type"] == "JobDeregistered":
         _remove_acl(data)
+    state_var_index, state_value = _get_var(STATE_VAR_PATH)
     _set_var(
         STATE_VAR_PATH,
         {"last_event": str(event["Index"])},
