@@ -105,7 +105,6 @@ def _create_variables(data: dict[str, Any]) -> None:
         variable_path: str = f"{PARAMS_VAR_ROOT_PATH}/{data['job']}/{variable_subpath}"
         param_vars.setdefault(variable_path, {})[variable_key] = param_value
     for path, value in param_vars.items():
-        print(f"Creating variable from params metadata for {data['job']} job @ {path}")
         current_value: dict[str, str] = {}
         index: int | None = None
         if _is_var(path, data["namespace"]):
@@ -113,6 +112,7 @@ def _create_variables(data: dict[str, Any]) -> None:
             if current_value == value:
                 continue
             value |= current_value
+        print(f"Creating variable from params metadata for {data['job']} job @ {path}")
         _set_var(path, value, index, data["namespace"])
 
 def _create_volumes(data: dict[str, Any]) -> None:
