@@ -49,28 +49,24 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 
 ### Pack Variables
 
-| Variable         | Type     | Default   | Required | Description                                                                                                         |
-|------------------|----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------|
-| `id`             | *string* |           | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.                   |
-| `log_level`      | *string* | `"INFO"`  | ❌       | Log verbosity for the CSI plugin process (e.g., `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`).                   |
-| `nfs_share`      | *string* |           | ✅       | NFS server (hostname/IP) or export to use as the backing store, e.g., `nas.lan:/export/nomad`.                      |
-| `plugin_version` | *string* | `"1.1.0"` | ❌       | Container image version tag for the CSI plugin (maps to `registry.gitlab.com/rocketduck/csi-plugin-nfs:<version>`). |
+| Variable | Type     | Default | Required | Description                                                                                       |
+|----------|----------|---------|----------|---------------------------------------------------------------------------------------------------|
+| `id`     | *string* |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables. |
 
-### Example `vars.hcl`
+#### Example `vars.hcl`
 
 ```hcl
 # Unique identifier used to distinguish multiple deployments of this pack.
 id = "<REQUIRED>"
-
-# Log verbosity for the CSI plugin process (e.g., `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`).
-log_level = "INFO"
-
-# NFS server (hostname/IP) or export to use as the backing store, e.g., `nas.lan:/export/nomad`.
-nfs_share = "<REQUIRED>"
-
-# Container image version tag for the CSI plugin (maps to `registry.gitlab.com/rocketduck/csi-plugin-nfs:<version>`).
-plugin_version = "1.1.0"
 ```
+
+### Nomad Variables (Parameters)
+
+| Variable  | Key                                             | Default | Description                                                                                 |
+|-----------|-------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| `config`  | `log_level`                                     | "INFO"  | Log verbosity for the CSI plugin. Allowed: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`. |
+| `images`  | `registry.gitlab.com/rocketduck/csi-plugin-nfs` | "1.1.0" | Container image tag for the CSI plugin.                                                     |
+| `secrets` | `nfs_share`                                     |         | NFS export in `<server>:/<path>` format, e.g., `nas.lan:/export/nomad`.                     |
 
 ## Pack Layout
 

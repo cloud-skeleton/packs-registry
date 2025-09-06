@@ -5,13 +5,13 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
                 args = [
                     "--node-id=${attr.unique.hostname}",
                     "--type=monolith",
-                    "--log-level=[[ var "log_level" . ]]",
-                    "--nfs-server=[[ var "nfs_share" . ]]",
+                    "--log-level=${LOG_LEVEL}",
+                    "--nfs-server=${NFS_SHARE}",
                     "--mount-options=vers=4,lookupcache=positive",
                     "--allow-nested-volumes"
                 ]
                 cpu_hard_limit = true
-                image          = "registry.gitlab.com/rocketduck/csi-plugin-nfs:[[ var "plugin_version" . ]]"
+                image          = "${DOCKER_IMAGE}"
                 network_mode   = "host"
                 privileged     = true
             }
@@ -28,11 +28,33 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
                 cpu    = 50
                 memory = 64
             }
+
+            template {
+                data        = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "csi_plugin") ]]/images" }}
+                DOCKER_IMAGE="registry.gitlab.com/rocketduck/csi-plugin-nfs:{{ index . "registry.gitlab.com/rocketduck/csi-plugin-nfs" }}"
+                {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "csi_plugin") ]]/secrets" }}
+                NFS_SHARE="{{ .nfs_share }}"
+                {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "csi_plugin") ]]/config" }}
+                LOG_LEVEL="{{ .log_level }}"
+                {{- end }}
+                EOF
+                destination = "secrets/env"
+                env         = true
+            }
         }
     }
 
     meta = {
         [[- template "extra_pack_meta" (list . "https://www.cloudskeleton.eu/packs-registry/tree/main/packs/storage_driver-nfs") ]]
+
+        // Docker images used in job
+        "params.images.registry.gitlab.com/rocketduck/csi-plugin-nfs" = "1.1.0"
+
+        // Dynamic configuration
+        "params.config.log_level" = "INFO"
     }
     namespace = "system"
     type      = "system"

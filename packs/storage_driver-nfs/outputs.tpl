@@ -1,25 +1,3 @@
-CSI volumes can be created with the Nomad CLI:
-
-```
-cat << VOL | nomad volume create --namespace {{ nomad_namespace }} -
-id        = "{{ csi_volume_name }}"
-name      = "{{ csi_volume_name }}"
-plugin_id = "[[ var "id" . ]]"
-type      = "csi"
-
-capability {
-  access_mode     = "multi-node-multi-writer"
-  attachment_mode = "file-system"
-}
-VOL
-```
-
-They can be destroyed with:
-```
-nomad volume delete --namespace {{ nomad_namespace }} "{{ csi_volume_name }}"
-```
-
-Or deregistered (to retain the underlying data) with:
-```
-nomad volume deregister --namespace {{ nomad_namespace }} "{{ csi_volume_name }}"
-```
+1. Configure server NFS share:
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "csi_plugin") ]]/secrets \
+    nfs_share=${NFS_SHARE}
