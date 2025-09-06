@@ -56,24 +56,20 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
     nomad-pack info <PACK_NAME>
     ```
 
-    > **Tip:** Use `nomad-pack render <PACK_NAME> --var <name1>=<value1> --var <name2>=<value2>` to see the rendered **[HashiCorp Nomad][hashicorp-nomad]** jobs without deploying.
+    > **Tip:** Use `nomad-pack render <PACK_NAME> -f <VARIABLES_FILE>` to see the rendered **[HashiCorp Nomad][hashicorp-nomad]** jobs without deploying.
 
 6. Deploy a **[Nomad Pack][hashicorp-nomad-packs]**:  
 
     Dry-run (plan)
 
     ```bash
-    nomad-pack plan <PACK_NAME> \
-        --var <name1>=<value1> \
-        --var <name2>=<value2>
+    nomad-pack plan <PACK_NAME> -f <VARIABLES_FILE>
     ```
 
     Apply
 
     ```bash
-    nomad-pack run <PACK_NAME> \
-        --var <name1>=<value1> \
-        --var <name2>=<value2>
+    nomad-pack run <PACK_NAME> -f <VARIABLES_FILE>
     ```
 
 7. Destroy a **[Nomad Pack][hashicorp-nomad-packs]**:  
@@ -81,9 +77,7 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
     Apply
 
     ```bash
-    nomad-pack destroy <PACK_NAME> \
-        --var <name1>=<value1> \
-        --var <name2>=<value2>
+    nomad-pack destroy <PACK_NAME> -f <VARIABLES_FILE>
     ```
 
 ---
