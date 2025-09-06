@@ -20,7 +20,7 @@ if not (NAMESPACE := getenv("NOMAD_NAMESPACE", "")):
 if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
     raise ValueError("NOMAD_JOB_NAME environment variable is not set.")
 
-NOMAD_SOCKET: str = f"{NOMAD_SECRETS_DIR}/api.sock"
+NOMAD_SOCKET: str = f"unix://{NOMAD_SECRETS_DIR}/api.sock"
 PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
