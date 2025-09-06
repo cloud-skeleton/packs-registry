@@ -92,12 +92,13 @@ def _attach_acl(data: dict[str, Any]) -> None:
         "Rules": rules
     }
     policy_id: str = f"allow-variables-read-{data['job']}".replace("_", "-")
+    should_create: bool = False
     try:
-        print(nomad.acl.get_policy(policy_id))
         if (nomad.acl.get_policy(policy_id) != policy):
-            print(f"Updating ACL policy for {data['job']} job")
-            nomad.acl.update_policy(policy_id, policy)
+            should_create = True
     except URLNotFoundNomadException:
+        should_create = True
+    if should_create:
         print(f"Creating ACL policy for {data['job']} job")
         nomad.acl.create_policy(policy_id, policy)
 
