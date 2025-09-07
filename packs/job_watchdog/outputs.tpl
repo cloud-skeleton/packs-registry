@@ -43,7 +43,7 @@ namespace "*" {
     policy = "read"
 
     variables {
-        path "params/*" {
+        path "params/*/images" {
             "capabilities" = [
                 "list",
                 "read",

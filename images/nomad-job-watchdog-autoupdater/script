@@ -196,7 +196,7 @@ def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> list[str]:
 
 def start() -> None:
     print(f"run -> {PARAMS_VAR_ROOT_PATH} {IMAGES_VARIABLE_NAME}")
-    _list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*")
+    print(_list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*"))
     # stream, _, events = cast(
     #     tuple[Thread, Event, Queue],
     #     nomad.event.stream.get_stream(
