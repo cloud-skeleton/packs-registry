@@ -27,6 +27,9 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/secrets" }}
                 NOMAD_TOKEN="{{ .nomad_token }}"
                 {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/config" }}
+                IMAGES_VARIABLE_NAME = "{{ .images_variable_name }}"
+                {{- end }}
                 EOF
                 destination = "secrets/env"
                 env         = true
@@ -40,16 +43,15 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
         // Docker images used in job
         "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.0"
 
-        // // Dynamic configuration
-        // "params.config.parameters_meta_prefix" = "params"
-        // "params.config.parameters_root_path"   = "params"
-        // "params.config.volumes_meta_prefix"    = "volumes"
+        // Dynamic configuration
+        "params.config.images_variable_name" = "images"
+    }
+
+    periodic {
+        crons            = ["@daily"]
+        prohibit_overlap = true
     }
 
     namespace = "system"
     type      = "batch"
-
-    update {
-        auto_revert = true
-    }
 }
