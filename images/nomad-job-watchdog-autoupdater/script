@@ -181,31 +181,13 @@ def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> dict[str, str]:
 #     )
 
 def start() -> None:
+    latest_versions: dict[str, str] = {}
     for variable, namespace in _list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*").items():
         if not variable.endswith(f"/{IMAGES_VARIABLE_NAME}"):
             continue
-        _, images = _get_var(variable, namespace)
-        print(f"{variable} @ {namespace} -> {images}")
-    # stream, _, events = cast(
-    #     tuple[Thread, Event, Queue],
-    #     nomad.event.stream.get_stream(
-    #         namespace = "*",
-    #         topic = {"Job": "*"}
-    #     )
-    # )
-    # stream.start()
-    # while True:
-    #     event: dict[str, Any] = events.get()
-    #     try:
-    #         _process_event(event)
-    #     except Exception as exception:
-    #         print(
-    #             f"While processing {event['Index']} ({event['Events'][0]['Key']} "
-    #             f"-> {event['Events'][0]['Type']}) exception was thrown: {exception}"
-    #         )
-    #         sleep(1)
-    #     finally:
-    #         events.task_done()
+        index, images = _get_var(variable, namespace)
+        for image, tag in images.items():
+            print(f"{variable} ~{index} @ {namespace} -> {images} -> {image}:{tag}")
 
 if __name__ == "__main__":
     start()
