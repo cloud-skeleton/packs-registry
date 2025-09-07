@@ -190,7 +190,7 @@ nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 #     )
 
 def start() -> None:
-    pass
+    print("run")
     # stream, _, events = cast(
     #     tuple[Thread, Event, Queue],
     #     nomad.event.stream.get_stream(
