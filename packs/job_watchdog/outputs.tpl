@@ -5,15 +5,15 @@ TOKEN=$(nomad acl token create -type management -name "nomad-job-watchdog" | gre
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/secrets \
     nomad_token=${TOKEN}
 
-nomad var put -force -namespace=system params/[[ template "job_name" (list . "scheduled") ]]/secrets \
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "autoupdater") ]]/secrets \
     nomad_token=${TOKEN}
 
 3. Set images variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/images \
     ghcr.io/cloud-skeleton/nomad-job-watchdog=v1.2
 
-nomad var put -force -namespace=system params/[[ template "job_name" (list . "scheduled") ]]/images \
-    ghcr.io/cloud-skeleton/nomad-job-watchdog-scheduled=v1.0
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "autoupdater") ]]/images \
+    ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater=v1.0
 
 4. Set config variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/config \

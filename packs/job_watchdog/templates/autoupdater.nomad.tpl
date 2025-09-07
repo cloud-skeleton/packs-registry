@@ -1,11 +1,11 @@
-job "[[ template "job_name" (list . "scheduled") ]]" {
+job "[[ template "job_name" (list . "autoupdater") ]]" {
     constraint {
         attribute = "${node.class}"
         operator  = "="
         value     = "main-worker"
     }
 
-    group "cloud-skeleton/nomad-job-watchdog-scheduled" {
+    group "cloud-skeleton/nomad-job-watchdog-autoupdater" {
         task "task" {
             config {
                 cpu_hard_limit = true
@@ -21,10 +21,10 @@ job "[[ template "job_name" (list . "scheduled") ]]" {
 
             template {
                 data        = <<-EOF
-                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/images" }}
-                DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog-scheduled:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog-scheduled" }}"
+                {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/images" }}
+                DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" }}"
                 {{- end }}
-                {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/secrets" }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/secrets" }}
                 NOMAD_TOKEN="{{ .nomad_token }}"
                 {{- end }}
                 EOF
@@ -37,16 +37,13 @@ job "[[ template "job_name" (list . "scheduled") ]]" {
     meta = {
         [[- template "extra_pack_meta" . ]]
 
-        // // Docker images used in job
-        // "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.2"
+        // Docker images used in job
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.0"
 
         // // Dynamic configuration
         // "params.config.parameters_meta_prefix" = "params"
         // "params.config.parameters_root_path"   = "params"
         // "params.config.volumes_meta_prefix"    = "volumes"
-
-        // // State
-        // "params.state.last_event" = "0"
     }
 
     namespace = "system"
