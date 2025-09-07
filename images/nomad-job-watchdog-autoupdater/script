@@ -189,7 +189,7 @@ nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 #     )
 
 def start() -> None:
-    print(f"run -> {IMAGES_VARIABLE_NAME}")
+    print(f"run -> {PARAMS_VAR_ROOT_PATH} {IMAGES_VARIABLE_NAME}")
     # stream, _, events = cast(
     #     tuple[Thread, Event, Queue],
     #     nomad.event.stream.get_stream(
