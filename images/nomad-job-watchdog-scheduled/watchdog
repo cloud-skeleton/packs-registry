@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+
+from warnings import filterwarnings
+from urllib3.exceptions import InsecureRequestWarning
+filterwarnings("ignore", category = InsecureRequestWarning)
+
+# from copy import deepcopy
+from nomad import Nomad
+# from nomad.api.exceptions import URLNotFoundNomadException
+from os import getenv
+# from queue import Queue
+# from threading import Thread, Event
+# from time import sleep
+# from typing import cast, Any
+
+if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
+    raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
+if not (NAMESPACE := getenv("NOMAD_NAMESPACE", "")):
+    raise ValueError("NOMAD_NAMESPACE environment variable is not set.")
+if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
+    raise ValueError("NOMAD_JOB_NAME environment variable is not set.")
+
+NOMAD_SOCKET: str = f"unix://{NOMAD_SECRETS_DIR}/api.sock"
+# PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
+# VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
+# PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
+# STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{JOB_NAME}/state"
+
+# VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
+#     "RequestedCapabilities": {
+#         "AccessMode": "multi-node-multi-writer",
+#         "AttachmentMode": "file-system"
+#     }
+# }
+
+nomad: Nomad = Nomad(address = NOMAD_SOCKET)
+
+# def _snake_to_pascal(name: str) -> str:
+#     return "".join(
+#         "ID" if word.lower() == "id" else word.capitalize()
+#         for word in name.split("_")
+#     )
+
+# def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
+#     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
+#     return var["ModifyIndex"], var["Items"]
+
+# def _is_var(path: str, namespace: str = NAMESPACE) -> bool:
+#     try:
+#         _get_var(path, namespace)
+#         return True
+#     except URLNotFoundNomadException:
+#         return False
+
+# def _set_var(
+#     path: str,
+#     data: dict[str, str],
+#     index: int | None = None,
+#     namespace: str = NAMESPACE
+# ) -> tuple[int, dict[str, str]]:
+#     var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, namespace, index)
+#     return var["ModifyIndex"], var["Items"]
+
+# def _attach_acl(data: dict[str, Any]) -> None:
+#     rules: str = f"""\
+#     namespace "{data["namespace"]}" {{
+#         policy = "read"
+
+#         variables {{
+#             path "{PARAMS_VAR_ROOT_PATH}/{data['job']}/*" {{
+#                 "capabilities" = [
+#                     "list",
+#                     "read"
+#                 ]
+#             }}
+
+#             path "{PARAMS_VAR_ROOT_PATH}/{data['job']}/state" {{
+#                 "capabilities" = [
+#                     "write"
+#                 ]
+#             }}
+#         }}
+#     }}
+#     """
+#     policy: dict[str, Any] = {
+#         "Name": f"allow-variables-read-{data['job']}".replace("_", "-"),
+#         "Description": f"AutoACL: Allow read variables for {data['job']} job",
+#         "JobACL": {
+#             "Namespace": data["namespace"],
+#             "JobID": data['job']
+#         },
+#         "Rules": rules
+#     }
+#     policy_id: str = f"allow-variables-read-{data['job']}".replace("_", "-")
+#     should_create: bool = False
+#     try:
+#         if (nomad.acl.get_policy(policy_id) != policy):
+#             should_create = True
+#     except URLNotFoundNomadException:
+#         should_create = True
+#     if should_create:
+#         print(f"Creating ACL policy for {data['job']} job")
+#         nomad.acl.create_policy(policy_id, policy)
+
+# def _remove_acl(data: dict[str, Any]) -> None:
+#     print(f"Deleting ACL policy for {data['job']} job")
+#     nomad.acl.delete_policy(f"allow-variables-read-{data['job']}".replace("_", "-"))
+
+# def _create_variables(data: dict[str, Any]) -> None:
+#     param_vars: dict[str, dict[str, str]] = {}
+#     for param_key, param_value in data["params"].items():
+#         variable_subpath, variable_key = param_key.split(".", 1)
+#         variable_path: str = f"{PARAMS_VAR_ROOT_PATH}/{data['job']}/{variable_subpath}"
+#         param_vars.setdefault(variable_path, {})[variable_key] = param_value
+#     for path, value in param_vars.items():
+#         current_value: dict[str, str] = {}
+#         index: int | None = None
+#         if _is_var(path, data["namespace"]):
+#             index, current_value = _get_var(path, data["namespace"])
+#             if current_value == value | current_value:
+#                 continue
+#             value |= current_value
+#         print(f"Creating variable from params metadata for {data['job']} job @ {path}")
+#         _set_var(path, value, index, data["namespace"])
+
+# def _create_volumes(data: dict[str, Any]) -> None:
+#     volumes: dict[str, dict[str, Any]] = {}
+#     for volume_key, volume_value in data["volumes"].items():
+#         volume_id, volume_param = volume_key.split(".", 1)
+#         volume_config: dict[str, Any] = volumes.setdefault(volume_id, deepcopy(VOLUME_DEFAULT_CONFIG))
+#         if "." not in volume_param:
+#             volume_config[_snake_to_pascal(volume_param)] = volume_value
+#             continue
+#         volume_param, volume_subparam = volume_param.split(".", 1)
+#         volume_subconfig: dict[str, Any] = volume_config.setdefault(_snake_to_pascal(volume_param), {})
+#         volume_subconfig[_snake_to_pascal(volume_subparam)] = volume_value
+#     should_reevaluate: bool = False
+#     for volume_id, volume_config in volumes.items():
+#         volume_payload: dict[str, Any] = volume_config | {
+#             "ID": volume_id,
+#             "Namespace": data["namespace"],
+#             "RequestedCapabilities": [
+#                 volume_config["RequestedCapabilities"]
+#             ]
+#         }
+#         try:
+#             nomad.volume.get_csi_volume(volume_id, data["namespace"])
+#         except URLNotFoundNomadException:
+#             print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
+#             nomad.volume.create_csi_volume(volume_id, volume_payload)
+#             should_reevaluate = True
+#     if should_reevaluate:
+#         print(f"Triggering scheduling re-evaluation for job '{data['job']}'")
+#         nomad.job.evaluate_job(data["job"])
+
+# def _process_event(event: dict[str, Any]) -> None:
+#     state_var_index: int = 0
+#     last_event_value: int = 0
+#     if _is_var(STATE_VAR_PATH):
+#         state_var_index, state_value = _get_var(STATE_VAR_PATH)
+#         last_event_value = int(state_value["last_event"])
+#     if event["Index"] <= last_event_value:
+#         return
+#     job: dict[str, Any] = event["Events"][0]["Payload"]["Job"]
+#     data: dict[str, Any] = {
+#         "namespace": job["Namespace"],
+#         "job": job["Name"],
+#         "params": {
+#             meta_key.removeprefix(f"{PARAMS_META_PREFIX}."): meta_value
+#             for meta_key, meta_value in job["Meta"].items()
+#             if meta_key.startswith(f"{PARAMS_META_PREFIX}.")
+#         },
+#         "volumes": {
+#             meta_key.removeprefix(f"{VOLUMES_META_PREFIX}."): meta_value
+#             for meta_key, meta_value in job["Meta"].items()
+#             if meta_key.startswith(f"{VOLUMES_META_PREFIX}.")
+#         }
+#     }
+#     if event["Events"][0]["Type"] == "JobRegistered":
+#         _attach_acl(data)
+#         _create_variables(data)
+#         _create_volumes(data)
+#     elif event["Events"][0]["Type"] == "JobDeregistered":
+#         _remove_acl(data)
+#     state_var_index, state_value = _get_var(STATE_VAR_PATH)
+#     _set_var(
+#         STATE_VAR_PATH,
+#         {"last_event": str(event["Index"])},
+#         state_var_index
+#     )
+
+def start() -> None:
+    pass
+    # stream, _, events = cast(
+    #     tuple[Thread, Event, Queue],
+    #     nomad.event.stream.get_stream(
+    #         namespace = "*",
+    #         topic = {"Job": "*"}
+    #     )
+    # )
+    # stream.start()
+    # while True:
+    #     event: dict[str, Any] = events.get()
+    #     try:
+    #         _process_event(event)
+    #     except Exception as exception:
+    #         print(
+    #             f"While processing {event['Index']} ({event['Events'][0]['Key']} "
+    #             f"-> {event['Events'][0]['Type']}) exception was thrown: {exception}"
+    #         )
+    #         sleep(1)
+    #     finally:
+    #         events.task_done()
+
+if __name__ == "__main__":
+    start()
