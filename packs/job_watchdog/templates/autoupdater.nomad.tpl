@@ -25,9 +25,6 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/images" }}
                 DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" }}"
                 {{- end }}
-                {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/secrets" }}
-                NOMAD_TOKEN="{{ .nomad_token }}"
-                {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/config" }}
                 IMAGES_VARIABLE_NAME = "{{ .images_variable_name }}"
                 PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"

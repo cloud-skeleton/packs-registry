@@ -5,15 +5,9 @@ TOKEN=$(nomad acl token create -type management -name "nomad-job-watchdog" | gre
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/secrets \
     nomad_token=${TOKEN}
 
-nomad var put -force -namespace=system params/[[ template "job_name" (list . "autoupdater") ]]/secrets \
-    nomad_token=${TOKEN}
-
 3. Set images variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/images \
     ghcr.io/cloud-skeleton/nomad-job-watchdog=v1.2
-
-nomad var put -force -namespace=system params/[[ template "job_name" (list . "autoupdater") ]]/images \
-    ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater=v1.0
 
 4. Set config variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/config \
@@ -35,6 +29,24 @@ namespace "system" {
 
         path "params/[[ template "job_name" (list . "watcher") ]]/state" {
             "capabilities" = [
+                "write"
+            ]
+        }
+    }
+}
+POLICY
+
+cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "autoupdater") ]] \
+    -description "Allow job watchdog autoupdater access to jobs' variables" \
+    allow-watchdog-autoupdater-variables-read-write -
+namespace "*" {
+    policy = "read"
+
+    variables {
+        path "params/*/images" {
+            "capabilities" = [
+                "list",
+                "read",
                 "write"
             ]
         }

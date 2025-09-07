@@ -44,6 +44,9 @@ nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 #     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
 #     return var["ModifyIndex"], var["Items"]
 
+def _get_vars(path_prefix: str, namespace: str = NAMESPACE) -> list[str]:
+    print(nomad.variables.get_variables(path_prefix, namespace))
+
 # def _is_var(path: str, namespace: str = NAMESPACE) -> bool:
 #     try:
 #         _get_var(path, namespace)
@@ -190,6 +193,7 @@ nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 
 def start() -> None:
     print(f"run -> {PARAMS_VAR_ROOT_PATH} {IMAGES_VARIABLE_NAME}")
+    _get_vars(PARAMS_VAR_ROOT_PATH, "*")
     # stream, _, events = cast(
     #     tuple[Thread, Event, Queue],
     #     nomad.event.stream.get_stream(
