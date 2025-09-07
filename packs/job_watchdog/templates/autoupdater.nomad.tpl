@@ -10,6 +10,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
+                force_pull     = true
             }
 
             driver = "docker"
@@ -29,6 +30,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/config" }}
                 IMAGES_VARIABLE_NAME = "{{ .images_variable_name }}"
+                PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"
                 {{- end }}
                 EOF
                 destination = "secrets/env"
@@ -45,6 +47,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
 
         // Dynamic configuration
         "params.config.images_variable_name" = "images"
+        "params.config.parameters_root_path" = "params"
     }
 
     periodic {

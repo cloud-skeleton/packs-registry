@@ -22,8 +22,7 @@ if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
 
 NOMAD_SOCKET: str = f"unix://{NOMAD_SECRETS_DIR}/api.sock"
 IMAGES_VARIABLE_NAME: str = getenv("IMAGES_VARIABLE_NAME", "images")
-# VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
-# PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
+PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 # STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{JOB_NAME}/state"
 
 # VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
