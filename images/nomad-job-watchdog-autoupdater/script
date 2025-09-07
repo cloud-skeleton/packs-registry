@@ -26,9 +26,9 @@ PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 
 nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 
-# def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
-#     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
-#     return var["ModifyIndex"], var["Items"]
+def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
+    var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
+    return var["ModifyIndex"], var["Items"]
 
 def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> dict[str, str]:
     return {
@@ -181,9 +181,11 @@ def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> dict[str, str]:
 #     )
 
 def start() -> None:
-    print(f"run -> {PARAMS_VAR_ROOT_PATH} {IMAGES_VARIABLE_NAME}")
     for variable, namespace in _list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*").items():
-        print(f"{variable} @ {namespace}")
+        if not variable.endswith(f"/{IMAGES_VARIABLE_NAME}"):
+            continue
+        _, images = _get_var(variable, namespace)
+        print(f"{variable} @ {namespace} -> {images}")
     # stream, _, events = cast(
     #     tuple[Thread, Event, Queue],
     #     nomad.event.stream.get_stream(
