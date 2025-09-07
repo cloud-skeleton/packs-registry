@@ -4,14 +4,14 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
-# from copy import deepcopy
+from copy import deepcopy
 from nomad import Nomad
-# from nomad.api.exceptions import URLNotFoundNomadException
+from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
-# from queue import Queue
-# from threading import Thread, Event
-# from time import sleep
-# from typing import cast, Any
+from queue import Queue
+from threading import Thread, Event
+from time import sleep
+from typing import cast, Any
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -23,32 +23,18 @@ if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
 NOMAD_SOCKET: str = f"unix://{NOMAD_SECRETS_DIR}/api.sock"
 IMAGES_VARIABLE_NAME: str = getenv("IMAGES_VARIABLE_NAME", "images")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
-# STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{JOB_NAME}/state"
-
-# VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
-#     "RequestedCapabilities": {
-#         "AccessMode": "multi-node-multi-writer",
-#         "AttachmentMode": "file-system"
-#     }
-# }
 
 nomad: Nomad = Nomad(address = NOMAD_SOCKET)
-
-# def _snake_to_pascal(name: str) -> str:
-#     return "".join(
-#         "ID" if word.lower() == "id" else word.capitalize()
-#         for word in name.split("_")
-#     )
 
 # def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
 #     var: dict[str, Any] = nomad.variable.get_variable(path, namespace)
 #     return var["ModifyIndex"], var["Items"]
 
-def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> list[str]:
-    return [
-        var['Path']
+def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> dict[str, str]:
+    return {
+        var['Path']: var['Namespace']
         for var in nomad.variables.get_variables(path_prefix, namespace)
-    ]
+    }
 
 # def _is_var(path: str, namespace: str = NAMESPACE) -> bool:
 #     try:
@@ -196,7 +182,8 @@ def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> list[str]:
 
 def start() -> None:
     print(f"run -> {PARAMS_VAR_ROOT_PATH} {IMAGES_VARIABLE_NAME}")
-    print(_list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*"))
+    for variable, namespace in _list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*").items():
+        print(f"{variable} @ {namespace}")
     # stream, _, events = cast(
     #     tuple[Thread, Event, Queue],
     #     nomad.event.stream.get_stream(

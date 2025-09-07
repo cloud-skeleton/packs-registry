@@ -37,7 +37,7 @@ namespace "system" {
 POLICY
 
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "autoupdater") ]] \
-    -description "Allow job watchdog autoupdater access to jobs' variables" \
+    -description "Allow job watchdog autoupdater access to other jobs' variables" \
     allow-watchdog-autoupdater-variables-read-write -
 namespace "*" {
     policy = "read"
