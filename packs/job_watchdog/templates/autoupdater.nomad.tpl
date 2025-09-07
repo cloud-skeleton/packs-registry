@@ -15,6 +15,11 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
 
             driver = "docker"
 
+            identity {
+                env         = true
+                change_mode = "restart"
+            }
+
             resources {
                 cpu    = 50
                 memory = 32
