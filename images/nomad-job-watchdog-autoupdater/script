@@ -4,17 +4,11 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
-from copy import deepcopy
 from dxf import DXF
-from functools import cmp_to_key
 from nomad import Nomad
-from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
-from queue import Queue
-from semantic_version import Version, SimpleSpec
-from threading import Thread, Event
-from time import sleep
-from typing import cast, Any, Iterable
+from semantic_version import Version=
+from typing import Any, Iterable
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -94,12 +88,11 @@ def start() -> None:
                     )
                 )
                 latest_tags[f"{host}/{repository}"] = _get_newest_tag(tag, dxf.list_aliases())
-            latest_tag: str = latest_tags[f"{host}/{repository}"]
-            if tag != latest_tag:
-                print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{latest_tag}!")
-            images[image] = latest_tag
-        print(images)
-        # _set_var(variable, images, index, namespace)
+            newest_tag: str = latest_tags[f"{host}/{repository}"]
+            if tag != newest_tag:
+                print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{newest_tag}!")
+            images[image] = newest_tag
+        _set_var(variable, images, index, namespace)
 
 if __name__ == "__main__":
     start()
