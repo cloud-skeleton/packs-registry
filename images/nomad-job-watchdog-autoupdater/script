@@ -7,7 +7,7 @@ filterwarnings("ignore", category = InsecureRequestWarning)
 from dxf import DXF
 from nomad import Nomad
 from os import getenv
-from semantic_version import Version=
+from semantic_version import Version
 from typing import Any, Iterable
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
