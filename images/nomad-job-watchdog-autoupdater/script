@@ -57,7 +57,7 @@ def start() -> None:
             continue
         index, images = _get_var(variable, namespace)
         for image, tag in images.items():
-            host: str = "registry.docker.io"
+            host: str = "registry-1.docker.io"
             repository: str = image
             first, separator, rest = image.partition("/")
             if separator and ('.' in first or ':' in first):
