@@ -73,8 +73,8 @@ def start() -> None:
                         actions = ["pull"]
                     )
                 )
-                for alias in dxf.list_aliases(iterate = True):
-                    print(alias)
+                for tag in reversed(dxf.list_aliases(iterate = True)):
+                    print(tag)
             # print(f"{variable} ~{index} @ {namespace} -> {images} -> {host}/{repository}:{tag}")
 
 if __name__ == "__main__":
