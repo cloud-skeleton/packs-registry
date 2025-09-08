@@ -10,6 +10,7 @@ from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
+from semver import compare
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
@@ -34,24 +35,21 @@ def _list_vars(path_prefix: str, namespace: str = NAMESPACE) -> dict[str, str]:
         for var in nomad.variables.get_variables(path_prefix, namespace)
     }
 
-# def _is_var(path: str, namespace: str = NAMESPACE) -> bool:
-#     try:
-#         _get_var(path, namespace)
-#         return True
-#     except URLNotFoundNomadException:
-#         return False
+def _set_var(
+    path: str,
+    data: dict[str, str],
+    index: int | None = None,
+    namespace: str = NAMESPACE
+) -> tuple[int, dict[str, str]]:
+    var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, namespace, index)
+    return var["ModifyIndex"], var["Items"]
 
-# def _set_var(
-#     path: str,
-#     data: dict[str, str],
-#     index: int | None = None,
-#     namespace: str = NAMESPACE
-# ) -> tuple[int, dict[str, str]]:
-#     var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, namespace, index)
-#     return var["ModifyIndex"], var["Items"]
+def _get_newest_tag(original_tag: str, all_tags: list[str]) -> str:
+    print([sorted(all_tags, key = compare)])
+    return ""
 
 def start() -> None:
-    latest_versions: dict[str, str] = {}
+    latest_tags: dict[str, str] = {}
     for variable, namespace in _list_vars(f"{PARAMS_VAR_ROOT_PATH}/", "*").items():
         if not variable.endswith(f"/{IMAGES_VARIABLE_NAME}"):
             continue
@@ -64,7 +62,7 @@ def start() -> None:
                 host = first
                 repository = rest
             print(f"Found variable {variable}@{namespace} containing {host}/{repository}:{tag} image.")
-            if f"{host}/{repository}" not in latest_versions:
+            if f"{host}/{repository}" not in latest_tags:
                 dxf: DXF = DXF(
                     host,
                     repository,
@@ -73,9 +71,11 @@ def start() -> None:
                         actions = ["pull"]
                     )
                 )
-                for tag in reversed(dxf.list_aliases()):
-                    print(tag)
-            # print(f"{variable} ~{index} @ {namespace} -> {images} -> {host}/{repository}:{tag}")
+                latest_tags[f"{host}/{repository}"] = _get_newest_tag(tag, dxf.list_aliases())
+            latest_tag: str = latest_tags[f"{host}/{repository}"]
+            print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{latest_tag}!")
+            images[image] = latest_tag
+        # _set_var(variable, images, index, namespace)
 
 if __name__ == "__main__":
     start()
