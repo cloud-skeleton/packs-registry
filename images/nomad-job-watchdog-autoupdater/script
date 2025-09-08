@@ -45,29 +45,30 @@ def _set_var(
     var: dict[str, Any] = nomad.variable.create_variable(path, {"Items": data}, namespace, index)
     return var["ModifyIndex"], var["Items"]
 
-def _filter_tag(new_tag: str, original_tag: Version) -> bool:
+def _filter_tag(new_tag: str, current_tag: str) -> bool:
+    current_tag_v: Version = Version.coerce(current_tag.removeprefix("v"))
     new_tag_v: Version
     try:
         new_tag_v = Version.coerce(new_tag.removeprefix("v"))
     except ValueError:
         return False
-    if new_tag_v.prerelease != original_tag.prerelease:
+    if new_tag_v.prerelease != current_tag_v.prerelease:
         return False
-    if new_tag_v.major != original_tag.major:
+    if new_tag_v.major != current_tag_v.major:
         return False
-    return new_tag_v >= original_tag
+    return new_tag_v >= current_tag_v
 
-def _get_newest_tag(original_tag: str, all_tags: list[str]) -> str:
-    v_prefix: bool = original_tag.startswith("v")
-    if v_prefix:
-        original_tag: str = original_tag.removeprefix("v")
-    original_tag_v: Version = Version.coerce(original_tag)
-    newer_tags: Iterable[str] = filter(lambda new_tag: _filter_tag(new_tag, original_tag_v), all_tags)
+def _get_newest_tag(current_tag: str, all_tags: list[str]) -> str:
+    # v_prefix: bool = current_tag.startswith("v")
+    # if v_prefix:
+    #     current_tag: str = current_tag.removeprefix("v")
+    # current_tag_v: Version = Version.coerce(current_tag)
+    newer_tags: Iterable[str] = filter(lambda new_tag: _filter_tag(new_tag, current_tag), all_tags)
     print(list(newer_tags))
-    # original_tag_v: Version = Version.coerce("3.13.7-alpine3.21")
-    # print(f"{original_tag_v} -> {original_tag_v.major} {original_tag_v.minor} {original_tag_v.patch} {original_tag_v.prerelease} {original_tag_v.build}")
-    # original_tag_v: Version = Version.coerce("3.13.7-slim-trixie")
-    # print(f"{original_tag_v} -> {original_tag_v.major} {original_tag_v.minor} {original_tag_v.patch} {original_tag_v.prerelease} {original_tag_v.build}")
+    # current_tag_v: Version = Version.coerce("3.13.7-alpine3.21")
+    # print(f"{current_tag_v} -> {current_tag_v.major} {current_tag_v.minor} {current_tag_v.patch} {current_tag_v.prerelease} {current_tag_v.build}")
+    # current_tag_v: Version = Version.coerce("3.13.7-slim-trixie")
+    # print(f"{current_tag_v} -> {current_tag_v.major} {current_tag_v.minor} {current_tag_v.patch} {current_tag_v.prerelease} {current_tag_v.build}")
     # print([sorted(all_tags, key = cmp_to_key(compare), reverse = True)])
     return ""
 
