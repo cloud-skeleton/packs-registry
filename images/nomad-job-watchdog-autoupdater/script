@@ -73,7 +73,7 @@ def start() -> None:
                         actions = ["pull"]
                     )
                 )
-                for tag in reversed(dxf.list_aliases(iterate = True)):
+                for tag in reversed(dxf.list_aliases()):
                     print(tag)
             # print(f"{variable} ~{index} @ {namespace} -> {images} -> {host}/{repository}:{tag}")
 
