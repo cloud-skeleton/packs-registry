@@ -70,6 +70,7 @@ def start() -> None:
         if not variable.endswith(f"/{IMAGES_VARIABLE_NAME}"):
             continue
         index, images = _get_var(variable, namespace)
+        images_new: dict[str, str] = {}
         for image, tag in images.items():
             host: str = "registry-1.docker.io"
             repository: str = f"library/{image}"
@@ -91,8 +92,10 @@ def start() -> None:
             newest_tag: str = latest_tags[f"{host}/{repository}"]
             if tag != newest_tag:
                 print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{newest_tag}!")
-            images[image] = newest_tag
-        _set_var(variable, images, index, namespace)
+            images_new[image] = newest_tag
+        if images_new != images:
+            print(f"Updating variable {variable}@{namespace}~{index} {images}")
+            _set_var(variable, images, index, namespace)
 
 if __name__ == "__main__":
     start()
