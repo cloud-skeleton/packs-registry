@@ -52,11 +52,11 @@ def _filter_tag(new_tag: str, current_tag: str) -> bool:
         new_tag_v = Version.coerce(new_tag.removeprefix("v"))
     except ValueError:
         return False
-    if any([
+    if any((
         new_tag_v.build != current_tag_v.build,
         new_tag_v.prerelease != current_tag_v.prerelease,
         new_tag_v.major != current_tag_v.major
-    ]):
+    )):
         return False
     return new_tag_v >= current_tag_v
 
@@ -66,7 +66,7 @@ def _get_newest_tag(current_tag: str, all_tags: list[str]) -> str:
     #     current_tag: str = current_tag.removeprefix("v")
     # current_tag_v: Version = Version.coerce(current_tag)
     newer_tags: Iterable[str] = filter(lambda new_tag: _filter_tag(new_tag, current_tag), all_tags)
-    print(list(newer_tags))
+    print(sorted(newer_tags, reverse = True, key = lambda tag: Version.coerce(tag.removeprefix("v"))))
     # current_tag_v: Version = Version.coerce("3.13.7-alpine3.21")
     # print(f"{current_tag_v} -> {current_tag_v.major} {current_tag_v.minor} {current_tag_v.patch} {current_tag_v.prerelease} {current_tag_v.build}")
     # current_tag_v: Version = Version.coerce("3.13.7-slim-trixie")
