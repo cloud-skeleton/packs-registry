@@ -58,21 +58,17 @@ def _filter_tag(new_tag: str, current_tag: str) -> bool:
         new_tag_v.major != current_tag_v.major
     )):
         return False
-    return new_tag_v >= current_tag_v
+    return new_tag_v > current_tag_v
 
 def _get_newest_tag(current_tag: str, all_tags: list[str]) -> str:
-    # v_prefix: bool = current_tag.startswith("v")
-    # if v_prefix:
-    #     current_tag: str = current_tag.removeprefix("v")
-    # current_tag_v: Version = Version.coerce(current_tag)
-    newer_tags: Iterable[str] = filter(lambda new_tag: _filter_tag(new_tag, current_tag), all_tags)
-    print(sorted(newer_tags, reverse = True, key = lambda tag: Version.coerce(tag.removeprefix("v"))))
-    # current_tag_v: Version = Version.coerce("3.13.7-alpine3.21")
-    # print(f"{current_tag_v} -> {current_tag_v.major} {current_tag_v.minor} {current_tag_v.patch} {current_tag_v.prerelease} {current_tag_v.build}")
-    # current_tag_v: Version = Version.coerce("3.13.7-slim-trixie")
-    # print(f"{current_tag_v} -> {current_tag_v.major} {current_tag_v.minor} {current_tag_v.patch} {current_tag_v.prerelease} {current_tag_v.build}")
-    # print([sorted(all_tags, key = cmp_to_key(compare), reverse = True)])
-    return ""
+    newer_tags: Iterable[str] = list(filter(lambda new_tag: _filter_tag(new_tag, current_tag), all_tags))
+    if len(newer_tags) == 0:
+        return current_tag
+    return sorted(
+        newer_tags,
+        reverse = True,
+        key = lambda tag: Version.coerce(tag.removeprefix("v"))
+    )[0]
 
 def start() -> None:
     latest_tags: dict[str, str] = {}
@@ -99,8 +95,10 @@ def start() -> None:
                 )
                 latest_tags[f"{host}/{repository}"] = _get_newest_tag(tag, dxf.list_aliases())
             latest_tag: str = latest_tags[f"{host}/{repository}"]
-            print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{latest_tag}!")
+            if tag != latest_tag:
+                print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{latest_tag}!")
             images[image] = latest_tag
+        print(images)
         # _set_var(variable, images, index, namespace)
 
 if __name__ == "__main__":
