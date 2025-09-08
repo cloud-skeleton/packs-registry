@@ -4,8 +4,9 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
-from dxf import DXF
 from copy import deepcopy
+from dxf import DXF
+from functools import cmp_to_key
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
@@ -45,7 +46,7 @@ def _set_var(
     return var["ModifyIndex"], var["Items"]
 
 def _get_newest_tag(original_tag: str, all_tags: list[str]) -> str:
-    print([sorted(all_tags, key = compare)])
+    print([sorted(all_tags, key = cmp_to_key(compare), reverse=True)])
     return ""
 
 def start() -> None:
