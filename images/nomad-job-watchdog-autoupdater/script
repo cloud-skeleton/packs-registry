@@ -52,9 +52,11 @@ def _filter_tag(new_tag: str, current_tag: str) -> bool:
         new_tag_v = Version.coerce(new_tag.removeprefix("v"))
     except ValueError:
         return False
-    if new_tag_v.prerelease != current_tag_v.prerelease:
-        return False
-    if new_tag_v.major != current_tag_v.major:
+    if any([
+        new_tag_v.build != current_tag_v.build,
+        new_tag_v.prerelease != current_tag_v.prerelease,
+        new_tag_v.major != current_tag_v.major
+    ]):
         return False
     return new_tag_v >= current_tag_v
 
