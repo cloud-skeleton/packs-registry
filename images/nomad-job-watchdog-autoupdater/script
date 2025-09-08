@@ -58,14 +58,22 @@ def start() -> None:
         index, images = _get_var(variable, namespace)
         for image, tag in images.items():
             host: str = "registry-1.docker.io"
-            repository: str = image
+            repository: str = f"library/{image}"
             first, separator, rest = image.partition("/")
-            if separator and ('.' in first or ':' in first):
+            if separator and '.' in first:
                 host = first
                 repository = rest
             print(f"Found variable {variable}@{namespace} containing {host}/{repository}:{tag} image.")
             if f"{host}/{repository}" not in latest_versions:
-                for alias in DXF(host, repository, lambda dxf, resp: dxf.authenticate(response=resp, actions=["pull"])).list_aliases(iterate = True):
+                dxf: DXF = DXF(
+                    host,
+                    repository,
+                    lambda dxf, response: dxf.authenticate(
+                        response = response,
+                        actions = ["pull"]
+                    )
+                )
+                for alias in dxf.list_aliases(iterate = True):
                     print(alias)
             # print(f"{variable} ~{index} @ {namespace} -> {images} -> {host}/{repository}:{tag}")
 
