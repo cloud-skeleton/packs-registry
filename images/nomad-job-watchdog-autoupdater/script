@@ -14,7 +14,7 @@ from queue import Queue
 from semantic_version import Version, SimpleSpec
 from threading import Thread, Event
 from time import sleep
-from typing import cast, Any
+from typing import cast, Any, Iterable
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -46,20 +46,24 @@ def _set_var(
     return var["ModifyIndex"], var["Items"]
 
 def _filter_tag(new_tag: str, original_tag: Version) -> bool:
+    new_tag_v: Version
     try:
-        new_tag_v: Version = Version.coerce(new_tag.removeprefix("v"))
-        print(f"{new_tag} -> {new_tag_v.major} {new_tag_v.minor} {new_tag_v.patch} {new_tag_v.prerelease} {new_tag_v.build}")
-        return True
+        new_tag_v = Version.coerce(new_tag.removeprefix("v"))
     except ValueError:
-        print(f"{new_tag} -> NOPE")
         return False
+    if new_tag_v.prerelease != original_tag.prerelease:
+        return False
+    if new_tag_v.major != original_tag.major:
+        return False
+    return new_tag_v >= original_tag
 
 def _get_newest_tag(original_tag: str, all_tags: list[str]) -> str:
     v_prefix: bool = original_tag.startswith("v")
     if v_prefix:
         original_tag: str = original_tag.removeprefix("v")
     original_tag_v: Version = Version.coerce(original_tag)
-    print(list(filter(lambda new_tag: _filter_tag(new_tag, original_tag_v), all_tags)))
+    newer_tags: Iterable[str] = filter(lambda new_tag: _filter_tag(new_tag, original_tag_v), all_tags)
+    print(list(newer_tags))
     # original_tag_v: Version = Version.coerce("3.13.7-alpine3.21")
     # print(f"{original_tag_v} -> {original_tag_v.major} {original_tag_v.minor} {original_tag_v.patch} {original_tag_v.prerelease} {original_tag_v.build}")
     # original_tag_v: Version = Version.coerce("3.13.7-slim-trixie")
