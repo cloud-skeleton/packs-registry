@@ -11,7 +11,7 @@ from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
-from semantic_version import Version
+from semantic_version import Version, SimpleSpec
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
@@ -49,7 +49,7 @@ def _get_newest_tag(original_tag: str, all_tags: list[str]) -> str:
     v_prefix: bool = original_tag.startswith("v")
     if v_prefix:
         original_tag: str = original_tag.removeprefix("v")
-    print(Version(original_tag))
+    print(Version.coerce(original_tag))
     # print([sorted(all_tags, key = cmp_to_key(compare), reverse = True)])
     return ""
 
