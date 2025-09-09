@@ -106,7 +106,7 @@ def start() -> None:
                 print(f"Updating from {host}/{repository}:{tag} to {host}/{repository}:{newest_tag}!")
             images_new[image] = newest_tag
         if images_new != images:
-            print(f"Updating variable {variable}@{namespace}~{index} with value {images_new}")
+            print(f"Updating variable {variable}@{namespace} with value {images_new}")
             _set_var(variable, images_new, index, namespace)
 
 if __name__ == "__main__":

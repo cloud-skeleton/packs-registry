@@ -40,6 +40,12 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/config" }}
                 IMAGES_VARIABLE_NAME = "{{ .images_variable_name }}"
                 PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"
+                {{- $lock := .version_update_lock.Value | parseJSON }}
+                DO_NOT_ALLOW_UPDATE_MAJOR_VERSION = "{{ if $lock.major }}true{{ else }}false{{ end }}"
+                DO_NOT_ALLOW_UPDATE_MINOR_VERSION = "{{ if $lock.minor }}true{{ else }}false{{ end }}"
+                DO_NOT_ALLOW_UPDATE_PATCH_VERSION = "{{ if $lock.patch }}true{{ else }}false{{ end }}"
+                DO_NOT_ALLOW_UPDATE_PRERELEASE_VERSION = "{{ if $lock.prerelease }}true{{ else }}false{{ end }}"
+                DO_NOT_ALLOW_UPDATE_BUILD_VERSION = "{{ if $lock.build }}true{{ else }}false{{ end }}"
                 {{- end }}
                 EOF
                 destination = "secrets/env"
@@ -57,6 +63,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
         // Dynamic configuration
         "params.config.images_variable_name" = "images"
         "params.config.parameters_root_path" = "params"
+        "params.config.version_update_lock" = "{\"major\":true,\"minor\":false,\"patch\":false,\"prerelease\":true,\"build\":true}"
     }
 
     periodic {
