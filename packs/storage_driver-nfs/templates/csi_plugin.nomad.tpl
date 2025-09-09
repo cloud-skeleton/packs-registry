@@ -37,7 +37,7 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
             }
 
             template {
-                data        = <<-EOF
+                data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "csi_plugin") ]]/images" }}
                 DOCKER_IMAGE="registry.gitlab.com/rocketduck/csi-plugin-nfs:{{ index . "registry.gitlab.com/rocketduck/csi-plugin-nfs" }}"
                 {{- end }}

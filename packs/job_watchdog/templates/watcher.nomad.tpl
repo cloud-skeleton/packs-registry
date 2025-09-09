@@ -27,7 +27,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
             }
 
             template {
-                data        = <<-EOF
+                data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/images" }}
                 DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog" }}"
                 {{- end }}

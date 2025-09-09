@@ -30,12 +30,12 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             check {
                 check_restart {
-                    limit = 3
                     grace = "2m"
+                    limit = 3
                 }
 
                 interval = "30s"
-                path     = "/ping" 
+                path     = "/ping"
                 port     = "https"
                 protocol = "https"
                 timeout  = "5s"
@@ -54,17 +54,17 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                 image          = "${DOCKER_IMAGE}"
 
                 mount {
-                    type     = "bind"
-                    target   = "/etc/traefik/dynamic.yml"
-                    source   = "local/traefik_dynamic.yml"
                     readonly = true
+                    source   = "local/traefik_dynamic.yml"
+                    target   = "/etc/traefik/dynamic.yml"
+                    type     = "bind"
                 }
 
                 mount {
-                    type     = "bind"
-                    target   = "/etc/traefik/traefik.yml"
-                    source   = "local/traefik_static.yml"
                     readonly = true
+                    source   = "local/traefik_static.yml"
+                    target   = "/etc/traefik/traefik.yml"
+                    type     = "bind"
                 }
 
                 ports = [
@@ -76,8 +76,8 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             driver = "docker"
 
             identity {
-                env         = true
                 change_mode = "restart"
+                env         = true
             }
 
             resources {
@@ -86,7 +86,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
 
             template {
-                data        = <<-EOF
+                data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/images" }}
                 DOCKER_IMAGE="traefik:{{ index . "traefik" }}"
                 {{- end }}
@@ -101,7 +101,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
 
             template {
-                data        = <<-EOF
+                data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
                 ---
                 api: {}
@@ -169,7 +169,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
 
             template {
-                data        = <<-EOF
+                data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingress_load_balancer") ]]/config" }}
                 ---
                 http:
@@ -283,13 +283,13 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
     meta = {
         [[- template "extra_pack_meta" . ]]
 
-        // Docker images used in job
-        "params.images.traefik" = "v3.5.1"
-
         // Dynamic configuration
         "params.config.admin_ip_cidrs" = "[]"
         "params.config.log_level"      = "INFO"
         "params.config.ssllabs_cidr"   = "69.67.183.0/24"
+
+        // Docker images used in job
+        "params.images.traefik" = "3.5.1"
 
         // Volumes
         "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"

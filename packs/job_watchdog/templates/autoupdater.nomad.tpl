@@ -22,8 +22,8 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
             driver = "docker"
 
             identity {
-                env         = true
                 change_mode = "restart"
+                env         = true
             }
 
             resources {
@@ -32,7 +32,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
             }
 
             template {
-                data        = <<-EOF
+                data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/images" }}
                 DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" }}"
                 {{- end }}
@@ -56,20 +56,22 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
     meta = {
         [[- template "extra_pack_meta" . ]]
 
-        // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.0"
-
         // Dynamic configuration
         "params.config.images_variable_name" = "images"
         "params.config.parameters_root_path" = "params"
-        "params.config.version_update_lock" = "{\"major\": true, \"minor\": false, \"patch\": false, \"prerelease\": true, \"build\": true}"
-    }
+        "params.config.version_update_lock"  = "{\"major\": true, \"minor\": false, \"patch\": false, \"prerelease\": true, \"build\": true}"
 
-    periodic {
-        crons            = ["@daily"]
-        prohibit_overlap = true
+        // Docker images used in job
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.0"
     }
 
     namespace = "system"
-    type      = "batch"
+
+    periodic {
+        crons            = ["[[ var "autoupdater_cron.cron" . ]]"]
+        prohibit_overlap = true
+        time_zone        = "[[ var "autoupdater_cron.timezone" . ]]"
+    }
+
+    type = "batch"
 }
