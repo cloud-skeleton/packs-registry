@@ -17,7 +17,6 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
-                force_pull     = true
             }
 
             driver = "docker"

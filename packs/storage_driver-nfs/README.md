@@ -62,11 +62,11 @@ id = "<REQUIRED>"
 
 ### Nomad Variables (Parameters)
 
-| Variable  | Key                                             | Default | Description                                                                                 |
-|-----------|-------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
-| `config`  | `log_level`                                     | "INFO"  | Log verbosity for the CSI plugin. Allowed: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`. |
-| `images`  | `registry.gitlab.com/rocketduck/csi-plugin-nfs` | "1.1.0" | Container image tag for the CSI plugin.                                                     |
-| `secrets` | `nfs_share`                                     |         | NFS export in `<server>:/<path>` format, e.g., `nas.lan:/export/nomad`.                     |
+| Variable                 | Key                                             | Default | Description                                                                                 |
+|--------------------------|-------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| `csi_plugin` ➢ `config`  | `log_level`                                     | "INFO"  | Log verbosity for the CSI plugin. Allowed: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`. |
+| `csi_plugin` ➢ `images`  | `registry.gitlab.com/rocketduck/csi-plugin-nfs` | "1.1.0" | Container image tag for the CSI plugin.                                                     |
+| `csi_plugin` ➢ `secrets` | `nfs_share`                                     |         | NFS export in `<server>:/<path>` format, e.g., `nas.lan:/export/nomad`.                     |
 
 ## Pack Layout
 
