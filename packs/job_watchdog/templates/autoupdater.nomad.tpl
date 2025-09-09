@@ -63,7 +63,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
         // Dynamic configuration
         "params.config.images_variable_name" = "images"
         "params.config.parameters_root_path" = "params"
-        "params.config.version_update_lock" = "{\"major\":true,\"minor\":false,\"patch\":false,\"prerelease\":true,\"build\":true}"
+        "params.config.version_update_lock" = "{\"major\": true, \"minor\": false, \"patch\": false, \"prerelease\": true, \"build\": true}"
     }
 
     periodic {
