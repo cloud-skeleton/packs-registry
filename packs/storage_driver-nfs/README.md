@@ -57,7 +57,7 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 
 ```hcl
 # Unique identifier used to distinguish multiple deployments of this pack.
-id = "<REQUIRED>"
+id = "main"
 ```
 
 ### Nomad Variables (Parameters)
