@@ -7,7 +7,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
     group "cloud-skeleton/nomad-job-watchdog" {
         restart {
-            interval         = "5m"
+            attempts         = 2
+            interval         = "2m"
             mode             = "delay"
             render_templates = true
         }
