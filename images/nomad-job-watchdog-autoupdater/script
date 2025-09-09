@@ -18,6 +18,16 @@ if not (NAMESPACE := getenv("NOMAD_NAMESPACE", "")):
 NOMAD_SOCKET: str = f"unix://{NOMAD_SECRETS_DIR}/api.sock"
 IMAGES_VARIABLE_NAME: str = getenv("IMAGES_VARIABLE_NAME", "images")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
+DO_NOT_ALLOW_UPDATE_MAJOR_VERSION: bool = \
+    True if getenv("DO_NOT_ALLOW_UPDATE_MAJOR_VERSION", "true") == "true" else False
+DO_NOT_ALLOW_UPDATE_MINOR_VERSION: bool = \
+    True if getenv("DO_NOT_ALLOW_UPDATE_MINOR_VERSION", "false") == "true" else False
+DO_NOT_ALLOW_UPDATE_PATCH_VERSION: bool = \
+    True if getenv("DO_NOT_ALLOW_UPDATE_PATCH_VERSION", "false") == "true" else False
+DO_NOT_ALLOW_UPDATE_PRERELEASE_VERSION: bool = \
+    True if getenv("DO_NOT_ALLOW_UPDATE_PRERELEASE_VERSION", "true") == "true" else False
+DO_NOT_ALLOW_UPDATE_BUILD_VERSION: bool = \
+    True if getenv("DO_NOT_ALLOW_UPDATE_BUILD_VERSION", "true") == "true" else False
 
 nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
@@ -47,9 +57,11 @@ def _filter_tag(new_tag: str, current_tag: str) -> bool:
     except ValueError:
         return False
     if any((
-        new_tag_v.build != current_tag_v.build,
-        new_tag_v.prerelease != current_tag_v.prerelease,
-        new_tag_v.major != current_tag_v.major
+        DO_NOT_ALLOW_UPDATE_BUILD_VERSION and new_tag_v.build != current_tag_v.build,
+        DO_NOT_ALLOW_UPDATE_PRERELEASE_VERSION and new_tag_v.prerelease != current_tag_v.prerelease,
+        DO_NOT_ALLOW_UPDATE_PATCH_VERSION and new_tag_v.patch != current_tag_v.patch,
+        DO_NOT_ALLOW_UPDATE_MINOR_VERSION and new_tag_v.minor != current_tag_v.minor,
+        DO_NOT_ALLOW_UPDATE_MAJOR_VERSION and new_tag_v.major != current_tag_v.major
     )):
         return False
     return new_tag_v > current_tag_v
