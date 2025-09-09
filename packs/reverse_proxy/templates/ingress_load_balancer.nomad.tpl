@@ -18,6 +18,12 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
             }
         }
 
+        restart {
+            interval         = "5m"
+            mode             = "delay"
+            render_templates = true
+        }
+
         service {
             address = "[[ var "traefik_hostname" . ]]"
 

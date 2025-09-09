@@ -1,5 +1,11 @@
 job "[[ template "job_name" (list . "csi_plugin") ]]" {
     group "rocketduck/csi-plugin-nfs" {
+        restart {
+            interval         = "5m"
+            mode             = "delay"
+            render_templates = true
+        }
+
         task "plugin" {
             config {
                 args = [

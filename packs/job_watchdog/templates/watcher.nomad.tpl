@@ -6,6 +6,12 @@ job "[[ template "job_name" (list . "watcher") ]]" {
     }
 
     group "cloud-skeleton/nomad-job-watchdog" {
+        restart {
+            interval         = "5m"
+            mode             = "delay"
+            render_templates = true
+        }
+
         task "service" {
             config {
                 cpu_hard_limit = true

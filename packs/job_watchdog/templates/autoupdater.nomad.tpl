@@ -6,6 +6,12 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
     }
 
     group "cloud-skeleton/nomad-job-watchdog-autoupdater" {
+        restart {
+            interval         = "5m"
+            mode             = "delay"
+            render_templates = true
+        }
+
         task "task" {
             config {
                 cpu_hard_limit = true
