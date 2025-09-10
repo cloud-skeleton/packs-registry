@@ -9,7 +9,7 @@
 > **IMPORTANT:** Before deploying any **[Nomad Packs][hashicorp-nomad-packs]**, **you must complete all the prerequisites detailed in the **[Cloud Skeleton][cloud-skeleton]** ► **[Prerequisites][prerequisites]** repository.** This step is essential to ensure that your system meets all the required configurations, dependencies, and security measures necessary for a successful deployment.
 
 **Nomad watchdog that auto-provisions variable access, parameter defaults and volumes.**  
-Automatically creates read/list ACL policies so job workloads can access variables under `/params/{job_name}`. It also inspects job metadata to pre-create Nomad Variables and initialize volumes, reducing manual bootstrap and keeping configurations consistent.
+Automatically creates read/list ACL policies so job workloads can access variables under `/params/{job_name}`. It also inspects job metadata to pre-create Nomad Variables and initialize volumes, reducing manual bootstrap and keeping configurations consistent. Finally it also includes automated Docker image tag updating mechanism: it will read `images` variable and look up if there are any new images available in repositories.
 
 ## Table of Contents
 
@@ -36,7 +36,6 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 | Node class(es) | `main-worker`                             |
 | CSI volumes    | ❌                                        |
 | Ingress        | ❌                                        |
-| Variables      | `system/tools/nomad-job-watchdog/secrets` |
 
 ### Security Requirements
 

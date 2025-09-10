@@ -36,7 +36,6 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 | Node class(es) | `ingress-worker`, `main-worker`           |
 | CSI volumes    | ❌                                        |
 | Ingress        | ❌                                        |
-| Variables      | ❌                                        |
 
 ### Security Requirements
 
