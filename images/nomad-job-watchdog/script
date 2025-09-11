@@ -10,7 +10,6 @@ from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
 from threading import Thread, Event
-from time import sleep
 from typing import cast, Any
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
@@ -176,26 +175,8 @@ def _process_job_event(event: dict[str, Any]) -> None:
     elif event["Type"] == "JobDeregistered":
         _remove_acl(data)
 
-def _process_event(event: dict[str, Any]) -> None:
-    state_var_index: int = 0
-    last_event_value: int = 0
-    if _is_var(STATE_VAR_PATH):
-        state_var_index, state_value = _get_var(STATE_VAR_PATH)
-        last_event_value = int(state_value["last_event"])
-    if event["Index"] <= last_event_value:
-        return
-    match event["Events"][0]["Topic"]:
-        case "Job":
-            _process_job_event(event["Events"][0])
-    state_var_index, state_value = _get_var(STATE_VAR_PATH)
-    _set_var(
-        STATE_VAR_PATH,
-        {"last_event": str(event["Index"])},
-        state_var_index
-    )
-
 def start() -> None:
-    stream, _, events = cast(
+    stream, _, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
             namespace = "*",
@@ -206,17 +187,32 @@ def start() -> None:
     )
     stream.start()
     while True:
-        event: dict[str, Any] = events.get()
+        state_var_index: int = 0
+        last_event_value: int = 0
+        if _is_var(STATE_VAR_PATH):
+            state_var_index, state_value = _get_var(STATE_VAR_PATH)
+            last_event_value = int(state_value["last_event"])
+        events: dict[str, Any] = events_queue.get()
+        if events["Index"] <= last_event_value:
+            continue
         try:
-            _process_event(event)
-        except Exception as exception:
-            print(
-                f"While processing {event['Index']} ({event['Events'][0]['Key']} "
-                f"-> {event['Events'][0]['Type']}) exception was thrown: {exception}"
+            for event in events["Events"]:
+                try:
+                    match event["Topic"]:
+                        case "Job":
+                            _process_job_event(event)
+                except Exception as exception:
+                    print(
+                        f"While processing {event['Index']} ({event['Key']}@{event['Namespace']} "
+                        f"-> {event['Topic']}:{event['Type']}) exception was thrown: {exception}"
+                    )
+            _set_var(
+                STATE_VAR_PATH,
+                {"last_event": str(events["Index"])},
+                state_var_index
             )
-            sleep(1)
         finally:
-            events.task_done()
+            events_queue.task_done()
 
 if __name__ == "__main__":
     start()
