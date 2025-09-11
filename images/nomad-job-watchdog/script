@@ -203,16 +203,18 @@ def start() -> None:
                         case "Job":
                             _process_job_event(event)
                 except Exception as exception:
-                    print(
+                    raise type(exception)(
                         f"While processing {event['Index']} ({event['Key']}@{event['Namespace']} "
                         f"-> {event['Topic']}:{event['Type']}) exception was thrown: {exception}"
-                    )
-                    sleep(5)
+                    ) from exception
             _set_var(
                 STATE_VAR_PATH,
                 {"last_event": str(events["Index"])},
                 state_var_index
             )
+        except Exception as exception:
+            print(exception)
+            sleep(5)
         finally:
             events_queue.task_done()
 
