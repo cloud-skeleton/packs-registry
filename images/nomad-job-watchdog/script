@@ -193,7 +193,7 @@ def _process_node_event(event: dict[str, Any]) -> None:
         case "NodeStreamEvent":
             if data["status"] != "ready":
                 return
-            print(nomad.jobs.get_jobs(filter_ = 'Status=="failed"'))
+            print(nomad.jobs.get_jobs())
 
 def start() -> None:
     stream, _, events_queue = cast(
