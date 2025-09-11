@@ -12,6 +12,7 @@ from queue import Queue
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
+from json import dumps
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -193,7 +194,7 @@ def _process_node_event(event: dict[str, Any]) -> None:
         case "NodeStreamEvent":
             if data["status"] != "ready":
                 return
-            print(nomad.jobs.get_jobs())
+            print(dumps(nomad.jobs.get_jobs()))
 
 def start() -> None:
     stream, _, events_queue = cast(
