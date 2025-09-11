@@ -169,17 +169,18 @@ def _process_job_event(event: dict[str, Any]) -> None:
             if meta_key.startswith(f"{VOLUMES_META_PREFIX}.")
         }
     }
-    if event["Type"] == "JobRegistered":
-        _attach_acl(data)
-        _create_variables(data)
-        _create_volumes(data)
-    elif event["Type"] == "JobDeregistered":
-        _remove_acl(data)
+    match event["Type"]:
+        case "JobRegistered":
+            _attach_acl(data)
+            _create_variables(data)
+            _create_volumes(data)
+        case "JobDeregistered":
+            _remove_acl(data)
 
 def _process_node_event(event: dict[str, Any]) -> None:
-    if event["Type"] != "NodeStreamEvent":
-        return
-    print(event)
+    match event["Type"]:
+        case "NodeStreamEvent":
+            print(event)
 
 def start() -> None:
     stream, _, events_queue = cast(
