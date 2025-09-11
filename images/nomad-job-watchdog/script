@@ -153,15 +153,8 @@ def _create_volumes(data: dict[str, Any]) -> None:
         print(f"Triggering scheduling re-evaluation for job '{data['job']}'")
         nomad.job.evaluate_job(data["job"])
 
-def _process_event(event: dict[str, Any]) -> None:
-    state_var_index: int = 0
-    last_event_value: int = 0
-    if _is_var(STATE_VAR_PATH):
-        state_var_index, state_value = _get_var(STATE_VAR_PATH)
-        last_event_value = int(state_value["last_event"])
-    if event["Index"] <= last_event_value:
-        return
-    job: dict[str, Any] = event["Events"][0]["Payload"]["Job"]
+def _process_job_event(event: dict[str, Any]) -> None:
+    job: dict[str, Any] = event["Payload"]["Job"]
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
         "job": job["Name"],
@@ -176,12 +169,22 @@ def _process_event(event: dict[str, Any]) -> None:
             if meta_key.startswith(f"{VOLUMES_META_PREFIX}.")
         }
     }
-    if event["Events"][0]["Type"] == "JobRegistered":
+    if event["Type"] == "JobRegistered":
         _attach_acl(data)
         _create_variables(data)
         _create_volumes(data)
-    elif event["Events"][0]["Type"] == "JobDeregistered":
+    elif event["Type"] == "JobDeregistered":
         _remove_acl(data)
+
+def _process_event(event: dict[str, Any]) -> None:
+    state_var_index: int = 0
+    last_event_value: int = 0
+    if _is_var(STATE_VAR_PATH):
+        state_var_index, state_value = _get_var(STATE_VAR_PATH)
+        last_event_value = int(state_value["last_event"])
+    if event["Index"] <= last_event_value:
+        return
+    _process_job_event(event["Events"][0])
     state_var_index, state_value = _get_var(STATE_VAR_PATH)
     _set_var(
         STATE_VAR_PATH,
@@ -194,7 +197,9 @@ def start() -> None:
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
             namespace = "*",
-            topic = {"Job": "*"}
+            topic = {
+                "Job": "*"
+            }
         )
     )
     stream.start()
