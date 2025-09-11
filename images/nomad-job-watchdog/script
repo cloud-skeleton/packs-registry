@@ -176,13 +176,19 @@ def _process_job_event(event: dict[str, Any]) -> None:
     elif event["Type"] == "JobDeregistered":
         _remove_acl(data)
 
+def _process_node_event(event: dict[str, Any]) -> None:
+    if event["Type"] != "NodeStreamEvent":
+        return
+    print(event)
+
 def start() -> None:
     stream, _, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
             namespace = "*",
             topic = {
-                "Job": "*"
+                "Job": "*",
+                "Node": "*"
             }
         )
     )
@@ -202,6 +208,8 @@ def start() -> None:
                     match event["Topic"]:
                         case "Job":
                             _process_job_event(event)
+                        case "Node":
+                            _process_node_event(event)
                 except Exception as exception:
                     raise type(exception)(
                         f"While processing {event['Index']} ({event['Key']}@{event['Namespace']} "
