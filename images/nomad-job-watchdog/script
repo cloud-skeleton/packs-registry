@@ -10,6 +10,7 @@ from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
 from threading import Thread, Event
+from time import sleep
 from typing import cast, Any
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
@@ -206,6 +207,7 @@ def start() -> None:
                         f"While processing {event['Index']} ({event['Key']}@{event['Namespace']} "
                         f"-> {event['Topic']}:{event['Type']}) exception was thrown: {exception}"
                     )
+                    sleep(5)
             _set_var(
                 STATE_VAR_PATH,
                 {"last_event": str(events["Index"])},
