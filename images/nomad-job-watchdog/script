@@ -184,7 +184,9 @@ def _process_event(event: dict[str, Any]) -> None:
         last_event_value = int(state_value["last_event"])
     if event["Index"] <= last_event_value:
         return
-    _process_job_event(event["Events"][0])
+    match event["Events"][0]["Topic"]:
+        case "Job":
+            _process_job_event(event["Events"][0])
     state_var_index, state_value = _get_var(STATE_VAR_PATH)
     _set_var(
         STATE_VAR_PATH,
