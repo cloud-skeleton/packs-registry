@@ -91,7 +91,7 @@ def _attach_acl(data: dict[str, Any]) -> None:
         },
         "Rules": rules
     }
-    policy_id: str = f"allow-variables-read-{data['job']}".replace("_", "-")
+    policy_id: str = f"AUTOACL-{data['job']}".replace("_", "-")
     should_create: bool = False
     try:
         if (nomad.acl.get_policy(policy_id) != policy):

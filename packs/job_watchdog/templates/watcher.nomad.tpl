@@ -16,6 +16,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         task "service" {
             config {
                 cpu_hard_limit = true
+                force_pull     = true
                 image          = "${DOCKER_IMAGE}"
             }
 
