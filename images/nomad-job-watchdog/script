@@ -178,9 +178,21 @@ def _process_job_event(event: dict[str, Any]) -> None:
             _remove_acl(data)
 
 def _process_node_event(event: dict[str, Any]) -> None:
+    node: dict[str, Any] = event["Payload"]["Node"]
+    data: dict[str, Any] = {
+        "id": node["ID"],
+        "name": node["Name"],
+        "status": node["Status"],
+        "csi_nodes": [
+            id
+            for id, plugin in node["CSINodePlugins"].items()
+            if plugin["Healthy"] and node["CSIControllerPlugins"][id]["Healthy"]
+        ]
+    }
     match event["Type"]:
         case "NodeStreamEvent":
             print(event)
+            print(data)
 
 def start() -> None:
     stream, _, events_queue = cast(
