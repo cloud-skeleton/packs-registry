@@ -83,7 +83,7 @@ def _attach_acl(data: dict[str, Any]) -> None:
     }}
     """
     policy: dict[str, Any] = {
-        "Name": f"allow-variables-read-{data['job']}".replace("_", "-"),
+        "Name": f"AUTOACL-{data['job']}".replace("_", "-"),
         "Description": f"AutoACL: Allow read variables for {data['job']} job",
         "JobACL": {
             "Namespace": data["namespace"],
