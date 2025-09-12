@@ -188,7 +188,7 @@ def _reevaluate_system_jobs(data: dict[str, Any]) -> None:
             for meta_key, meta_value in job["Meta"].items()
             if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
         }
-        if not job_csi_plugins.issubset(data["healthy_csi_plugins"]):
+        if len(job_csi_plugins) == 0 or not job_csi_plugins.issubset(data["healthy_csi_plugins"]):
             continue
         job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
         if job_data["Stable"]:
