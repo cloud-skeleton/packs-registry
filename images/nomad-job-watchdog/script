@@ -200,7 +200,12 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
     plugin: dict[str, Any] = event["Payload"]["Plugin"]
     data: dict[str, Any] = {
         "id": plugin["ID"],
-        "is_healthy": plugin["Healthy"]
+        "is_healthy": plugin["NodesExpected"] == plugin["NodesHealthy"],
+        "nodes": {
+            node["NodeInfo"]["ID"]
+            for node in plugin["Nodes"]
+            if node["Healthy"]
+        }
     }
     match event["Type"]:
         case "NodeRegistration":
