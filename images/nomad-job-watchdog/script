@@ -151,7 +151,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
             nomad.volume.create_csi_volume(volume_id, volume_payload)
             should_reevaluate = True
     if should_reevaluate:
-        print(f"Triggering scheduling re-evaluation for job '{data['job']}'")
+        print(f"Triggering re-evaluation of job '{data['job']}'")
         nomad.job.evaluate_job(data["job"])
 
 def _process_job_event(event: dict[str, Any]) -> None:
@@ -179,37 +179,36 @@ def _process_job_event(event: dict[str, Any]) -> None:
             _remove_acl(data)
 
 def _reevaluate_system_jobs(data: dict[str, Any]) -> None:
-    if data["status"] != "ready" or len(data["healthy_csi_plugins"]) == 0:
-        return
     print(data)
-    for job in nomad.jobs.get_jobs(filter_ = 'Type == "system"', meta = True):
-        job_csi_plugins: set[str] = {
-            meta_value
-            for meta_key, meta_value in job["Meta"].items()
-            if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
-        }
-        if len(job_csi_plugins) == 0 or not job_csi_plugins.issubset(data["healthy_csi_plugins"]):
-            continue
-        job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
-        if job_data["Stable"]:
-            continue
-        print(f"REEVALUATE: {dumps(job_data)}")
-        nomad.job.evaluate_job(job_data["ID"])
+    # if data["status"] != "ready" or len(data["healthy_csi_plugins"]) == 0:
+    #     return
+    # for job in nomad.jobs.get_jobs(filter_ = 'Type == "system" or Type == "service"', meta = True):
+    #     job_csi_plugins: set[str] = {
+    #         meta_value
+    #         for meta_key, meta_value in job["Meta"].items()
+    #         if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
+    #     }
+    #     if len(job_csi_plugins) == 0 or not job_csi_plugins.issubset(data["healthy_csi_plugins"]):
+    #         continue
+    #     job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
+    #     if job_data["Stable"]:
+    #         continue
+    #     print(f"Triggering re-evaluation of job '{job_data['ID']}'")
+    #     nomad.job.evaluate_job(job_data["ID"])
 
-def _process_node_event(event: dict[str, Any]) -> None:
-    node: dict[str, Any] = event["Payload"]["Node"]
+def _process_csi_plugin_event(event: dict[str, Any]) -> None:
+    plugin: dict[str, Any] = event["Payload"]["Plugin"]
     data: dict[str, Any] = {
-        "id": node["ID"],
-        "name": node["Name"],
-        "status": node["Status"],
-        "healthy_csi_plugins": {
-            id
-            for id, plugin in node["CSINodePlugins"].items()
-            if plugin["Healthy"] and node["CSIControllerPlugins"][id]["Healthy"]
+        "id": plugin["ID"],
+        "is_healthy": plugin["Healthy"],
+        "nodes": {
+            node["NodeInfo"]["ID"]
+            for node in plugin["Nodes"]
+            if node["Healthy"]
         }
     }
     match event["Type"]:
-        case "NodeStreamEvent":
+        case "NodeRegistration":
             _reevaluate_system_jobs(data)
 
 def start() -> None:
@@ -219,7 +218,7 @@ def start() -> None:
             namespace = "*",
             topic = {
                 "Job": "*",
-                "Node": "*"
+                "CSIPlugin": "*"
             }
         )
     )
@@ -239,8 +238,8 @@ def start() -> None:
                     match event["Topic"]:
                         case "Job":
                             _process_job_event(event)
-                        case "Node":
-                            _process_node_event(event)
+                        case "CSIPlugin":
+                            _process_csi_plugin_event(event)
                 except Exception as exception:
                     raise type(exception)(
                         f"While processing {event['Index']} ({event['Key']}@{event['Namespace']} "
