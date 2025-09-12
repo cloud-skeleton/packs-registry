@@ -181,6 +181,7 @@ def _process_job_event(event: dict[str, Any]) -> None:
 def _reevaluate_jobs(data: dict[str, Any]) -> None:
     if data["status"] != "ready":
         return
+    print(data)
     # jobs: list[dict[str, Any]] = nomad.jobs.get_jobs()
     print(dumps(nomad.jobs.get_jobs(filter_ = 'Type == "system" or Type == "service"')))
 
@@ -190,7 +191,7 @@ def _process_node_event(event: dict[str, Any]) -> None:
         "id": node["ID"],
         "name": node["Name"],
         "status": node["Status"],
-        "csi_nodes": [
+        "healthy_csi_plugins": [
             id
             for id, plugin in node["CSINodePlugins"].items()
             if plugin["Healthy"] and node["CSIControllerPlugins"][id]["Healthy"]
