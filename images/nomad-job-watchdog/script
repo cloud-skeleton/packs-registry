@@ -182,16 +182,17 @@ def _reevaluate_system_jobs(data: dict[str, Any]) -> None:
     if data["status"] != "ready" or len(data["healthy_csi_plugins"]) == 0:
         return
     print(data)
-    for job in nomad.jobs.get_jobs(filter_ = 'Type == "system"'):
-        job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
-        if job_data["Stable"]:
-            continue
-        print(dumps(job_data))
-        print([
-            meta_value
-            for meta_key, meta_value in job_data["Meta"].items()
-            if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
-        ])
+    print(dumps(nomad.jobs.get_jobs(filter_ = 'Type == "system"', meta = True)))
+    # for job in nomad.jobs.get_jobs(filter_ = 'Type == "system"', meta = True):
+    #     job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
+    #     if job_data["Stable"]:
+    #         continue
+    #     print(dumps(job_data))
+    #     print([
+    #         meta_value
+    #         for meta_key, meta_value in job_data["Meta"].items()
+    #         if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
+    #     ])
 
 def _process_node_event(event: dict[str, Any]) -> None:
     node: dict[str, Any] = event["Payload"]["Node"]
