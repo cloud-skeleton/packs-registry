@@ -188,9 +188,9 @@ def _reevaluate_system_jobs(data: dict[str, Any]) -> None:
             continue
         print(dumps(job_data))
         print([
-            volume["Source"]
-            for group in job_data["TaskGroups"]
-            for volume in group["Volumes"]
+            meta_value
+            for meta_key, meta_value in job_data["Meta"].items()
+            if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
         ])
 
 def _process_node_event(event: dict[str, Any]) -> None:
