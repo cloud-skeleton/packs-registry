@@ -1,0 +1,16 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Contact: https://github.com/orgs/cloud-skeleton/discussions
+Expires: 2025-10-01T00:00:00.000Z
+Encryption: https://raw.githubusercontent.com/cloud-skeleton/packs-registry/refs/heads/main/packs/reverse_proxy/security/info@cloudskeleton.eu.public.asc
+Preferred-Languages: en, lt
+-----BEGIN PGP SIGNATURE-----
+
+iMAFARYKAEAiIQXqGwHsudGWEcmkoQeUb26tP/dbMeeOw7tqhLJC2ACe0wUCaMQZ
+6RYcaW5mb0BjbG91ZHNrZWxldG9uLmV1AAA7mgHHTYmLMm6LXcixUjg3PPZPE1bk
+jwJzK4kiUTq3lJOPaJc/eBxp6KThP/2kmoGFaQTNkiNTIPv5iTgAAcY85NuwtC7X
+bhMjc4uVRG63PusJ2nldGLMZXSPcu1wzggkiYO6AchY3MngKy3NI0KY9wpRDgwCX
+EQA=
+=gdYY
+-----END PGP SIGNATURE-----
