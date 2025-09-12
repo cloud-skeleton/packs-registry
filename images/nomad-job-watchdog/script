@@ -178,7 +178,7 @@ def _process_job_event(event: dict[str, Any]) -> None:
         case "JobDeregistered":
             _remove_acl(data)
 
-def _reevaluate_system_jobs(data: dict[str, Any]) -> None:
+def _reevaluate_jobs(data: dict[str, Any]) -> None:
     print(data)
     # if data["status"] != "ready" or len(data["healthy_csi_plugins"]) == 0:
     #     return
@@ -200,16 +200,11 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
     plugin: dict[str, Any] = event["Payload"]["Plugin"]
     data: dict[str, Any] = {
         "id": plugin["ID"],
-        "is_healthy": plugin["Healthy"],
-        "nodes": {
-            node["NodeInfo"]["ID"]
-            for node in plugin["Nodes"]
-            if node["Healthy"]
-        }
+        "is_healthy": plugin["Healthy"]
     }
     match event["Type"]:
         case "NodeRegistration":
-            _reevaluate_system_jobs(data)
+            _reevaluate_jobs(data)
 
 def start() -> None:
     stream, _, events_queue = cast(
