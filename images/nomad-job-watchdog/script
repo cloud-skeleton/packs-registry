@@ -178,6 +178,12 @@ def _process_job_event(event: dict[str, Any]) -> None:
         case "JobDeregistered":
             _remove_acl(data)
 
+def _reevaluate_jobs(data: dict[str, Any]) -> None:
+    if data["status"] != "ready":
+        return
+    # jobs: list[dict[str, Any]] = nomad.jobs.get_jobs()
+    print(dumps(nomad.jobs.get_jobs(filter_ = 'Type == "system" or Type == "service"')))
+
 def _process_node_event(event: dict[str, Any]) -> None:
     node: dict[str, Any] = event["Payload"]["Node"]
     data: dict[str, Any] = {
@@ -192,10 +198,7 @@ def _process_node_event(event: dict[str, Any]) -> None:
     }
     match event["Type"]:
         case "NodeStreamEvent":
-            if data["status"] != "ready":
-                return
-            # jobs: list[dict[str, Any]] = nomad.jobs.get_jobs()
-            print(dumps(nomad.jobs.get_jobs(filter_ = 'Type == "system" or Type == "service"')))
+            _reevaluate_jobs(data)
 
 def start() -> None:
     stream, _, events_queue = cast(
