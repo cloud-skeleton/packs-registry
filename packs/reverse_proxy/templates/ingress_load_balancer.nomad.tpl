@@ -141,9 +141,6 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         static-response:
                             moduleName: github.com/tuxgal/traefik_inline_response
                             version: v0.1.2
-                        statiq:
-                            moduleName: github.com/hhftechnology/statiq
-                            version: v1.0.1
                 global:
                     checkNewVersion: false
                     sendAnonymousUsage: false
@@ -187,6 +184,10 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                                 sourceRange:
                                     - {{ env "NOMAD_HOST_IP_https" }}
 
+                        rewrite-security.txt-path-to-github:
+                            replacePath:
+                                path: /cloud-skeleton/packs-registry/refs/heads/main/packs/reverse_proxy/security/security.txt
+
                         security-headers:
                             headers:
                                 browserXssFilter: true
@@ -210,6 +211,13 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                                 replacement: "$${1}/dashboard/"
 
                     routers:
+                        security.txt-file:
+                            middlewares:
+                                - rewrite-security.txt-path-to-github
+                            priority: 10001
+                            rule: Path("/.well-known/security.txt")
+                            service: github-raw-files
+
                         ssllabs-certificate-validation:
                             middlewares:
                                 - success-response
@@ -241,6 +249,13 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     serversTransports:
                         self-signed:
                             insecureSkipVerify: true
+
+                    services:
+                        github-raw-files:
+                            loadBalancer:
+                                passHostHeader: false
+                                servers:
+                                    - url: https://raw.githubusercontent.com
 
                 tls:
                     options:
