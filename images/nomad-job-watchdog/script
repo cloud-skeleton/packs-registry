@@ -202,9 +202,8 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
         "id": plugin["ID"],
         "is_healthy": plugin["NodesExpected"] == plugin["NodesHealthy"],
         "nodes": {
-            node["NodeInfo"]["ID"]
+            node["NodeInfo"]["ID"]: node["Healthy"]
             for node in plugin["Nodes"]
-            if node["Healthy"]
         }
     }
     match event["Type"]:
