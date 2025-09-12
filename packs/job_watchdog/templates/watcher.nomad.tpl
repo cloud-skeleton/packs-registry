@@ -16,7 +16,6 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         task "service" {
             config {
                 cpu_hard_limit = true
-                force_pull     = true
                 image          = "${DOCKER_IMAGE}"
             }
 
@@ -51,7 +50,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.2"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.3"
 
         // Dynamic configuration
         "params.config.parameters_meta_prefix" = "params"
