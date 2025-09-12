@@ -178,23 +178,22 @@ def _process_job_event(event: dict[str, Any]) -> None:
         case "JobDeregistered":
             _remove_acl(data)
 
-def _reevaluate_jobs(data: dict[str, Any]) -> None:
-    print(data)
-    # if data["status"] != "ready" or len(data["healthy_csi_plugins"]) == 0:
-    #     return
-    # for job in nomad.jobs.get_jobs(filter_ = 'Type == "system" or Type == "service"', meta = True):
-    #     job_csi_plugins: set[str] = {
-    #         meta_value
-    #         for meta_key, meta_value in job["Meta"].items()
-    #         if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
-    #     }
-    #     if len(job_csi_plugins) == 0 or not job_csi_plugins.issubset(data["healthy_csi_plugins"]):
-    #         continue
-    #     job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
-    #     if job_data["Stable"]:
-    #         continue
-    #     print(f"Triggering re-evaluation of job '{job_data['ID']}'")
-    #     nomad.job.evaluate_job(job_data["ID"])
+def _reevaluate_jobs_with_csi_plugins(data: dict[str, Any]) -> None:
+    if not data["is_healthy"]:
+        return
+    for job in nomad.jobs.get_jobs(filter_ = 'Type == "system" or Type == "service"', meta = True):
+        job_csi_plugins: set[str] = {
+            meta_value
+            for meta_key, meta_value in job["Meta"].items()
+            if meta_key.startswith(f"{VOLUMES_META_PREFIX}.") and meta_key.endswith(".plugin_id")
+        }
+        if len(job_csi_plugins) == 0 or data["id"] not in job_csi_plugins:
+            continue
+        job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
+        if job_data["Stable"]:
+            continue
+        print(f"Triggering re-evaluation of job '{job_data['ID']}'")
+        nomad.job.evaluate_job(job_data["ID"])
 
 def _process_csi_plugin_event(event: dict[str, Any]) -> None:
     plugin: dict[str, Any] = event["Payload"]["Plugin"]
@@ -208,7 +207,7 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
     }
     match event["Type"]:
         case "NodeRegistration":
-            _reevaluate_jobs(data)
+            _reevaluate_jobs_with_csi_plugins(data)
 
 def start() -> None:
     stream, _, events_queue = cast(
