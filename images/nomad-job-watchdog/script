@@ -194,6 +194,7 @@ def _reevaluate_system_jobs(data: dict[str, Any]) -> None:
         if job_data["Stable"]:
             continue
         print(f"REEVALUATE: {dumps(job_data)}")
+        nomad.job.evaluate_job(job_data["ID"])
 
 def _process_node_event(event: dict[str, Any]) -> None:
     node: dict[str, Any] = event["Payload"]["Node"]
