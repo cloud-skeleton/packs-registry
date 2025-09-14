@@ -20,6 +20,10 @@
 
 [[- define "service_name" -]]
 [[- $root := index . 0 -]]
-[[- $name  := index . 1 -]]
-[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" | trunc 63 ]]
+[[- $name := index . 1 -]]
+[[- $suffix := index . 2 -]]
+[[- if $suffix -]]
+[[- $suffix = printf "-%s" $suffix -]]
+[[- end -]]
+[[ printf "%s-%s%s-%s" (meta "pack.name" $root) $name $suffix (var "id" $root) | replace "_" "-" | trunc 63 ]]
 [[- end -]]

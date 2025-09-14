@@ -106,10 +106,10 @@ packs/job_watchdog/
 
 ## Services & Ports
 
-| Service Name                                | Port Name | Source Port | Destination Port    | Description                                         |
-|---------------------------------------------|-----------|-------------|---------------------|-----------------------------------------------------|
-| `reverse-proxy-ingress-load-balancer-${id}` | http      | 80          | `$NOMAD_PORT_http`  | HTTP entrypoint; redirects to HTTPS.                |
-| `reverse-proxy-ingress-load-balancer-${id}` | https     | 443         | `$NOMAD_PORT_https` | Primary HTTPS entrypoint; health check `GET /ping`. |
+| Service Name                                      | Port Name | Source Port | Destination Port    | Description                                         |
+|---------------------------------------------------|-----------|-------------|---------------------|-----------------------------------------------------|
+| `reverse-proxy-ingress-load-balancer-http-${id}`  | http      | 80          | `$NOMAD_PORT_http`  | HTTP entrypoint; redirects to HTTPS.                |
+| `reverse-proxy-ingress-load-balancer-https-${id}` | https     | 443         | `$NOMAD_PORT_https` | Primary HTTPS entrypoint; health check `GET /ping`. |
 
 ## Storage
 

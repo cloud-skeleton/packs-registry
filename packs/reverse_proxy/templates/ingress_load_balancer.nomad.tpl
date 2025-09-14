@@ -42,8 +42,30 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                 type     = "http"
             }
 
-            name     = "[[ template "service_name" (list . "ingress_load_balancer") ]]"
+            name     = "[[ template "service_name" (list . "ingress_load_balancer" "https") ]]"
             port     = "https"
+            provider = "nomad"
+            task     = "service"
+        }
+
+        service {
+            address = "[[ var "hostname" . ]]"
+
+            check {
+                check_restart {
+                    grace = "2m"
+                    limit = 3
+                }
+
+                interval = "30s"
+                path     = "/ping"
+                port     = "http"
+                timeout  = "5s"
+                type     = "http"
+            }
+
+            name     = "[[ template "service_name" (list . "ingress_load_balancer" "http") ]]"
+            port     = "http"
             provider = "nomad"
             task     = "service"
         }
