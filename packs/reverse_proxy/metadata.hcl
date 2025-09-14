@@ -4,6 +4,6 @@ app {
 
 pack {
     name        = "reverse_proxy"
-    description = "Traefik HTTP reverse proxy and load balancer"
-    version     = "25.9.12"
+    description = "Traefik HTTP reverse proxy and load balancer."
+    version     = "25.9.14"
 }

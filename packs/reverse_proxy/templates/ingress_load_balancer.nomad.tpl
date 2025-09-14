@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         }
 
         service {
-            address = "[[ var "traefik_hostname" . ]]"
+            address = "[[ var "hostname" . ]]"
 
             check {
                 check_restart {
@@ -146,6 +146,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     sendAnonymousUsage: false
                 log:
                     level: {{ .log_level }}
+                ocsp: {}
                 ping:
                     manualRouting: true
                 providers:
@@ -222,28 +223,28 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             middlewares:
                                 - success-response
                             priority: 10001
-                            rule: Host("[[ var "traefik_hostname" . ]]") && ClientIP("{{ .ssllabs_cidr }}")
+                            rule: Host("[[ var "hostname" . ]]") && ClientIP("{{ .ssllabs_cidr }}")
                             service: noop@internal
 
                         traefik-dashboard:
                             middlewares:
                                 - admin-ip-only
                             priority: 10000
-                            rule: Host("[[ var "traefik_hostname" . ]]") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
+                            rule: Host("[[ var "hostname" . ]]") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
                         traefik-dashboard-redirect:
                             middlewares:
                                 - traefik-dashboard-redirect
                             priority: 10000
-                            rule: Host("[[ var "traefik_hostname" . ]]") && Path("/")
+                            rule: Host("[[ var "hostname" . ]]") && Path("/")
                             service: noop@internal
 
                         traefik-ping:
                             middlewares:
                                 - local-ip-only
                             priority: 10000
-                            rule: Host("[[ var "traefik_hostname" . ]]") && Path("/ping")
+                            rule: Host("[[ var "hostname" . ]]") && Path("/ping")
                             service: ping@internal
 
                     serversTransports:

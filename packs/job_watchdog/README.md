@@ -29,13 +29,13 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 
 ### Generic Requirements
 
-| Component      | Requirement / Note                        |
-|----------------|-------------------------------------------|
-| Resources      | **CPU:** 50 MHz <br> **RAM:** 32 MB       |
-| Namespace(s)   | `system`                                  |
-| Node class(es) | `main-worker`                             |
-| CSI volumes    | ❌                                        |
-| Ingress        | ❌                                        |
+| Component      | Requirement / Note                  |
+|----------------|-------------------------------------|
+| Resources      | **CPU:** 50 MHz <br> **RAM:** 32 MB |
+| Namespace(s)   | `system`                            |
+| Node class(es) | `main-worker`                       |
+| CSI volumes    | ❌                                  |
+| Ingress        | ❌                                  |
 
 ### Security Requirements
 
@@ -58,11 +58,11 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 ```hcl
 # Schedule for the autoupdater periodic job. `cron` accepts standard CRON expressions or nicknames (e.g., @hourly, @daily), and `timezone` is the IANA time zone (e.g., UTC, Europe/Vilnius) used to evaluate the schedule.
 autoupdater_cron = {
-  cron     = "@daily"
-  timezone = "UTC"
+    cron     = "@daily"
+    timezone = "UTC"
 }
 
-# Unique identifier used to distinguish multiple deployments of this pack.
+# Unique identifier used to distinguish multiple deployments of this pack with different variables.
 id = "main"
 ```
 
@@ -97,13 +97,13 @@ packs/job_watchdog/
 
 ## Services & Ports
 
-| Service Name | Port Var / Static | Target (in-task) | Ingress | Notes |
-|--------------|-------------------|------------------|---------|-------|
+| Service Name | Port Name | Source Port | Destination Port | Description |
+|--------------|-----------|-------------|------------------|-------------|
 
 ## Storage
 
-| Volume ID | Mount Path | Access Mode | Attachment Mode | Notes |
-|-----------|------------|-------------|-----------------|-------|
+| Mount Path | Access Mode | Type | Description |
+|------------|-------------|------|-------------|
 
 ## Contributing
 

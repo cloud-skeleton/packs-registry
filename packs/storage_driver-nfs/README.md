@@ -29,13 +29,13 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 
 ### Generic Requirements
 
-| Component      | Requirement / Note                        |
-|----------------|-------------------------------------------|
-| Resources      | **CPU:** 100 MHz <br> **RAM:** 128 MB     |
-| Namespace(s)   | `system`                                  |
-| Node class(es) | `ingress-worker`, `main-worker`           |
-| CSI volumes    | ❌                                        |
-| Ingress        | ❌                                        |
+| Component      | Requirement / Note                    |
+|----------------|---------------------------------------|
+| Resources      | **CPU:** 100 MHz <br> **RAM:** 128 MB |
+| Namespace(s)   | `system`                              |
+| Node class(es) | `ingress-worker`, `main-worker`       |
+| CSI volumes    | ❌                                    |
+| Ingress        | ❌                                    |
 
 ### Security Requirements
 
@@ -55,14 +55,14 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 #### Example `vars.hcl`
 
 ```hcl
-# Unique identifier used to distinguish multiple deployments of this pack.
+# Unique identifier used to distinguish multiple deployments of this pack with different variables.
 id = "main"
 ```
 
 ### Nomad Variables (Parameters)
 
-| Job            | Variable                 | Key                                             | Default | Description                                                                                 |
-|----------------|--------------------------|-------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| Job            | Variable  | Key                                             | Default | Description                                                                                 |
+|----------------|-----------|-------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
 | **csi_plugin** | `config`  | `log_level`                                     | "INFO"  | Log verbosity for the CSI plugin. Allowed: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`. |
 | **csi_plugin** | `images`  | `registry.gitlab.com/rocketduck/csi-plugin-nfs` | "1.1.0" | Container image tag for the CSI plugin.                                                     |
 | **csi_plugin** | `secrets` | `nfs_share`                                     |         | NFS export in `<server>:/<path>` format, e.g., `nas.lan:/export/nomad`.                     |
@@ -84,13 +84,13 @@ packs/job_watchdog/
 
 ## Services & Ports
 
-| Service Name | Port Var / Static | Target (in-task) | Ingress | Notes |
-|--------------|-------------------|------------------|---------|-------|
+| Service Name | Port Name | Source Port | Destination Port | Description |
+|--------------|-----------|-------------|------------------|-------------|
 
 ## Storage
 
-| Volume ID | Mount Path | Access Mode | Attachment Mode | Notes |
-|-----------|------------|-------------|-----------------|-------|
+| Mount Path | Access Mode | Type | Description |
+|------------|-------------|------|-------------|
 
 ## Contributing
 
