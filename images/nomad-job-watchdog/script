@@ -156,7 +156,9 @@ def _create_volumes(data: dict[str, Any]) -> None:
 
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]
-    print(dumps(job))
+    if job["ParentID"]:
+        print(f"Skipping child job '{job["Name"]}'")
+        return
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
         "job": job["Name"],
