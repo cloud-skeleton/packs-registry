@@ -152,7 +152,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
             should_reevaluate = True
     if should_reevaluate:
         print(f"Triggering re-evaluation of job '{data['job']}'")
-        nomad.job.evaluate_job(data["job"])
+        nomad.job.evaluate_job(data["job"], data["namespace"])
 
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]

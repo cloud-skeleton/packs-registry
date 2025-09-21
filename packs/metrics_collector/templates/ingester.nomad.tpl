@@ -9,9 +9,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         network {
             mode = "bridge"
 
-            // port "http" {
-            //     static = 80
-            // }
+            port "http" {
+                to = 8086
+            }
         }
 
         restart {
@@ -43,6 +43,32 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 //             provider = "nomad"
 //             task     = "service"
 //         }
+
+        service {
+            // address = "[[ var "hostname" . ]]"
+
+            check {
+                check_restart {
+                    grace = "2m"
+                    limit = 3
+                }
+
+                interval = "30s"
+                path     = "/health"
+                port     = "http"
+                timeout  = "5s"
+                type     = "http"
+            }
+
+            name     = "[[ template "service_name" (list . "ingester" "http") ]]"
+            port     = "http"
+            provider = "nomad"
+            // tags = [
+            //     "expose.enable=true",
+            //     "expose.http.routers.influxdb.rule=Host(\"[[ var "hostname" . ]]\")"
+            // ]
+            task = "service"
+        }
 
         task "setup" {
             config {
@@ -108,10 +134,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
-
-                // ports = [
-                //     "http",
-                // ]
+                ports = [
+                    "http"
+                ]
             }
 
             driver = "docker"
