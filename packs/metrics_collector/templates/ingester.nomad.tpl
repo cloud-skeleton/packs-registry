@@ -21,32 +21,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             render_templates = true
         }
 
-//         service {
-//             address = "[[ var "hostname" . ]]"
-
-//             check {
-//                 check_restart {
-//                     grace = "2m"
-//                     limit = 3
-//                 }
-
-//                 interval = "30s"
-//                 path     = "/ping"
-//                 port     = "https"
-//                 protocol = "https"
-//                 timeout  = "5s"
-//                 type     = "http"
-//             }
-
-//             name     = "[[ template "service_name" (list . "ingester" "https") ]]"
-//             port     = "https"
-//             provider = "nomad"
-//             task     = "service"
-//         }
-
         service {
-            // address = "[[ var "hostname" . ]]"
-
             check {
                 check_restart {
                     grace = "2m"
