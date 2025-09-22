@@ -166,7 +166,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     update {
         // auto_promote     = true
-        auto_revert      = true
+        auto_revert       = true
+        healthy_deadline  = "2m"
+        progress_deadline = "3m"
         // canary           = 1
         // min_healthy_time = "1m"
     }

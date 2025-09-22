@@ -175,11 +175,11 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     file:
                         filename: /etc/traefik/dynamic.yml
                     nomad:
-                        constraints: "TagRegex(`traefik\\.hostname=.+`)"
                         defaultRule: "Host(`{{"{{"}} index .Labels \"traefik.hostname\" {{"}}"}}`)"
                         endpoint:
                             address: {{ env "NOMAD_UNIX_ADDR" }}
                             token: {{ env "NOMAD_TOKEN" }}
+                        exposedByDefault: false
                         {{- $namespaces := .namespaces.Value | parseJSON }}
                         namespaces: {{ if eq (len $namespaces) 0 }}[]{{ end }}
                         {{- range $namespace := $namespaces }}
