@@ -80,14 +80,15 @@ id = "main"
 
 ### Nomad Variables (Parameters)
 
-| Job                       | Variable | Key              | Default          | Description                                                                                                      |
-|---------------------------|----------|------------------|------------------|------------------------------------------------------------------------------------------------------------------|
-| **ingress_load_balancer** | `config` | `admin_ip_cidrs` | "[]"             | JSON array of CIDRs allowed to access the Traefik dashboard (IPAllowList middleware). Example: `["1.2.3.4/32"]`. |
-| **ingress_load_balancer** | `config` | `log_level`      | "INFO"           | Traefik log verbosity. Valid values: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `PANIC`.                |
-| **ingress_load_balancer** | `config` | `ssllabs_cidr`   | "69.67.183.0/24" | CIDR allowed to hit the special SSL Labs validation route. Used by the `ssllabs-certificate-validation` router.  |
-| **ingress_load_balancer** | `dns`    | `CODE`           |                  | ACME DNS challenge provider code for Traefik (e.g., `"cloudflare"`, `"route53"`).                                |
-| **ingress_load_balancer** | `dns`    | `{dynamic}`      |                  | Provider-specific env vars rendered into the task (e.g., `CLOUDFLARE_DNS_API_TOKEN`, `AWS_ACCESS_KEY_ID`, etc.). |
-| **ingress_load_balancer** | `images` | `traefik`        | "3.5.2"          | Traefik container image **tag** used by the job (repository is the key; tag is the value).                       |
+| Job                       | Variable | Key              | Default                 | Description                                                                                                      |
+|---------------------------|----------|------------------|-------------------------|------------------------------------------------------------------------------------------------------------------|
+| **ingress_load_balancer** | `config` | `admin_ip_cidrs` | "[]"                    | JSON array of CIDRs allowed to access the Traefik dashboard (IPAllowList middleware). Example: `["1.2.3.4/32"]`. |
+| **ingress_load_balancer** | `config` | `log_level`      | "INFO"                  | Traefik log verbosity. Valid values: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `PANIC`.                |
+| **ingress_load_balancer** | `config` | `namespaces`     | "["default", "system"]" | JSON array of Nomad namespaces that Traefik’s **Nomad provider** will watch for services.                        |
+| **ingress_load_balancer** | `config` | `ssllabs_cidr`   | "69.67.183.0/24"        | CIDR allowed to hit the special SSL Labs validation route. Used by the `ssllabs-certificate-validation` router.  |
+| **ingress_load_balancer** | `dns`    | `CODE`           |                         | ACME DNS challenge provider code for Traefik (e.g., `"cloudflare"`, `"route53"`).                                |
+| **ingress_load_balancer** | `dns`    | `{dynamic}`      |                         | Provider-specific env vars rendered into the task (e.g., `CLOUDFLARE_DNS_API_TOKEN`, `AWS_ACCESS_KEY_ID`, etc.). |
+| **ingress_load_balancer** | `images` | `traefik`        | "3.5.2"                 | Traefik container image **tag** used by the job (repository is the key; tag is the value).                       |
 
 ## Pack Layout
 

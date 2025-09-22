@@ -175,11 +175,16 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     file:
                         filename: /etc/traefik/dynamic.yml
                     nomad:
-                        defaultRule: "Host(`{{"{{"}} normalize .Name {{"}}"}}`)"
+                        constraints: "TagRegex(`traefik\\.hostname=.+`)"
+                        defaultRule: "Host(`{{"{{"}} index .Labels \"traefik.hostname\" {{"}}"}}`)"
                         endpoint:
                             address: {{ env "NOMAD_UNIX_ADDR" }}
-                        exposedByDefault: false
-                        prefix: expose
+                            token: {{ env "NOMAD_TOKEN" }}
+                        {{- $namespaces := .namespaces.Value | parseJSON }}
+                        namespaces: {{ if eq (len $namespaces) 0 }}[]{{ end }}
+                        {{- range $namespace := $namespaces }}
+                            - {{ $namespace }}
+                        {{- end }}
                         stale: true
                         watch: true
                 ...
@@ -324,6 +329,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         // Dynamic configuration
         "params.config.admin_ip_cidrs" = "[]"
         "params.config.log_level"      = "INFO"
+        "params.config.namespaces"     = "[\"default\", \"system\"]"
         "params.config.ssllabs_cidr"   = "69.67.183.0/24"
 
         // Docker images used in job
