@@ -63,10 +63,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             name     = "[[ template "service_name" (list . "ingester" "http") ]]"
             port     = "http"
             provider = "nomad"
-            // tags = [
-            //     "expose.enable=true",
-            //     "expose.http.routers.influxdb.rule=Host(\"[[ var "hostname" . ]]\")"
-            // ]
+            tags = [
+                "traefik.hostname=[[ var "hostname" . ]]"
+            ]
             task = "service"
         }
 
