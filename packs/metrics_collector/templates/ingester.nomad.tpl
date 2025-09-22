@@ -39,6 +39,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             port     = "http"
             provider = "nomad"
             tags = [
+                "traefik.enable=true",
                 "traefik.hostname=[[ var "hostname" . ]]"
             ]
             task = "service"
