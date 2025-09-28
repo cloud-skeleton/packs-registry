@@ -266,7 +266,9 @@ def update_certificates() -> None:
     update_cert_var(is_ca_renewed, ca_key, ca_cert, "backend")
 
 def start() -> None:
+    print("\n✨ Updating certificates...")
     update_certificates()
+    print("\n✨ Updating images...")
     update_images()
 
 if __name__ == "__main__":
