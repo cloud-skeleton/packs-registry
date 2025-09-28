@@ -1,8 +1,18 @@
-1. Allow Traefik to access Nomad job information:
+1. Allow Traefik to access Nomad job information and frontend certificate:
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "ingress_load_balancer") ]] \
-    -description "Allow Traefik read access to Jobs" allow-traefik-jobs-read -
+    -description "Allow Traefik to access Nomad job information and frontend certificate" \
+    allow-traefik-job-info-certificates-read -
 namespace "*" {
     capabilities = ["read-job"]
+
+    variables {
+        path "certs/ingress_to_service/frontend" {
+            "capabilities" = [
+                "list",
+                "read"
+            ]
+        }
+    }
 }
 POLICY
 
