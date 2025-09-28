@@ -9,7 +9,7 @@
 > **IMPORTANT:** Before deploying any **[Nomad Packs][hashicorp-nomad-packs]**, **you must complete all the prerequisites detailed in the **[Cloud Skeleton][cloud-skeleton]** ► **[Prerequisites][prerequisites]** repository.** This step is essential to ensure that your system meets all the required configurations, dependencies, and security measures necessary for a successful deployment.
 
 **Nomad watchdog that auto-provisions variable access, parameter defaults and volumes.**  
-Automatically creates read/list ACL policies so job workloads can access variables under `/params/{job_name}`. It also inspects job metadata to pre-create Nomad Variables and initialize volumes, reducing manual bootstrap and keeping configurations consistent. Finally it also includes automated Docker image tag updating mechanism: it will read `images` variable and look up if there are any new images available in repositories.
+Automatically creates read/list ACL policies so job workloads can access variables under `/params/{job_name}`. It also inspects job metadata to pre-create Nomad Variables and initialize volumes, reducing manual bootstrap and keeping configurations consistent. Finally it also includes automated Docker image tag updating mechanism and certificates rotation.
 
 ## Table of Contents
 
@@ -68,17 +68,18 @@ id = "main"
 
 ### Nomad Variables (Parameters)
 
-| Job             | Variable | Key                                                     | Default                                                                            | Description                                                                                     |
-|-----------------|----------|---------------------------------------------------------|------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| **autoupdater** |`config`  | `images_variable_name`                                  | "images"                                                                           | Name of the Nomad Variable (under `parameters_root_path`) that stores the map of Docker images. |
-| **autoupdater** |`config`  | `parameters_root_path`                                  | "params"                                                                           | Base path in Nomad Variables (KV) that the **autoupdater** manages (e.g., `params/`).           |
-| **autoupdater** |`config`  | `version_update_lock`                                   | {"major": true, "minor": false, "patch": false, "prerelease": true, "build": true} | Map of booleans controlling updates; **true** = do **not** update that SemVer component.        |
-| **autoupdater** |`images`  | `ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater` | "v1.0"                                                                             | Container image **tag** for the job watchdog autoupdater (key is the full repository name).     |
-| **watcher**     |`config`  | `parameters_meta_prefix`                                | "params"                                                                           | Prefix for job meta keys that hold default parameter values.                                    |
-| **watcher**     |`config`  | `parameters_root_path`                                  | "params"                                                                           | Base path in Nomad Variables (KV) that the **watcher** manages (e.g., `params/`).               |
-| **watcher**     |`config`  | `volumes_meta_prefix`                                   | "volumes"                                                                          | Prefix for job meta keys used for **volume** configuration.                                     |
-| **watcher**     |`images`  | `ghcr.io/cloud-skeleton/nomad-job-watchdog`             | "v1.2"                                                                             | Container image **tag** for the job watchdog (key is the full repository name).                 |
-| **watcher**     |`secrets` | `nomad_token`                                           |                                                                                    | Nomad management token used by the watcher to list/update variables and volumes.                |
+| Job             | Variable | Key                                                     | Default                                                                            | Description                                                                                           |
+|-----------------|----------|---------------------------------------------------------|------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| **autoupdater** |`config`  | `certificates_root_path`                                | "certs"                                                                            | Base path in Nomad Variables (KV) that the **autoupdater** manages for certificates (e.g., `certs/`). |
+| **autoupdater** |`config`  | `images_variable_name`                                  | "images"                                                                           | Name of the Nomad Variable (under `parameters_root_path`) that stores the map of Docker images.       |
+| **autoupdater** |`config`  | `parameters_root_path`                                  | "params"                                                                           | Base path in Nomad Variables (KV) that the **autoupdater** manages (e.g., `params/`).                 |
+| **autoupdater** |`config`  | `version_update_lock`                                   | {"major": true, "minor": false, "patch": false, "prerelease": true, "build": true} | Map of booleans controlling updates; **true** = do **not** update that SemVer component.              |
+| **autoupdater** |`images`  | `ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater` | "v1.1"                                                                             | Container image **tag** for the job watchdog autoupdater (key is the full repository name).           |
+| **watcher**     |`config`  | `parameters_meta_prefix`                                | "params"                                                                           | Prefix for job meta keys that hold default parameter values.                                          |
+| **watcher**     |`config`  | `parameters_root_path`                                  | "params"                                                                           | Base path in Nomad Variables (KV) that the **watcher** manages (e.g., `params/`).                     |
+| **watcher**     |`config`  | `volumes_meta_prefix`                                   | "volumes"                                                                          | Prefix for job meta keys used for **volume** configuration.                                           |
+| **watcher**     |`images`  | `ghcr.io/cloud-skeleton/nomad-job-watchdog`             | "v1.5"                                                                             | Container image **tag** for the job watchdog (key is the full repository name).                       |
+| **watcher**     |`secrets` | `nomad_token`                                           |                                                                                    | Nomad management token used by the watcher to list/update variables and volumes.                      |
 
 ## Pack Layout
 

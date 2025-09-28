@@ -37,6 +37,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 DOCKER_IMAGE="ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater:{{ index . "ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/config" }}
+                CERTS_VAR_ROOT_PATH = "{{ .certificates_root_path }}"
                 IMAGES_VARIABLE_NAME = "{{ .images_variable_name }}"
                 PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"
                 {{- $lock := .version_update_lock.Value | parseJSON }}
@@ -57,12 +58,13 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Dynamic configuration
-        "params.config.images_variable_name" = "images"
-        "params.config.parameters_root_path" = "params"
-        "params.config.version_update_lock"  = "{\"major\": true, \"minor\": false, \"patch\": false, \"prerelease\": true, \"build\": true}"
+        "params.config.certificates_root_path" = "certs"
+        "params.config.images_variable_name"   = "images"
+        "params.config.parameters_root_path"   = "params"
+        "params.config.version_update_lock"    = "{\"major\": true, \"minor\": false, \"patch\": false, \"prerelease\": true, \"build\": true}"
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.0"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.1"
     }
 
     namespace = "system"

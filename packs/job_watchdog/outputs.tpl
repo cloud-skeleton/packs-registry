@@ -43,6 +43,14 @@ namespace "*" {
     policy = "read"
 
     variables {
+        path "certs/ingress_to_service/*" {
+            "capabilities" = [
+                "list",
+                "read",
+                "write"
+            ]
+        }
+
         path "params/*/images" {
             "capabilities" = [
                 "list",
@@ -53,3 +61,6 @@ namespace "*" {
     }
 }
 POLICY
+
+6. Trigger auto-updater job to generate certificates and update Docker image tags:
+nomad job periodic force -namespace system [[ template "job_name" (list . "autoupdater") ]]

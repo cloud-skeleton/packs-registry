@@ -35,6 +35,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
                 NOMAD_TOKEN="{{ .nomad_token }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/config" }}
+                CERTS_VAR_ROOT_PATH = "{{ .certificates_root_path }}"
                 PARAMS_META_PREFIX = "{{ .parameters_meta_prefix }}"
                 PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"
                 VOLUMES_META_PREFIX = "{{ .volumes_meta_prefix }}"
@@ -50,9 +51,10 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.4"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.5"
 
         // Dynamic configuration
+        "params.config.certificates_root_path" = "certs"
         "params.config.parameters_meta_prefix" = "params"
         "params.config.parameters_root_path"   = "params"
         "params.config.volumes_meta_prefix"    = "volumes"
