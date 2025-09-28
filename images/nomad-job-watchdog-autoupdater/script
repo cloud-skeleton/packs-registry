@@ -16,6 +16,7 @@ from cryptography.x509 import (
 from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from datetime import datetime, timedelta, timezone
 from dxf import DXF
 from nomad import Nomad
@@ -160,31 +161,33 @@ def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
     )
     return ca_key, ca_cert
 
-def update_ca_var() -> bool:
+def update_ca_var() -> tuple[bool, Ed25519PrivateKey, Certificate]:
     should_generate_ca: bool = not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca")
     index: int = 0
     if should_generate_ca:
         print("No CA certificate has been found. Generating a new one!")
     else:
         index, value = _get_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca")
-        cert: Certificate = load_pem_x509_certificate(value["certificate"].encode("utf-8"))
-        expiration: datetime = cert.not_valid_after.replace(tzinfo = timezone.utc)
+        ca_key: Ed25519PrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
+        ca_cert: Certificate = load_pem_x509_certificate(value["certificate"].encode("utf-8"))
+        expiration: datetime = ca_cert.not_valid_after.replace(tzinfo = timezone.utc)
         should_generate_ca = (expiration - timedelta(weeks = 4)) < datetime.now(timezone.utc)
         if should_generate_ca:
             print(f"CA certificate expires at {expiration.strftime('%Y-%m-%d %H:%M:%S')}. Replacing it now!")
         else:
             print(f"CA certificate valid until {expiration.strftime('%Y-%m-%d %H:%M:%S')}.")
     if should_generate_ca:
-        ca_key, ca_cert = _as_pem(*generate_ca())
+        ca_key, ca_cert = generate_ca()
+        ca_key_pem, ca_cert_pem = _as_pem(ca_key, ca_cert)
         _set_var(
             f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca",
             {
-                "certificate": ca_cert,
-                "private_key": ca_key
+                "certificate": ca_cert_pem,
+                "private_key": ca_key_pem
             },
             index
         )
-    return should_generate_ca
+    return should_generate_ca, ca_key, ca_cert
 
 def update_certificates() -> None:
     update_ca_var()
