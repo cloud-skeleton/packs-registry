@@ -1,4 +1,5 @@
 FROM ghcr.io/cloud-skeleton/nomad-job-watchdog:latest
+ENV CERTS_VAR_ROOT_PATH=certs
 ENV IMAGES_VARIABLE_NAME=images
 ENV PARAMS_VAR_ROOT_PATH=params
 ENV DO_NOT_ALLOW_UPDATE_MAJOR_VERSION=true
