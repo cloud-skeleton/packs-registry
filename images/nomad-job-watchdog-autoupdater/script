@@ -8,9 +8,10 @@ from cryptography.x509 import (
     BasicConstraints,
     Certificate,
     CertificateBuilder,
+    load_pem_x509_certificate,
     Name,
     NameAttribute,
-    random_serial_number,
+    random_serial_number
 )
 from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
 from cryptography.hazmat.primitives import serialization
@@ -159,23 +160,31 @@ def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
     )
     return ca_key, ca_cert
 
-def update_ca_var() -> None:
+def update_ca_var() -> bool:
     should_generate_ca: bool = not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca")
     index: int = 0
-    if not should_generate_ca:
+    if should_generate_ca:
+        print("No CA certificate has been found. Generating a new one!")
+    else:
         index, value = _get_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca")
-        print("Key exists")
-        print(value)
+        cert: Certificate = load_pem_x509_certificate(value["certificate"].encode("utf-8"))
+        expiration: datetime = cert.not_valid_after.replace(tzinfo = timezone.utc)
+        should_generate_ca = (expiration - timedelta(weeks = 4)) < datetime.now(timezone.utc)
+        if should_generate_ca:
+            print(f"CA certificate expires at {expiration.strftime('%Y-%m-%d %H:%M:%S')}. Replacing it now!")
+        else:
+            print(f"CA certificate valid until {expiration.strftime('%Y-%m-%d %H:%M:%S')}.")
     if should_generate_ca:
         ca_key, ca_cert = _as_pem(*generate_ca())
         _set_var(
             f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca",
             {
-                "certificate": ca_key,
-                "private_key": ca_cert
+                "certificate": ca_cert,
+                "private_key": ca_key
             },
             index
         )
+    return should_generate_ca
 
 def update_certificates() -> None:
     update_ca_var()
