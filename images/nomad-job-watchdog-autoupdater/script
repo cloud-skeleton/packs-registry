@@ -4,12 +4,24 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
+from cryptography.x509 import (
+    BasicConstraints,
+    Certificate,
+    CertificateBuilder,
+    Name,
+    NameAttribute,
+    random_serial_number,
+)
+from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from datetime import datetime, timedelta, timezone
 from dxf import DXF
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from semantic_version import Version
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -118,17 +130,45 @@ def update_images() -> None:
             print(f"Updating variable {variable}@{namespace} with value {images_new}")
             _set_var(variable, images_new, index, namespace)
 
+def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
+    ca_key: Ed25519PrivateKey = Ed25519PrivateKey.generate()
+    name: Name = Name([
+        NameAttribute(NameOID.COMMON_NAME, "cloudskeleton.eu"),
+        NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
+    ])
+    now_utc: datetime = datetime.now(timezone.utc)
+    ca_cert: Certificate = (
+        CertificateBuilder()
+            .subject_name(name)
+            .issuer_name(name)
+            .public_key(ca_key.public_key())
+            .serial_number(random_serial_number())
+            .not_valid_before(now_utc - timedelta(days = 1))
+            .not_valid_after(now_utc + timedelta(days = 365))
+            .add_extension(BasicConstraints(ca = True, path_length = None), critical = True)
+            .sign(private_key = ca_key, algorithm = None)
+    )
+    return ca_key, ca_cert
+
 def update_certificates() -> None:
     if not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca"):
-        print("no CA")
+        ca_key, ca_cert = generate_ca()
+        key_pem = ca_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        cert_pem = ca_cert.public_bytes(serialization.Encoding.PEM)
+        print(key_pem)
+        print(cert_pem)
     if not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ingress"):
         print("no ingress")
     if not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/service"):
         print("no service")
 
 def start() -> None:
-    update_images()
     update_certificates()
+    #update_images()
 
 if __name__ == "__main__":
     start()
