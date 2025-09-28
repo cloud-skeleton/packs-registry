@@ -197,15 +197,15 @@ def update_ca_var() -> tuple[bool, Ed25519PrivateKey, Certificate]:
 def generate_leaf_cert(
     ca_key: Ed25519PrivateKey,
     ca_cert: Certificate,
-    is_client: bool = False
+    type: str
 ) -> tuple[Ed25519PrivateKey, Certificate]:
     key: Ed25519PrivateKey = Ed25519PrivateKey.generate()
     name: Name = Name([
-        NameAttribute(NameOID.COMMON_NAME, "cloudskeleton.eu"),
+        NameAttribute(NameOID.COMMON_NAME, f"{type}.cloudskeleton.eu"),
         NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
     ])
     eku: ExtendedKeyUsage = ExtendedKeyUsage([
-        ExtendedKeyUsageOID.CLIENT_AUTH if is_client else ExtendedKeyUsageOID.SERVER_AUTH
+        ExtendedKeyUsageOID.CLIENT_AUTH if type == "frontend" else ExtendedKeyUsageOID.SERVER_AUTH
     ])
     san_list: list[DNSName] = [DNSName("cloudskeleton.eu")]
     now_utc: datetime = datetime.now(timezone.utc)
@@ -248,7 +248,7 @@ def update_cert_var(
         else:
             print(f"✅ {type.title()} certificate valid until {expiry_str}.")
     if is_renewed:
-        key, cert = generate_leaf_cert(ca_key, ca_cert, type == "frontend")
+        key, cert = generate_leaf_cert(ca_key, ca_cert, type)
         key_pem, cert_pem = _as_pem(key, cert)
         _set_var(
             var,
