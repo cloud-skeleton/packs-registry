@@ -223,16 +223,17 @@ def generate_leaf_cert(
     )
     return key, cert
 
-def update_proxy_var(
+def update_cert_var(
     is_ca_renewed: bool,
     ca_key: Ed25519PrivateKey,
-    ca_cert: Certificate
+    ca_cert: Certificate,
+    type: str
 ) -> tuple[bool, Ed25519PrivateKey, Certificate]:
-    var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/proxy"
+    var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/{type}"
     is_renewed: bool = not _is_var(var)
     index: int = 0
     if is_renewed:
-        print("❌ No proxy certificate has been found. Generating a new one!")
+        print(f"❌ No {type} certificate has been found. Generating a new one!")
     else:
         index, value = _get_var(var)
         key: Ed25519PrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
@@ -241,13 +242,13 @@ def update_proxy_var(
         is_renewed = (expiration - timedelta(weeks = 4)) < datetime.now(timezone.utc)
         expiry_str: str = expiration.strftime("%Y-%m-%d %H:%M:%S")
         if is_ca_renewed:
-            print(f"🔥 CA certificate renewed. Generating a new proxy certificate!")
+            print(f"🔥 CA certificate renewed. Generating a new {type} certificate!")
         elif is_renewed:
-            print(f"⚠️ Proxy certificate expiring ({expiry_str}). Generating a new one!")
+            print(f"⚠️ {type.title()} certificate expiring ({expiry_str}). Generating a new one!")
         else:
-            print(f"✅ Proxy certificate valid until {expiry_str}.")
+            print(f"✅ {type.title()} certificate valid until {expiry_str}.")
     if is_renewed:
-        key, cert = generate_leaf_cert(ca_key, ca_cert)
+        key, cert = generate_leaf_cert(ca_key, ca_cert, type == "frontend")
         key_pem, cert_pem = _as_pem(key, cert)
         _set_var(
             var,
@@ -261,13 +262,12 @@ def update_proxy_var(
 
 def update_certificates() -> None:
     is_ca_renewed, ca_key, ca_cert = update_ca_var()
-    is_proxy_renewed, proxy_key, proxy_cert = update_proxy_var(is_ca_renewed, ca_key, ca_cert)
-    if not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/service"):
-        print("no service")
+    update_cert_var(is_ca_renewed, ca_key, ca_cert, "frontend")
+    update_cert_var(is_ca_renewed, ca_key, ca_cert, "backend")
 
 def start() -> None:
     update_certificates()
-    #update_images()
+    update_images()
 
 if __name__ == "__main__":
     start()
