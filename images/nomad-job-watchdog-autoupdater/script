@@ -152,6 +152,8 @@ def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
 
 def update_certificates() -> None:
     should_generate_ca: bool = not _is_var(f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca")
+    if not should_generate_ca:
+        print("Key exists")
     if should_generate_ca:
         ca_key, ca_cert = generate_ca()
         key_pem: str = ca_key.private_bytes(
