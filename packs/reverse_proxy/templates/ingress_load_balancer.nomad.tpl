@@ -77,6 +77,27 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
                 mount {
                     readonly = true
+                    source   = "secrets/ca.cert"
+                    target   = "/run/secrets/ca.cert"
+                    type     = "bind"
+                }
+
+                mount {
+                    readonly = true
+                    source   = "secrets/frontend.cert"
+                    target   = "/run/secrets/frontend.cert"
+                    type     = "bind"
+                }
+
+                mount {
+                    readonly = true
+                    source   = "secrets/frontend.key"
+                    target   = "/run/secrets/frontend.key"
+                    type     = "bind"
+                }
+
+                mount {
+                    readonly = true
                     source   = "local/traefik_dynamic.yml"
                     target   = "/etc/traefik/dynamic.yml"
                     type     = "bind"
@@ -120,6 +141,33 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                 EOF
                 destination = "secrets/env"
                 env         = true
+            }
+
+            template {
+                data = <<-EOF
+                {{ with nomadVar "certs/ingress_to_service/ca" }}
+                {{ .certificate }}
+                {{ end }}
+                EOF
+                destination = "secrets/ca.cert"
+            }
+
+            template {
+                data = <<-EOF
+                {{ with nomadVar "certs/ingress_to_service/frontend" }}
+                {{ .certificate }}
+                {{ end }}
+                EOF
+                destination = "secrets/frontend.cert"
+            }
+
+            template {
+                data = <<-EOF
+                {{ with nomadVar "certs/ingress_to_service/frontend" }}
+                {{ .private_key }}
+                {{ end }}
+                EOF
+                destination = "secrets/frontend.key"
             }
 
             template {
@@ -275,8 +323,12 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             service: ping@internal
 
                     serversTransports:
-                        self-signed:
-                            insecureSkipVerify: true
+                        mtls:
+                            certificates:
+                              - certFile: /run/secrets/frontend.cert
+                                keyFile: /run/secrets/frontend.key
+                            rootCAs:
+                                - /run/secrets/ca.cert
 
                     services:
                         github-raw-files:
