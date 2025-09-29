@@ -10,6 +10,8 @@ from cryptography.x509 import (
     CertificateBuilder,
     DNSName,
     ExtendedKeyUsage,
+    GeneralName,
+    IPAddress,
     load_pem_x509_certificate,
     Name,
     NameAttribute,
@@ -22,11 +24,13 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from datetime import datetime, timedelta, timezone
 from dxf import DXF
+from ipaddress import ip_address
+from json import loads
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from semantic_version import Version
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -47,6 +51,8 @@ DO_NOT_ALLOW_UPDATE_PRERELEASE_VERSION: bool = \
     True if getenv("DO_NOT_ALLOW_UPDATE_PRERELEASE_VERSION", "true") == "true" else False
 DO_NOT_ALLOW_UPDATE_BUILD_VERSION: bool = \
     True if getenv("DO_NOT_ALLOW_UPDATE_BUILD_VERSION", "true") == "true" else False
+INGRESS_WORKER_IPS: list[str] = loads(getenv("INGRESS_WORKER_IPS", "[]"))
+MAIN_WORKER_IPS: list[str] = loads(getenv("MAIN_WORKER_IPS", "[]"))
 
 nomad: Nomad = Nomad(address = NOMAD_SOCKET)
 def _get_var(path: str, namespace: str = NAMESPACE) -> tuple[int, dict[str, str]]:
@@ -207,7 +213,8 @@ def generate_leaf_cert(
     eku: ExtendedKeyUsage = ExtendedKeyUsage([
         ExtendedKeyUsageOID.CLIENT_AUTH if type == "frontend" else ExtendedKeyUsageOID.SERVER_AUTH
     ])
-    san_list: list[DNSName] = [DNSName("cloudskeleton.eu")]
+    san_list: list[GeneralName] = [DNSName("cloudskeleton.eu")]
+    san_list.extend(IPAddress(ip_address(ip)) for ip in (INGRESS_WORKER_IPS if type == "frontend" else MAIN_WORKER_IPS))
     now_utc: datetime = datetime.now(timezone.utc)
     cert: Certificate = (
         CertificateBuilder()
