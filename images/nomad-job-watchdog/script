@@ -189,7 +189,9 @@ def _process_job_event(event: dict[str, Any]) -> None:
     }
     match event["Type"]:
         case "JobRegistered":
-            _attach_acl(data)
+            if "job_watchdog" not in data["job"]:
+                print("Skipping ACL for own jobs")
+                _attach_acl(data)
             _create_variables(data)
             _create_volumes(data)
         case "JobDeregistered":
