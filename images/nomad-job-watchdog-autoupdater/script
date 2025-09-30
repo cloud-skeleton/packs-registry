@@ -211,10 +211,10 @@ def generate_leaf_cert(
         NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
     ])
     eku: ExtendedKeyUsage = ExtendedKeyUsage([
-        ExtendedKeyUsageOID.CLIENT_AUTH if type == "frontend" else ExtendedKeyUsageOID.SERVER_AUTH
+        ExtendedKeyUsageOID.CLIENT_AUTH if type == "ingress" else ExtendedKeyUsageOID.SERVER_AUTH
     ])
     san_list: list[GeneralName] = [DNSName("cloudskeleton.eu")]
-    san_list.extend(IPAddress(ip_address(ip)) for ip in (INGRESS_WORKER_IPS if type == "frontend" else MAIN_WORKER_IPS))
+    san_list.extend(IPAddress(ip_address(ip)) for ip in (INGRESS_WORKER_IPS if type == "ingress" else MAIN_WORKER_IPS))
     now_utc: datetime = datetime.now(timezone.utc)
     cert: Certificate = (
         CertificateBuilder()
@@ -269,8 +269,8 @@ def update_cert_var(
 
 def update_certificates() -> None:
     is_ca_renewed, ca_key, ca_cert = update_ca_var()
-    update_cert_var(is_ca_renewed, ca_key, ca_cert, "frontend")
-    update_cert_var(is_ca_renewed, ca_key, ca_cert, "backend")
+    update_cert_var(is_ca_renewed, ca_key, ca_cert, "ingress")
+    update_cert_var(is_ca_renewed, ca_key, ca_cert, "main")
 
 def start() -> None:
     print("\n✨ Updating certificates...")
