@@ -84,15 +84,15 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
                 mount {
                     readonly = true
-                    source   = "secrets/frontend.cert"
-                    target   = "/run/secrets/frontend.cert"
+                    source   = "secrets/ingress.cert"
+                    target   = "/run/secrets/ingress.cert"
                     type     = "bind"
                 }
 
                 mount {
                     readonly = true
-                    source   = "secrets/frontend.key"
-                    target   = "/run/secrets/frontend.key"
+                    source   = "secrets/ingress.key"
+                    target   = "/run/secrets/ingress.key"
                     type     = "bind"
                 }
 
@@ -145,7 +145,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             template {
                 data = <<-EOF
-                {{ with nomadVar "certs/ingress_to_service/ca" }}
+                {{ with nomadVar "certs/ingress_to_main/ca" }}
                 {{ .certificate }}
                 {{ end }}
                 EOF
@@ -154,20 +154,20 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             template {
                 data = <<-EOF
-                {{ with nomadVar "certs/ingress_to_service/frontend" }}
+                {{ with nomadVar "certs/ingress_to_main/ingress" }}
                 {{ .certificate }}
                 {{ end }}
                 EOF
-                destination = "secrets/frontend.cert"
+                destination = "secrets/ingress.cert"
             }
 
             template {
                 data = <<-EOF
-                {{ with nomadVar "certs/ingress_to_service/frontend" }}
+                {{ with nomadVar "certs/ingress_to_main/ingress" }}
                 {{ .private_key }}
                 {{ end }}
                 EOF
-                destination = "secrets/frontend.key"
+                destination = "secrets/ingress.key"
             }
 
             template {
@@ -325,8 +325,8 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     serversTransports:
                         mtls:
                             certificates:
-                              - certFile: /run/secrets/frontend.cert
-                                keyFile: /run/secrets/frontend.key
+                              - certFile: /run/secrets/ingress.cert
+                                keyFile: /run/secrets/ingress.key
                             rootCAs:
                                 - /run/secrets/ca.cert
 
