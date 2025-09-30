@@ -68,7 +68,7 @@ def _attach_acl(data: dict[str, Any]) -> None:
         policy = "read"
 
         variables {{
-            path "{CERTS_VAR_ROOT_PATH}/ingress_to_main/backend" {{
+            path "{CERTS_VAR_ROOT_PATH}/ingress_to_main/main" {{
                 "capabilities" = [
                     "list",
                     "read"
