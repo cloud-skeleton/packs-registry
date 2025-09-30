@@ -245,9 +245,8 @@ def update_cert_var(
         index, value = _get_var(var)
         key: Ed25519PrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
         cert: Certificate = load_pem_x509_certificate(value["certificate"].encode("utf-8"))
-        expiration: datetime = cert.not_valid_after.replace(tzinfo = timezone.utc)
-        is_renewed = (expiration - timedelta(weeks = 4)) < datetime.now(timezone.utc)
-        expiry_str: str = expiration.strftime("%Y-%m-%d %H:%M:%S")
+        is_renewed = (cert.not_valid_after_utc - timedelta(weeks = 4)) < datetime.now(timezone.utc)
+        expiry_str: str = cert.not_valid_after_utc.strftime("%Y-%m-%d %H:%M:%S")
         if is_ca_renewed:
             print(f"🔥 CA certificate renewed. Generating a new {type} certificate!")
         elif is_renewed:
