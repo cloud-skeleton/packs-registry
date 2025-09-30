@@ -171,7 +171,7 @@ def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
     return ca_key, ca_cert
 
 def update_ca_var() -> tuple[bool, Ed25519PrivateKey, Certificate]:
-    var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/ca"
+    var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_main/ca"
     is_renewed: bool = not _is_var(var)
     index: int = 0
     if is_renewed:
@@ -236,7 +236,7 @@ def update_cert_var(
     ca_cert: Certificate,
     type: str
 ) -> tuple[bool, Ed25519PrivateKey, Certificate]:
-    var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_service/{type}"
+    var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_main/{type}"
     is_renewed: bool = not _is_var(var)
     index: int = 0
     if is_renewed:
