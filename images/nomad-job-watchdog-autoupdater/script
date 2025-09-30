@@ -248,6 +248,7 @@ def update_cert_var(
         is_renewed = (cert.not_valid_after_utc - timedelta(weeks = 4)) < datetime.now(timezone.utc)
         expiry_str: str = cert.not_valid_after_utc.strftime("%Y-%m-%d %H:%M:%S")
         if is_ca_renewed:
+            is_renewed = True
             print(f"🔥 CA certificate renewed. Generating a new {type} certificate!")
         elif is_renewed:
             print(f"⚠️ {type.title()} certificate expiring ({expiry_str}). Generating a new one!")
