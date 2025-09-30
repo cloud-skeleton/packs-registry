@@ -49,23 +49,7 @@ namespace "*" {
     policy = "read"
 
     variables {
-        path "certs/ingress_to_main/ca" {
-            "capabilities" = [
-                "list",
-                "read",
-                "write"
-            ]
-        }
-
-        path "certs/ingress_to_main/ingress" {
-            "capabilities" = [
-                "list",
-                "read",
-                "write"
-            ]
-        }
-
-        path "certs/ingress_to_main/main" {
+        path "certs/ingress_to_main/*" {
             "capabilities" = [
                 "list",
                 "read",
