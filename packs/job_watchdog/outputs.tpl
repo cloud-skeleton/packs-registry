@@ -13,6 +13,12 @@ nomad var put -force -namespace=system params/[[ template "job_name" (list . "wa
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/config \
     parameters_meta_prefix=params parameters_root_path=params volumes_meta_prefix=volumes
 
+nomad var put -force -namespace=system params/[[ template "job_name" (list . "autoupdater") ]]/config \
+    ingress_worker_ips=$(nomad node status -filter 'NodeClass == "ingress-worker"' -json \
+    | jq -c '[.[] .Address]') \
+    main_worker_ips=$(nomad node status -filter 'NodeClass == "main-worker"' -json \
+    | jq -c '[.[] .Address]')
+
 5. Create ACL policy to allow access to token (& other) variables:
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "watcher") ]] \
     -description "Allow job watchdog initial access to variables" allow-watchdog-variables-read-write -
@@ -43,7 +49,7 @@ namespace "*" {
     policy = "read"
 
     variables {
-        path "certs/ingress_to_service/*" {
+        path "certs/ingress_to_main/*" {
             "capabilities" = [
                 "list",
                 "read",

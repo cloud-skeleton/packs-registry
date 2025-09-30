@@ -35,10 +35,10 @@ job "[[ template "job_name" (list . "watcher") ]]" {
                 NOMAD_TOKEN="{{ .nomad_token }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "watcher") ]]/config" }}
-                CERTS_VAR_ROOT_PATH = "{{ .certificates_root_path }}"
-                PARAMS_META_PREFIX = "{{ .parameters_meta_prefix }}"
-                PARAMS_VAR_ROOT_PATH = "{{ .parameters_root_path }}"
-                VOLUMES_META_PREFIX = "{{ .volumes_meta_prefix }}"
+                CERTS_VAR_ROOT_PATH="{{ .certificates_root_path }}"
+                PARAMS_META_PREFIX="{{ .parameters_meta_prefix }}"
+                PARAMS_VAR_ROOT_PATH="{{ .parameters_root_path }}"
+                VOLUMES_META_PREFIX="{{ .volumes_meta_prefix }}"
                 {{- end }}
                 EOF
                 destination = "secrets/env"
