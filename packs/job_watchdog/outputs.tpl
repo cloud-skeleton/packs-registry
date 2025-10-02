@@ -44,7 +44,7 @@ namespace "system" {
 POLICY
 
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "autoupdater") ]] \
-    -description [[ template "job_policy_description" (list . "autoupdater") ]] \
+    -description "[[ template "job_policy_description" (list . "autoupdater") ]]" \
     [[ template "job_policy_name" (list . "autoupdater") ]] -
 namespace "*" {
     policy = "read"
