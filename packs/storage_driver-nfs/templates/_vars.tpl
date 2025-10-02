@@ -18,6 +18,18 @@
 [[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
 [[- end -]]
 
+[[- define "job_policy_description" -]]
+[[- $root := index . 0 -]]
+[[- $name  := index . 1 -]]
+[[ printf "JOB POLICY: Allow extra permissions for %s-%s-%s job" (meta "pack.name" $root) $name (var "id" $root) ]]
+[[- end -]]
+
+[[- define "job_policy_name" -]]
+[[- $root := index . 0 -]]
+[[- $name  := index . 1 -]]
+[[ printf "JOB-POLICY-%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" ]]
+[[- end -]]
+
 [[- define "service_name" -]]
 [[- $root := index . 0 -]]
 [[- $name := index . 1 -]]

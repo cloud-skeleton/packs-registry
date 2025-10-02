@@ -21,7 +21,8 @@ nomad var put -force -namespace=system params/[[ template "job_name" (list . "au
 
 5. Create ACL policy to allow access to token (& other) variables:
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "watcher") ]] \
-    -description "Allow job watchdog initial access to variables" allow-watchdog-variables-read-write -
+    -description [[ template "job_policy_description" (list . "watcher") ]] \
+    [[ template "job_policy_name" (list . "watcher") ]] -
 namespace "system" {
     policy = "read"
 
@@ -43,8 +44,8 @@ namespace "system" {
 POLICY
 
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "autoupdater") ]] \
-    -description "Allow job watchdog autoupdater access to other jobs' variables" \
-    allow-watchdog-autoupdater-variables-read-write -
+    -description [[ template "job_policy_description" (list . "autoupdater") ]] \
+    [[ template "job_policy_name" (list . "autoupdater") ]] -
 namespace "*" {
     policy = "read"
 
