@@ -48,8 +48,30 @@ cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_n
 namespace "*" {
     policy = "read"
 
+    variables {       
+        path "params/*/images" {
+            "capabilities" = [
+                "list",
+                "read",
+                "write"
+            ]
+        }
+    }
+}
+
+namespace "system" {
+    policy = "read"
+
     variables {
-        path "certs/ingress_to_main/*" {
+        path "certs/ingress_to_main/ca" {
+            "capabilities" = [
+                "list",
+                "read",
+                "write"
+            ]
+        }
+        
+        path "certs/ingress_to_main/ingress" {
             "capabilities" = [
                 "list",
                 "read",
@@ -57,7 +79,7 @@ namespace "*" {
             ]
         }
 
-        path "params/*/images" {
+        path "certs/ingress_to_main/main" {
             "capabilities" = [
                 "list",
                 "read",
