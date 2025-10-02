@@ -201,7 +201,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         http:
                             encodeQuerySemicolons: true
                             middlewares:
-                                - security-headers@file
+                                -   security-headers@file
                             tls:
                                 certResolver: lets-encrypt
                         http3: {}
@@ -231,7 +231,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                         {{- $namespaces := .namespaces.Value | parseJSON }}
                         namespaces: {{ if eq (len $namespaces) 0 }}[]{{ end }}
                         {{- range $namespace := $namespaces }}
-                            - {{ $namespace }}
+                            -   {{ $namespace }}
                         {{- end }}
                         stale: true
                         watch: true
@@ -252,13 +252,13 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                                 {{- $admin_ip_cidrs := .admin_ip_cidrs.Value | parseJSON }}
                                 sourceRange: {{ if eq (len $admin_ip_cidrs) 0 }}[]{{ end }}
                                 {{- range $admin_ip_cidr := $admin_ip_cidrs }}
-                                    - {{ $admin_ip_cidr }}
+                                    -   {{ $admin_ip_cidr }}
                                 {{- end }}
 
                         local-ip-only:
                             IPAllowList:
                                 sourceRange:
-                                    - {{ env "NOMAD_HOST_IP_https" }}
+                                    -   {{ env "NOMAD_HOST_IP_https" }}
 
                         rewrite-security.txt-path-to-github:
                             replacePath:
@@ -289,35 +289,35 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     routers:
                         security.txt-file:
                             middlewares:
-                                - rewrite-security.txt-path-to-github
+                                -   rewrite-security.txt-path-to-github
                             priority: 10001
                             rule: Path("/.well-known/security.txt")
                             service: github-raw-files
 
                         ssllabs-certificate-validation:
                             middlewares:
-                                - success-response
+                                -   success-response
                             priority: 10001
                             rule: Host("[[ var "hostname" . ]]") && ClientIP("{{ .ssllabs_cidr }}")
                             service: noop@internal
 
                         traefik-dashboard:
                             middlewares:
-                                - admin-ip-only
+                                -   admin-ip-only
                             priority: 10000
                             rule: Host("[[ var "hostname" . ]]") && (PathPrefix("/api/") || PathPrefix("/dashboard/"))
                             service: api@internal
 
                         traefik-dashboard-redirect:
                             middlewares:
-                                - traefik-dashboard-redirect
+                                -   traefik-dashboard-redirect
                             priority: 10000
                             rule: Host("[[ var "hostname" . ]]") && Path("/")
                             service: noop@internal
 
                         traefik-ping:
                             middlewares:
-                                - local-ip-only
+                                -   local-ip-only
                             priority: 10000
                             rule: Host("[[ var "hostname" . ]]") && Path("/ping")
                             service: ping@internal
@@ -325,33 +325,33 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                     serversTransports:
                         mtls:
                             certificates:
-                              - certFile: /run/secrets/ingress.cert
-                                keyFile: /run/secrets/ingress.key
+                                -   certFile: /run/secrets/ingress.cert
+                                    keyFile: /run/secrets/ingress.key
                             rootCAs:
-                                - /run/secrets/ca.cert
+                                -   /run/secrets/ca.cert
 
                     services:
                         github-raw-files:
                             loadBalancer:
                                 passHostHeader: false
                                 servers:
-                                    - url: https://raw.githubusercontent.com
+                                    -   url: https://raw.githubusercontent.com
 
                 tls:
                     options:
                         default:
                             cipherSuites:
-                                - TLS_AES_256_GCM_SHA384
-                                - TLS_CHACHA20_POLY1305_SHA256
-                                - TLS_AES_128_GCM_SHA256
-                                - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
-                                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-                                - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+                                -   TLS_AES_256_GCM_SHA384
+                                -   TLS_CHACHA20_POLY1305_SHA256
+                                -   TLS_AES_128_GCM_SHA256
+                                -   TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+                                -   TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+                                -   TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
                             curvePreferences:
-                                - secp521r1
-                                - secp384r1
-                                - x25519
-                                - secp256r1
+                                -   secp521r1
+                                -   secp384r1
+                                -   x25519
+                                -   secp256r1
                             minVersion: VersionTLS12
                             sniStrict: true
                 ...
