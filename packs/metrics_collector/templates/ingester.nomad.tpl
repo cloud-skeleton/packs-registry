@@ -10,7 +10,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             mode = "bridge"
 
             port "http" {
-                to = 8086
+                to = 443
             }
         }
 
@@ -22,27 +22,29 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         }
 
         service {
-            check {
-                check_restart {
-                    grace = "2m"
-                    limit = 3
-                }
+            // check {
+            //     check_restart {
+            //         grace = "2m"
+            //         limit = 3
+            //     }
 
-                interval = "30s"
-                path     = "/health"
-                port     = "http"
-                timeout  = "5s"
-                type     = "http"
-            }
+            //     interval = "30s"
+            //     path     = "/health"
+            //     port     = "http"
+            //     timeout  = "5s"
+            //     type     = "http"
+            // }
 
             name     = "[[ template "service_name" (list . "ingester" "http") ]]"
             port     = "http"
             provider = "nomad"
             tags = [
                 "traefik.enable=true",
-                "traefik.hostname=[[ var "hostname" . ]]"
+                "traefik.hostname=[[ var "hostname" . ]]",
+                "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.serversTransport=mtls@file",
+                "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.server.scheme=https"
             ]
-            task = "service"
+            task = "tunnel"
         }
 
         task "setup" {
@@ -99,11 +101,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 destination = "secrets/env"
                 env         = true
             }
-
-            volume_mount {
-                destination = "/var/lib/influxdb2"
-                volume      = "data"
-            }
         }
 
         task "service" {
@@ -117,31 +114,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     target   = "/etc/influxdb2/configs/config.yml"
                     type     = "bind"
                 }
-
-                // mount {
-                //     readonly = true
-                //     source   = "secrets/ca.cert"
-                //     target   = "/run/secrets/ca.cert"
-                //     type     = "bind"
-                // }
-
-                // mount {
-                //     readonly = true
-                //     source   = "secrets/main.cert"
-                //     target   = "/run/secrets/main.cert"
-                //     type     = "bind"
-                // }
-
-                // mount {
-                //     readonly = true
-                //     source   = "secrets/main.key"
-                //     target   = "/run/secrets/main.key"
-                //     type     = "bind"
-                // }
-
-                ports = [
-                    "http"
-                ]
             }
 
             driver = "docker"
@@ -196,36 +168,114 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 gid         = 1000
             }
 
-            // template {
-            //     data = <<-EOF
-            //     {{ with nomadVar "certs/ingress_to_main/ca" }}
-            //     {{ .certificate }}
-            //     {{ end }}
-            //     EOF
-            //     destination = "secrets/ca.cert"
-            // }
-
-            // template {
-            //     data = <<-EOF
-            //     {{ with nomadVar "certs/ingress_to_main/main" }}
-            //     {{ .certificate }}
-            //     {{ end }}
-            //     EOF
-            //     destination = "secrets/main.cert"
-            // }
-
-            // template {
-            //     data = <<-EOF
-            //     {{ with nomadVar "certs/ingress_to_main/main" }}
-            //     {{ .private_key }}
-            //     {{ end }}
-            //     EOF
-            //     destination = "secrets/main.key"
-            // }
-
             volume_mount {
                 destination = "/var/lib/influxdb2"
                 volume      = "data"
+            }
+        }
+
+        task "tunnel" {
+            config {
+                args           = ["/etc/stunnel/stunnel.conf"]
+                cpu_hard_limit = true
+                image          = "${DOCKER_IMAGE}"
+
+                mount {
+                    readonly = true
+                    source   = "local/stunnel.conf"
+                    target   = "/etc/stunnel/stunnel.conf"
+                    type     = "bind"
+                }
+
+                mount {
+                    readonly = true
+                    source   = "secrets/ca.cert"
+                    target   = "/run/secrets/ca.cert"
+                    type     = "bind"
+                }
+
+                mount {
+                    readonly = true
+                    source   = "secrets/main.cert"
+                    target   = "/run/secrets/main.cert"
+                    type     = "bind"
+                }
+
+                mount {
+                    readonly = true
+                    source   = "secrets/main.key"
+                    target   = "/run/secrets/main.key"
+                    type     = "bind"
+                }
+
+                ports = [
+                    "http"
+                ]
+            }
+
+            driver = "docker"
+
+            lifecycle {
+                hook    = "prestart"
+                sidecar = true
+            }
+
+            resources {
+                cpu    = 25
+                memory = 16
+            }
+
+            template {
+                data = <<-EOF
+                debug = info
+                foreground = yes
+
+                [backend]
+                accept = 0.0.0.0:443
+                connect = 127.0.0.1:8086
+                verify = 2
+                CAfile = /run/secrets/ca.cert
+                cert = /run/secrets/main.cert
+                key = /run/secrets/main.key
+                EOF
+                destination = "local/stunnel.conf"
+            }
+
+            template {
+                data = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+                DOCKER_IMAGE="cleanstart/stunnel:{{ index . "cleanstart/stunnel" }}"
+                {{- end }}
+                EOF
+                destination = "secrets/env"
+                env         = true
+            }
+
+            template {
+                data = <<-EOF
+                {{ with nomadVar "certs/ingress_to_main/ca" }}
+                {{ .certificate }}
+                {{ end }}
+                EOF
+                destination = "secrets/ca.cert"
+            }
+
+            template {
+                data = <<-EOF
+                {{ with nomadVar "certs/ingress_to_main/main" }}
+                {{ .certificate }}
+                {{ end }}
+                EOF
+                destination = "secrets/main.cert"
+            }
+
+            template {
+                data = <<-EOF
+                {{ with nomadVar "certs/ingress_to_main/main" }}
+                {{ .private_key }}
+                {{ end }}
+                EOF
+                destination = "secrets/main.key"
             }
         }
 
@@ -248,7 +298,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         "params.config.organization_name" = "cloud-skeleton"
 
         // Docker images used in job
-        "params.images.influxdb" = "2.7.12-alpine"
+        "params.images.influxdb"            = "2.7.12-alpine"
+        "params.images.cleanstart/stunnel"  = "5.75"
 
         // Volumes
         "volumes.[[ var "data_volume.id" . ]].id"        = "[[ var "data_volume.id" . ]]"

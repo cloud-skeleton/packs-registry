@@ -327,7 +327,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             certificates:
                                 -   certFile: /run/secrets/ingress.cert
                                     keyFile: /run/secrets/ingress.key
-                            rootCAs:
+                            rootcas:
                                 -   /run/secrets/ca.cert
 
                     services:
