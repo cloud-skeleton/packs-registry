@@ -221,8 +221,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
 
             resources {
-                cpu    = 25
-                memory = 16
+                cpu    = 75
+                memory = 32
             }
 
             template {
@@ -230,13 +230,15 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 debug = info
                 foreground = yes
 
-                [backend]
-                accept = 0.0.0.0:443
-                connect = 127.0.0.1:8086
-                verify = 2
+                [http]
+                accept = 0.0.0.0:{{ env "NOMAD_PORT_http" }}
                 CAfile = /run/secrets/ca.cert
                 cert = /run/secrets/main.cert
+                connect = 127.0.0.1:8086
                 key = /run/secrets/main.key
+                TIMEOUTclose = 3
+                TIMEOUTidle = 30
+                verify = 2
                 EOF
                 destination = "local/stunnel.conf"
             }
