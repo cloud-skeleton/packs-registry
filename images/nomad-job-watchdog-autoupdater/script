@@ -20,7 +20,13 @@ from cryptography.x509 import (
 )
 from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKey,
+    EllipticCurvePublicKey,
+    generate_private_key,
+    SECP521R1
+)
+from cryptography.hazmat.primitives.hashes import SHA512
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from datetime import datetime, timedelta, timezone
 from dxf import DXF
@@ -147,7 +153,7 @@ def update_images() -> None:
             print(f"⚠️ Updating variable {variable}@{namespace} with value {images_new}")
             _set_var(variable, images_new, index, namespace)
 
-def _as_pem(key: Ed25519PrivateKey, cert: Certificate) -> tuple[str, str]:
+def _as_pem(key: EllipticCurvePrivateKey, cert: Certificate) -> tuple[str, str]:
     key_pem: str = key.private_bytes(
         encoding = serialization.Encoding.PEM,
         format = serialization.PrivateFormat.PKCS8,
@@ -156,8 +162,8 @@ def _as_pem(key: Ed25519PrivateKey, cert: Certificate) -> tuple[str, str]:
     cert_pem: str = cert.public_bytes(serialization.Encoding.PEM).decode("utf-8")
     return key_pem, cert_pem
 
-def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
-    ca_key: Ed25519PrivateKey = Ed25519PrivateKey.generate()
+def generate_ca() -> tuple[EllipticCurvePrivateKey, Certificate]:
+    ca_key: EllipticCurvePrivateKey = generate_private_key(SECP521R1())
     name: Name = Name([
         NameAttribute(NameOID.COMMON_NAME, "cloudskeleton.eu"),
         NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
@@ -172,11 +178,11 @@ def generate_ca() -> tuple[Ed25519PrivateKey, Certificate]:
             .not_valid_before(now_utc - timedelta(days = 1))
             .not_valid_after(now_utc + timedelta(days = 365))
             .add_extension(BasicConstraints(ca = True, path_length = None), critical = True)
-            .sign(private_key = ca_key, algorithm = None)
+            .sign(private_key = ca_key, algorithm = SHA512())
     )
     return ca_key, ca_cert
 
-def update_ca_var() -> tuple[bool, Ed25519PrivateKey, Certificate]:
+def update_ca_var() -> tuple[bool, EllipticCurvePrivateKey, Certificate]:
     var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_main/ca"
     is_renewed: bool = not _is_var(var)
     index: int = 0
@@ -184,7 +190,7 @@ def update_ca_var() -> tuple[bool, Ed25519PrivateKey, Certificate]:
         print("❌ No CA certificate has been found. Generating a new one!")
     else:
         index, value = _get_var(var)
-        key: Ed25519PrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
+        key: EllipticCurvePrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
         cert: Certificate = load_pem_x509_certificate(value["certificate"].encode("utf-8"))
         is_renewed = (cert.not_valid_after_utc - timedelta(weeks = 4)) < datetime.now(timezone.utc)
         expiry_str: str = cert.not_valid_after_utc.strftime("%Y-%m-%d %H:%M:%S")
@@ -206,11 +212,11 @@ def update_ca_var() -> tuple[bool, Ed25519PrivateKey, Certificate]:
     return is_renewed, key, cert
 
 def generate_leaf_cert(
-    ca_key: Ed25519PrivateKey,
+    ca_key: EllipticCurvePrivateKey,
     ca_cert: Certificate,
     type: str
-) -> tuple[Ed25519PrivateKey, Certificate]:
-    key: Ed25519PrivateKey = Ed25519PrivateKey.generate()
+) -> tuple[EllipticCurvePrivateKey, Certificate]:
+    key: EllipticCurvePrivateKey = generate_private_key(SECP521R1())
     name: Name = Name([
         NameAttribute(NameOID.COMMON_NAME, f"{type}.cloudskeleton.eu"),
         NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
@@ -231,16 +237,16 @@ def generate_leaf_cert(
             .not_valid_after(now_utc + timedelta(days = 90))
             .add_extension(eku, critical = False)
             .add_extension(SubjectAlternativeName(san_list), critical = False)
-            .sign(private_key = ca_key, algorithm = None)
+            .sign(private_key = ca_key, algorithm = SHA512())
     )
     return key, cert
 
 def update_cert_var(
     is_ca_renewed: bool,
-    ca_key: Ed25519PrivateKey,
+    ca_key: EllipticCurvePrivateKey,
     ca_cert: Certificate,
     type: str
-) -> tuple[bool, Ed25519PrivateKey, Certificate]:
+) -> tuple[bool, EllipticCurvePrivateKey, Certificate]:
     var: str = f"{CERTS_VAR_ROOT_PATH}/ingress_to_main/{type}"
     is_renewed: bool = not _is_var(var)
     index: int = 0
@@ -248,7 +254,7 @@ def update_cert_var(
         print(f"❌ No {type} certificate has been found. Generating a new one!")
     else:
         index, value = _get_var(var)
-        key: Ed25519PrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
+        key: EllipticCurvePrivateKey = load_pem_private_key(value["private_key"].encode("utf-8"), password = None)
         cert: Certificate = load_pem_x509_certificate(value["certificate"].encode("utf-8"))
         is_renewed = (cert.not_valid_after_utc - timedelta(weeks = 4)) < datetime.now(timezone.utc)
         expiry_str: str = cert.not_valid_after_utc.strftime("%Y-%m-%d %H:%M:%S")
