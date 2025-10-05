@@ -36,13 +36,13 @@ A robust reverse proxy setup using **[Traefik][traefik]** to:
 
 ### Generic Requirements
 
-| Component      | Requirement / Note                        |
-|----------------|-------------------------------------------|
-| Resources      | **CPU:** 150 MHz <br> **RAM:** 64 MB      |
-| Namespace(s)   | `system`                                  |
-| Node class(es) | `ingress-worker`                          |
-| CSI volumes    | ✅                                        |
-| Ingress        | ✅                                        |
+| Component      | Requirement / Note                   |
+|----------------|--------------------------------------|
+| Resources      | **CPU:** 150 MHz <br> **RAM:** 64 MB |
+| Namespace(s)   | `system`                             |
+| Node class(es) | `ingress-worker`                     |
+| CSI volumes    | ✅                                   |
+| Ingress        | ✅                                   |
 
 ### Security Requirements
 
