@@ -118,7 +118,7 @@ def update_images() -> None:
         images_new: dict[str, str] = {}
         for image, tag in images.items():
             host: str = "registry-1.docker.io"
-            repository: str = f"library/{image}"
+            repository: str = image if "/" in image else f"library/{image}"
             first, separator, rest = image.partition("/")
             if separator and '.' in first:
                 host = first
