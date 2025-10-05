@@ -125,6 +125,7 @@ def update_images() -> None:
                 repository = rest
             print(f"Found variable {variable}@{namespace} containing {host}/{repository}:{tag} image.")
             if f"{host}/{repository}" not in latest_tags:
+                # @TODO: add ability to pass credentials for host and host/repository from secrets variable
                 dxf: DXF = DXF(
                     host,
                     repository,
@@ -133,15 +134,15 @@ def update_images() -> None:
                         actions = ["pull"]
                     )
                 )
-                # @TODO: add ability to pass credentials for host and host/repository from secrets variable
                 try:
                     latest_tags[f"{host}/{repository}"] = _get_newest_tag(tag, dxf.list_aliases())
                     newest_tag: str = latest_tags[f"{host}/{repository}"]
                     if tag != newest_tag:
                         print(f"⚠️ Updating from {host}/{repository}:{tag} to {host}/{repository}:{newest_tag}!")
-                    images_new[image] = newest_tag
                 except DXFUnauthorizedError:
                     print(f"‼️ Missing authentication to {host}/{repository} repository!")
+                    newest_tag: str = tag
+                images_new[image] = newest_tag
         if images_new != images:
             print(f"⚠️ Updating variable {variable}@{namespace} with value {images_new}")
             _set_var(variable, images_new, index, namespace)
