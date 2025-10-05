@@ -38,7 +38,7 @@ A robust reverse proxy setup using **[Traefik][traefik]** to:
 
 | Component      | Requirement / Note                        |
 |----------------|-------------------------------------------|
-| Resources      | **CPU:** 100 MHz <br> **RAM:** 64 MB      |
+| Resources      | **CPU:** 150 MHz <br> **RAM:** 64 MB      |
 | Namespace(s)   | `system`                                  |
 | Node class(es) | `ingress-worker`                          |
 | CSI volumes    | ✅                                        |
