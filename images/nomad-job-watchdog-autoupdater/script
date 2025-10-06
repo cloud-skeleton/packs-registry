@@ -22,11 +22,10 @@ from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import (
     EllipticCurvePrivateKey,
-    EllipticCurvePublicKey,
     generate_private_key,
-    SECP521R1
+    SECP256R1
 )
-from cryptography.hazmat.primitives.hashes import SHA512
+from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from datetime import datetime, timedelta, timezone
 from dxf import DXF
@@ -163,7 +162,7 @@ def _as_pem(key: EllipticCurvePrivateKey, cert: Certificate) -> tuple[str, str]:
     return key_pem, cert_pem
 
 def generate_ca() -> tuple[EllipticCurvePrivateKey, Certificate]:
-    ca_key: EllipticCurvePrivateKey = generate_private_key(SECP521R1())
+    ca_key: EllipticCurvePrivateKey = generate_private_key(SECP256R1())
     name: Name = Name([
         NameAttribute(NameOID.COMMON_NAME, "cloudskeleton.eu"),
         NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
@@ -178,7 +177,7 @@ def generate_ca() -> tuple[EllipticCurvePrivateKey, Certificate]:
             .not_valid_before(now_utc - timedelta(days = 1))
             .not_valid_after(now_utc + timedelta(days = 365))
             .add_extension(BasicConstraints(ca = True, path_length = None), critical = True)
-            .sign(private_key = ca_key, algorithm = SHA512())
+            .sign(private_key = ca_key, algorithm = SHA256())
     )
     return ca_key, ca_cert
 
@@ -216,7 +215,7 @@ def generate_leaf_cert(
     ca_cert: Certificate,
     type: str
 ) -> tuple[EllipticCurvePrivateKey, Certificate]:
-    key: EllipticCurvePrivateKey = generate_private_key(SECP521R1())
+    key: EllipticCurvePrivateKey = generate_private_key(SECP256R1())
     name: Name = Name([
         NameAttribute(NameOID.COMMON_NAME, f"{type}.cloudskeleton.eu"),
         NameAttribute(NameOID.ORGANIZATION_NAME, "Cloud Skeleton"),
@@ -237,7 +236,7 @@ def generate_leaf_cert(
             .not_valid_after(now_utc + timedelta(days = 90))
             .add_extension(eku, critical = False)
             .add_extension(SubjectAlternativeName(san_list), critical = False)
-            .sign(private_key = ca_key, algorithm = SHA512())
+            .sign(private_key = ca_key, algorithm = SHA256())
     )
     return key, cert
 
