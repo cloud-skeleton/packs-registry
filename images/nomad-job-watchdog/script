@@ -282,6 +282,7 @@ def start() -> None:
             sleep(5)
         finally:
             events_queue.task_done()
+    print("triggered exit")
     stop_event.set()
     stream.join()
 
