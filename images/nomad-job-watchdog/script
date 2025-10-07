@@ -10,6 +10,7 @@ from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
 from signal import signal, SIGINT
+from sys import exit
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
@@ -248,7 +249,9 @@ def start() -> None:
         )
     )
     stream.start()
-    while not SHOULD_STOP:
+    while True:
+        if SHOULD_STOP:
+            exit()
         state_var_index: int = 0
         last_event_value: int = 0
         if _is_var(STATE_VAR_PATH):
