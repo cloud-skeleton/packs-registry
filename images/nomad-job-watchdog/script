@@ -17,7 +17,7 @@ from typing import cast, Any
 SHOULD_STOP: bool = False
 
 def STOP() -> None:
-    print('SETTING STOP')
+    global SHOULD_STOP
     SHOULD_STOP = True
 
 signal(SIGINT, lambda *_: STOP())
