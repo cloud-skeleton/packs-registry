@@ -26,7 +26,8 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 env         = true
             }
 
-            kill_signal = "SIGINT"
+            kill_timeout = "5m"
+            kill_signal  = "SIGINT"
 
             resources {
                 cpu    = 50
