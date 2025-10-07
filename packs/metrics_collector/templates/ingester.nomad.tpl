@@ -22,10 +22,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         }
 
         service {
-            canary_tags = [
-                "traefik.enable=false"
-            ]
-
             check {
                 check_restart {
                     grace = "2m"
@@ -125,6 +121,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 INFLUXD_CONFIG_PATH = "/etc/influxdb2/configs"
             }
 
+            kill_signal  = "SIGINT"
+
             resources {
                 cpu    = 100
                 memory = 128
@@ -210,9 +208,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     namespace = "system"
 
     update {
-        auto_promote      = true
         auto_revert       = true
-        canary            = 1
         healthy_deadline  = "2m"
         min_healthy_time  = "30s"
         progress_deadline = "3m"
