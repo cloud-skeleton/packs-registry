@@ -29,7 +29,9 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
                 type           = "monolith"
             }
 
-            driver = "docker"
+            driver       = "docker"
+            kill_signal  = "SIGINT"
+            kill_timeout = "30s"
 
             resources {
                 cpu    = 50
