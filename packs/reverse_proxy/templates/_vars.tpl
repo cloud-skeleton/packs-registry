@@ -85,7 +85,7 @@
 
             resources {
                 cpu    = 75
-                memory = 16
+                memory = 32
             }
 
             template {
@@ -100,8 +100,8 @@
                 cert = /run/secrets/main.cert
                 connect = 127.0.0.1:[[ $port ]]
                 key = /run/secrets/main.key
-                TIMEOUTclose = 3
-                TIMEOUTidle = 30
+                TIMEOUTclose = 5
+                TIMEOUTidle = 35
                 verify = 2
                 [[- end ]]
                 EOF

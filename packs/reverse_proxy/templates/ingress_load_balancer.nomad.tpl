@@ -327,6 +327,13 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
                             certificates:
                                 -   certFile: /run/secrets/ingress.cert
                                     keyFile: /run/secrets/ingress.key
+                            forwardingTimeouts:
+                                dialTimeout: 2s
+                                idleConnTimeout: 25s
+                                pingTimeout: 5s
+                                readIdleTimeout: 2s
+                                responseHeaderTimeout: 45s
+                            maxIdleConnsPerHost: 128
                             rootcas:
                                 -   /run/secrets/ca.cert
 
