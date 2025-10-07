@@ -22,18 +22,21 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         }
 
         service {
-            // check {
-            //     check_restart {
-            //         grace = "2m"
-            //         limit = 3
-            //     }
+            canary_tags = [
+                "traefik.enable=false"
+            ]
 
-            //     interval = "30s"
-            //     path     = "/health"
-            //     port     = "http"
-            //     timeout  = "5s"
-            //     type     = "http"
-            // }
+            check {
+                check_restart {
+                    grace = "2m"
+                    limit = 3
+                }
+
+                interval = "30s"
+                port     = "http"
+                timeout  = "2s"
+                type     = "tcp"
+            }
 
             name     = "[[ template "service_name" (list . "ingester" "http") ]]"
             port     = "http"
@@ -207,11 +210,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     namespace = "system"
 
     update {
-        // auto_promote     = true
+        auto_promote      = true
         auto_revert       = true
+        canary            = 1
         healthy_deadline  = "2m"
+        min_healthy_time  = "30s"
         progress_deadline = "3m"
-        // canary           = 1
-        // min_healthy_time = "1m"
     }
 }
