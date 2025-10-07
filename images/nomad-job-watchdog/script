@@ -10,12 +10,16 @@ from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
 from signal import signal, SIGINT
-from sys import exit
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
 
-signal(SIGINT, lambda *_: exit())
+SHOULD_STOP: bool = False
+
+def STOP() -> None:
+    SHOULD_STOP = True
+
+signal(SIGINT, lambda *_: STOP())
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -244,6 +248,8 @@ def start() -> None:
     )
     stream.start()
     while True:
+        if SHOULD_STOP:
+            break
         state_var_index: int = 0
         last_event_value: int = 0
         if _is_var(STATE_VAR_PATH):
