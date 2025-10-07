@@ -26,6 +26,8 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 env         = true
             }
 
+            kill_signal = "SIGINT"
+
             resources {
                 cpu    = 50
                 memory = 32

@@ -21,6 +21,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             driver = "docker"
 
+            kill_signal = "SIGINT"
+
             resources {
                 cpu    = 50
                 memory = 32
