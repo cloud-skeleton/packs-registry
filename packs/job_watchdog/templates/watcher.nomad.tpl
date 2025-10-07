@@ -21,7 +21,8 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             driver = "docker"
 
-            kill_signal = "SIGINT"
+            kill_timeout = "30s"
+            kill_signal  = "SIGINT"
 
             resources {
                 cpu    = 50

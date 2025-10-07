@@ -281,9 +281,7 @@ def start() -> None:
             sleep(5)
         finally:
             events_queue.task_done()
-    print("before exit stream")
     stream_exit.set()
-    print("after exit stream")
 
 if __name__ == "__main__":
     start()
