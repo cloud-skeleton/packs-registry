@@ -8,18 +8,16 @@ from copy import deepcopy
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
-from queue import Queue
+from queue import Queue, Empty
 from signal import signal, SIGINT
-from sys import exit
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
 
-SHOULD_STOP: bool = False
+SHOULD_STOP: Event = Event()
 
 def STOP() -> None:
-    global SHOULD_STOP
-    SHOULD_STOP = True
+    SHOULD_STOP.set()
 
 signal(SIGINT, lambda *_: STOP())
 
@@ -238,7 +236,7 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
             _reevaluate_jobs_with_csi_plugins(data)
 
 def start() -> None:
-    stream, _, events_queue = cast(
+    stream, stop_event, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
             namespace = "*",
@@ -249,15 +247,16 @@ def start() -> None:
         )
     )
     stream.start()
-    while True:
-        if SHOULD_STOP:
-            exit()
+    while not SHOULD_STOP.is_set():
         state_var_index: int = 0
         last_event_value: int = 0
         if _is_var(STATE_VAR_PATH):
             state_var_index, state_value = _get_var(STATE_VAR_PATH)
             last_event_value = int(state_value["last_event"])
-        events: dict[str, Any] = events_queue.get()
+        try:
+            events: dict[str, Any] = events_queue.get(timeout = 0.5)
+        except Empty:
+            continue
         if events["Index"] <= last_event_value:
             continue
         try:
@@ -283,6 +282,8 @@ def start() -> None:
             sleep(5)
         finally:
             events_queue.task_done()
+    stop_event.set()
+    stream.join(timeout = 5)
 
 if __name__ == "__main__":
     start()
