@@ -10,6 +10,7 @@ from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
 from signal import signal, SIGINT
+from sys import exit
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
@@ -236,7 +237,7 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
             _reevaluate_jobs_with_csi_plugins(data)
 
 def start() -> None:
-    stream, stop_event, events_queue = cast(
+    stream, _, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
             namespace = "*",
@@ -281,7 +282,7 @@ def start() -> None:
             sleep(5)
         finally:
             events_queue.task_done()
-    stop_event.set()
+    exit(0)
 
 if __name__ == "__main__":
     start()
