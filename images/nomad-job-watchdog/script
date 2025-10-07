@@ -9,9 +9,13 @@ from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
 from queue import Queue
+from signal import signal, SIGTERM
+from sys import exit
 from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
+
+signal(SIGTERM, lambda *_: exit())
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
