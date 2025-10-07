@@ -39,7 +39,10 @@ from semantic_version import Version
 from signal import signal, SIGINT
 from typing import Any, Iterable
 
-signal(SIGINT, lambda *_: ())
+def STOP() -> None:
+    pass
+
+signal(SIGINT, lambda *_: STOP())
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
