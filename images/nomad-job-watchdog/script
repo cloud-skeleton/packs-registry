@@ -17,6 +17,7 @@ from typing import cast, Any
 SHOULD_STOP: bool = False
 
 def STOP() -> None:
+    print('SETTING STOP')
     SHOULD_STOP = True
 
 signal(SIGINT, lambda *_: STOP())
@@ -247,9 +248,7 @@ def start() -> None:
         )
     )
     stream.start()
-    while True:
-        if SHOULD_STOP:
-            break
+    while not SHOULD_STOP:
         state_var_index: int = 0
         last_event_value: int = 0
         if _is_var(STATE_VAR_PATH):
