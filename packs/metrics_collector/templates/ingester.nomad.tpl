@@ -23,15 +23,18 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
         service {
             check {
+                address_mode = "alloc"
+
                 check_restart {
                     grace = "2m"
                     limit = 3
                 }
 
                 interval = "30s"
-                port     = "http"
+                path     = "/health"
+                port     = 8086
                 timeout  = "2s"
-                type     = "tcp"
+                type     = "http"
             }
 
             name     = "[[ template "service_name" (list . "ingester" "http") ]]"
