@@ -99,6 +99,8 @@ def _attach_acl(data: dict[str, Any]) -> None:
 
             path "{PARAMS_VAR_ROOT_PATH}/{data['job']}/state" {{
                 "capabilities" = [
+                    "list",
+                    "read",
                     "write"
                 ]
             }}
