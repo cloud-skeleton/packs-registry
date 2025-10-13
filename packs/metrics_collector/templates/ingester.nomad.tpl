@@ -54,7 +54,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 args = [
                     "-c",
                     <<-EOS
-                    while ! influx ping 2> /dev/null; do
+                    while ! influx ping > /dev/null 2>&1; do
                         sleep 5
                     done
                     if curl -s http://127.0.0.1:8086/api/v2/setup | grep -q '"allowed": true'; then
@@ -67,10 +67,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                             -r '${INFLUX_DATA_RETENTION}' -f > /dev/null
                         ORG_ID=$(influx org ls -n '${INFLUX_ORGANIZATION}' --hide-headers | awk '{ print $1 }')
                         USER_ID=$(influx user ls -n '${INFLUX_USER}' --hide-headers | awk '{ print $1 }')
+                        BUCKET_ID=$(influx bucket ls -n '${INFLUX_BUCKET}' --org-id $ORG_ID --hide-headers | awk '{ print $1 }')
                         curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
                             -H "Authorization: Bearer ${NOMAD_TOKEN}" \
                             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
-                            --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":{\"org_id\":\"$ORG_ID\",\"user_id\":\"$USER_ID\"}}"
+                            --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":{\"bucket_id\":\"$BUCKET_ID\",\"org_id\":\"$ORG_ID\",\"user_id\":\"$USER_ID\"}}"
                         echo 'Database has been initialized.'
                         exit 0
                     fi
@@ -81,6 +82,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     if [ "$(influx org ls -i $ORG_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_ORGANIZATION}' ]; then
                         influx org update -i $ORG_ID -n '${INFLUX_ORGANIZATION}' > /dev/null
                         echo 'Organization name has been changed.'
+                    fi
+                    BUCKET_ID=$(echo "$STATE" | grep -oE '"bucket_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+                    if [ "$(influx bucket ls -i $BUCKET_ID --org-id $ORG_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_BUCKET}' ]; then
+                        influx bucket update -i $BUCKET_ID -n '${INFLUX_BUCKET}' > /dev/null
+                        echo 'Bucket name has been changed.'
                     fi
                     USER_ID=$(echo "$STATE" | grep -oE '"user_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
                     if [ "$(influx user ls -i $USER_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_USER}' ]; then
