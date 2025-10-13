@@ -88,6 +88,29 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                         influx bucket update -i $BUCKET_ID -n '${INFLUX_BUCKET}' > /dev/null
                         echo 'Bucket name has been changed.'
                     fi
+                    duration_to_seconds() {
+                        local duration="$1" seconds=0 num unit rest
+                        while [[ "[[" ]] $duration =~ ^([0-9]+)([smhdw])(.*)$ [[ "]]" ]]; do
+                            num=$$${BASH_REMATCH[1]}
+                            unit=$$${BASH_REMATCH[2]}
+                            rest=$$${BASH_REMATCH[3]}
+                            case "$unit" in
+                                s) seconds=$((seconds + num)) ;;
+                                m) seconds=$((seconds + num * 60)) ;;
+                                h) seconds=$((seconds + num * 3600)) ;;
+                                d) seconds=$((seconds + num * 86400)) ;;
+                                w) seconds=$((seconds + num * 604800)) ;;
+                            esac
+                            duration="$rest"
+                        done
+                        [[ "[[" ]] -n $duration [[ "]]" ]] && return 1
+                        echo "$seconds"
+                    }
+                    BUCKET_RETENTION=$(influx bucket ls --org-id $ORG_ID -i $BUCKET_ID --hide-headers | awk '{ print $3 }')
+                    if [ $(duration_to_seconds $BUCKET_RETENTION) != $(duration_to_seconds ${INFLUX_DATA_RETENTION}) ]; then
+                        influx bucket update -i $BUCKET_ID -r '${INFLUX_DATA_RETENTION}' > /dev/null
+                        echo 'Bucket retention has been changed.'
+                    fi
                     USER_ID=$(echo "$STATE" | grep -oE '"user_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
                     if [ "$(influx user ls -i $USER_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_USER}' ]; then
                         influx user update -i $USER_ID -n '${INFLUX_USER}' > /dev/null
@@ -102,7 +125,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     fi
                     EOS
                 ]
-                command        = "sh"
+                command        = "bash"
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
             }
