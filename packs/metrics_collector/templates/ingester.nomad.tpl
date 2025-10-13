@@ -49,7 +49,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             task = "tunnel"
         }
 
-        task "setup" {
+        task "influxdb-setup" {
             config {
                 args = [
                     "-c",
@@ -57,14 +57,42 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     while ! influx ping 2> /dev/null; do
                         sleep 5
                     done
-                    if ! influx org ls -n '${INFLUX_ORGANIZATION}' 2> /dev/null; then
+                    if curl -s http://127.0.0.1:8086/api/v2/setup | grep -q '"allowed": true'; then
                         influx setup \
                             -u '${INFLUX_USER}' \
                             -p '${INFLUX_PASSWORD}' \
                             -t '${INFLUX_TOKEN}' \
                             -o '${INFLUX_ORGANIZATION}' \
                             -b '${INFLUX_BUCKET}' \
-                            -r '${INFLUX_DATA_RETENTION}' -f
+                            -r '${INFLUX_DATA_RETENTION}' -f > /dev/null
+                        ORG_ID=$(influx org ls -n '${INFLUX_ORGANIZATION}' --hide-headers | awk '{ print $1 }')
+                        USER_ID=$(influx user ls -n '${INFLUX_USER}' --hide-headers | awk '{ print $1 }')
+                        curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
+                            -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+                            -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
+                            --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":{\"org_id\":\"$ORG_ID\",\"user_id\":\"$USER_ID\"}}"
+                        echo 'Database has been initialized.'
+                        exit 0
+                    fi
+                    STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
+                        -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+                        "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
+                    ORG_ID=$(echo "$STATE" | grep -oE '"org_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+                    if [ "$(influx org ls -i $ORG_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_ORGANIZATION}' ]; then
+                        influx org update -i $ORG_ID -n '${INFLUX_ORGANIZATION}' > /dev/null
+                        echo 'Organization name has been changed.'
+                    fi
+                    USER_ID=$(echo "$STATE" | grep -oE '"user_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+                    if [ "$(influx user ls -i $USER_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_USER}' ]; then
+                        influx user update -i $USER_ID -n '${INFLUX_USER}' > /dev/null
+                        echo 'User name has been changed.'
+                    fi
+                    CREDENTIALS_STATUS_CODE=$(curl -so /dev/null -w "%%%{http_code}" \
+                        -X POST http://127.0.0.1:8086/api/v2/signin \
+                        -u '${INFLUX_USER}:${INFLUX_PASSWORD}')
+                    if [[ "[[" ]] $CREDENTIALS_STATUS_CODE == 401 [[ "]]" ]]; then
+                        influx user password -i $USER_ID -p '${INFLUX_PASSWORD}' > /dev/null
+                        echo 'User password has been changed.'
                     fi
                     EOS
                 ]
@@ -74,6 +102,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
 
             driver = "docker"
+
+            identity {
+                change_mode = "restart"
+                env         = true
+            }
 
             lifecycle {
                 hook = "poststart"
@@ -105,7 +138,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
         }
 
-        task "service" {
+        task "influxdb-service" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
@@ -177,6 +210,79 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 volume      = "data"
             }
         }
+
+        // task "telegraf-service" {
+        //     // config {
+        //     //     cpu_hard_limit = true
+        //     //     image          = "${DOCKER_IMAGE}"
+
+        //     //     mount {
+        //     //         readonly = true
+        //     //         source   = "local/config.yml"
+        //     //         target   = "/etc/influxdb2/configs/config.yml"
+        //     //         type     = "bind"
+        //     //     }
+        //     // }
+
+        //     // driver = "docker"
+
+        //     // env {
+        //     //     INFLUXD_CONFIG_PATH = "/etc/influxdb2/configs"
+        //     // }
+
+        //     // kill_signal  = "SIGINT"
+
+        //     // resources {
+        //     //     cpu    = 100
+        //     //     memory = 128
+        //     // }
+
+        //     // template {
+        //     //     data = <<-EOF
+        //     //     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        //     //     DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
+        //     //     {{- end }}
+        //     //     EOF
+        //     //     destination = "secrets/env"
+        //     //     env         = true
+        //     // }
+
+        //     // template {
+        //     //     data = <<-EOF
+        //     //     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+        //     //     ---
+        //     //     bolt-path: /var/lib/influxdb2/influxd.bolt
+        //     //     engine-path: /var/lib/influxdb2/engine
+        //     //     hardening-enabled: true
+        //     //     instance-id: "{{ env "NOMAD_ALLOC_ADDR_http" }}"
+        //     //     log-level: {{ index . "log_level" }}
+        //     //     metrics-disabled: true
+        //     //     pprof-disabled: true
+        //     //     query-concurrency: 2
+        //     //     query-initial-memory-bytes: 8388608
+        //     //     query-memory-bytes: 16777216
+        //     //     query-queue-size: 12
+        //     //     reporting-disabled: true
+        //     //     storage-cache-max-memory-size: 16777216
+        //     //     storage-cache-snapshot-memory-size: 8388608
+        //     //     storage-compact-throughput-burst: 8388608
+        //     //     storage-max-concurrent-compactions: 1
+        //     //     storage-retention-check-interval: 60m0s
+        //     //     storage-shard-precreator-check-interval: 30m0s
+        //     //     strong-passwords: true
+        //     //     ...
+        //     //     {{- end }}
+        //     //     EOF
+        //     //     destination = "local/config.yml"
+        //     //     uid         = 1000
+        //     //     gid         = 1000
+        //     // }
+
+        //     // volume_mount {
+        //     //     destination = "/var/lib/influxdb2"
+        //     //     volume      = "data"
+        //     // }
+        // }
 
         [[ template "tunnel_mtls" (list . "ingester" (dict "http" 8086)) ]]
 
