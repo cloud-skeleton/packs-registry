@@ -47,28 +47,10 @@
         task "tunnel" {
             config {
                 args = [
-                    "/etc/stunnel/stunnel.conf"
+                    "/local/stunnel.conf"
                 ]
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
-
-                mount {
-                    readonly = true
-                    source   = "local/stunnel.conf"
-                    target   = "/etc/stunnel/stunnel.conf"
-                    type     = "bind"
-                }
-
-                [[- range $secret := list "ca.cert" "main.cert" "main.key" ]]
-
-                mount {
-                    readonly = true
-                    source   = "secrets/[[ $secret ]]"
-                    target   = "/run/secrets/[[ $secret ]]"
-                    type     = "bind"
-                }
-                [[- end ]]
-
                 ports = [
                     [[- range $name, $port := $ports ]]
                     "[[ $name ]]",
@@ -96,10 +78,10 @@
 
                 [[ printf "[%s]" $name ]]
                 accept = 0.0.0.0:{{ env "NOMAD_PORT_[[ $name ]]" }}
-                CAfile = /run/secrets/ca.cert
-                cert = /run/secrets/main.cert
+                CAfile = /secrets/ca.cert
+                cert = /secrets/main.cert
                 connect = 127.0.0.1:[[ $port ]]
-                key = /run/secrets/main.key
+                key = /secrets/main.key
                 TIMEOUTclose = 5
                 TIMEOUTidle = 35
                 verify = 2
