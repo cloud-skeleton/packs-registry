@@ -49,81 +49,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             task = "tunnel"
         }
 
-        task "influxdb-setup" {
+        task "influxdb-autoconfig" {
             config {
                 args = [
-                    "-c",
-                    <<-EOS
-                    while ! influx ping > /dev/null 2>&1; do
-                        sleep 5
-                    done
-                    if curl -s http://127.0.0.1:8086/api/v2/setup | grep -q '"allowed": true'; then
-                        influx setup \
-                            -u '${INFLUX_USER}' \
-                            -p '${INFLUX_PASSWORD}' \
-                            -t '${INFLUX_TOKEN}' \
-                            -o '${INFLUX_ORGANIZATION}' \
-                            -b '${INFLUX_BUCKET}' \
-                            -r '${INFLUX_DATA_RETENTION}' -f > /dev/null
-                        ORG_ID=$(influx org ls -n '${INFLUX_ORGANIZATION}' --hide-headers | awk '{ print $1 }')
-                        USER_ID=$(influx user ls -n '${INFLUX_USER}' --hide-headers | awk '{ print $1 }')
-                        BUCKET_ID=$(influx bucket ls -n '${INFLUX_BUCKET}' --org-id $ORG_ID --hide-headers | awk '{ print $1 }')
-                        curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
-                            -H "Authorization: Bearer ${NOMAD_TOKEN}" \
-                            -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
-                            --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":{\"bucket_id\":\"$BUCKET_ID\",\"org_id\":\"$ORG_ID\",\"user_id\":\"$USER_ID\"}}"
-                        echo 'Database has been initialized.'
-                        exit 0
-                    fi
-                    STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
-                        -H "Authorization: Bearer ${NOMAD_TOKEN}" \
-                        "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
-                    ORG_ID=$(echo "$STATE" | grep -oE '"org_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
-                    if [ "$(influx org ls -i $ORG_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_ORGANIZATION}' ]; then
-                        influx org update -i $ORG_ID -n '${INFLUX_ORGANIZATION}' > /dev/null
-                        echo 'Organization name has been changed.'
-                    fi
-                    BUCKET_ID=$(echo "$STATE" | grep -oE '"bucket_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
-                    if [ "$(influx bucket ls -i $BUCKET_ID --org-id $ORG_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_BUCKET}' ]; then
-                        influx bucket update -i $BUCKET_ID -n '${INFLUX_BUCKET}' > /dev/null
-                        echo 'Bucket name has been changed.'
-                    fi
-                    duration_to_seconds() {
-                        local duration="$1" seconds=0 num unit rest
-                        while [[ "[[" ]] $duration =~ ^([0-9]+)([smhdw])(.*)$ [[ "]]" ]]; do
-                            num=$$${BASH_REMATCH[1]}
-                            unit=$$${BASH_REMATCH[2]}
-                            rest=$$${BASH_REMATCH[3]}
-                            case "$unit" in
-                                s) seconds=$((seconds + num)) ;;
-                                m) seconds=$((seconds + num * 60)) ;;
-                                h) seconds=$((seconds + num * 3600)) ;;
-                                d) seconds=$((seconds + num * 86400)) ;;
-                                w) seconds=$((seconds + num * 604800)) ;;
-                            esac
-                            duration="$rest"
-                        done
-                        [[ "[[" ]] -n $duration [[ "]]" ]] && return 1
-                        echo "$seconds"
-                    }
-                    BUCKET_RETENTION=$(influx bucket ls --org-id $ORG_ID -i $BUCKET_ID --hide-headers | awk '{ print $3 }')
-                    if [ $(duration_to_seconds $BUCKET_RETENTION) != $(duration_to_seconds ${INFLUX_DATA_RETENTION}) ]; then
-                        influx bucket update -i $BUCKET_ID -r '${INFLUX_DATA_RETENTION}' > /dev/null
-                        echo 'Bucket retention has been changed.'
-                    fi
-                    USER_ID=$(echo "$STATE" | grep -oE '"user_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
-                    if [ "$(influx user ls -i $USER_ID --hide-headers | awk '{ print $2 }')" != '${INFLUX_USER}' ]; then
-                        influx user update -i $USER_ID -n '${INFLUX_USER}' > /dev/null
-                        echo 'User name has been changed.'
-                    fi
-                    CREDENTIALS_STATUS_CODE=$(curl -so /dev/null -w "%%%{http_code}" \
-                        -X POST http://127.0.0.1:8086/api/v2/signin \
-                        -u '${INFLUX_USER}:${INFLUX_PASSWORD}')
-                    if [[ "[[" ]] $CREDENTIALS_STATUS_CODE == 401 [[ "]]" ]]; then
-                        influx user password -i $USER_ID -p '${INFLUX_PASSWORD}' > /dev/null
-                        echo 'User password has been changed.'
-                    fi
-                    EOS
+                    "local/autoconfig.sh"
                 ]
                 command        = "bash"
                 cpu_hard_limit = true
@@ -137,8 +66,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 env         = true
             }
 
+            kill_timeout = "30s"
+
             lifecycle {
-                hook = "poststart"
+                hook    = "poststart"
+                sidecar = true
             }
 
             resources {
@@ -147,7 +79,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
 
             template {
-                data = <<-EOF
+                data        = <<-EOF
+[[ fileContents "files/autoconfig.sh" | indent 16 ]]
+                EOF
+                destination = "local/autoconfig.sh"
+            }
+
+            template {
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}
@@ -194,7 +133,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
 
             template {
-                data = <<-EOF
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}
@@ -204,7 +143,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
 
             template {
-                data = <<-EOF
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
                 ---
                 bolt-path: /var/lib/influxdb2/influxd.bolt
