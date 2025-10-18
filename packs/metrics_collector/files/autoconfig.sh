@@ -1,7 +1,3 @@
-create_tokens() {
-    echo "Create tokens"
-}
-
 duration_to_seconds() {
     local DURATION="$1"
     local SECONDS=0
@@ -26,7 +22,7 @@ duration_to_seconds() {
 
 initialize() {
     if curl -s http://127.0.0.1:8086/api/v2/setup | grep -q '"allowed": true'; then
-        export INFLUX_TOKEN=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)
+        export INFLUX_TOKEN=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
         influx setup \
             -u "${INFLUX_USER}" \
             -p "${INFLUX_PASSWORD}" \
@@ -37,11 +33,14 @@ initialize() {
         local ORG_ID=$(influx org ls -n "${INFLUX_ORGANIZATION}" --hide-headers | awk '{ print $1 }')
         local USER_ID=$(influx user ls -n "${INFLUX_USER}" --hide-headers | awk '{ print $1 }')
         local BUCKET_ID=$(influx bucket ls -n "${INFLUX_BUCKET}" --org-id ${ORG_ID} --hide-headers | awk '{ print $1 }')
+        local TELEGRAF_TOKEN_DATA="$(influx auth create --org-id ${ORG_ID} -d "Telegraf's Token" --write-bucket ${BUCKET_ID} --json)"
+        local TELEGRAF_TOKEN="$(echo "$TELEGRAF_TOKEN_DATA" | grep -oE '"token":\s*"[^"]+"' | cut -d' :' -f2 | tr -d '"')"
         curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
             -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
             --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":{\"bucket_id\":\"${BUCKET_ID}\",\
-            \"org_id\":\"${ORG_ID}\",\"admin_token\":\"${INFLUX_TOKEN}\",\"user_id\":\"${USER_ID}\"}}"
+            \"org_id\":\"${ORG_ID}\",\"admin_token\":\"${INFLUX_TOKEN}\",\"telegraf_token\":\"${TELEGRAF_TOKEN}\",\
+            \"user_id\":\"${USER_ID}\"}}"
         echo 'Database has been initialized.'
         return 1
     fi
@@ -132,7 +131,6 @@ if initialize; then
     set_bucket_name
     set_bucket_retention
 fi
-create_tokens
 
 (( GOT_TERM )) && exit 0
 sleep infinity & SLEEP_PID=$!
