@@ -91,9 +91,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
-                INFLUX_TOKEN={{ index . "token" }}
-                INFLUX_USER={{ index . "user" }}
-                INFLUX_PASSWORD={{ index . "password" }}
+                INFLUX_USER={{ index . "admin_user" }}
+                INFLUX_PASSWORD={{ index . "admin_password" }}
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
                 INFLUX_BUCKET={{ index . "bucket_name" }}
@@ -180,76 +179,129 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         }
 
         // task "telegraf-service" {
-        //     // config {
-        //     //     cpu_hard_limit = true
-        //     //     image          = "${DOCKER_IMAGE}"
+        //     config {
+        //         cpu_hard_limit = true
+        //         image          = "${DOCKER_IMAGE}"
 
-        //     //     mount {
-        //     //         readonly = true
-        //     //         source   = "local/config.yml"
-        //     //         target   = "/etc/influxdb2/configs/config.yml"
-        //     //         type     = "bind"
-        //     //     }
-        //     // }
+        //         mount {
+        //             readonly = true
+        //             source   = "local/main.conf"
+        //             target   = "/etc/telegraf/telegraf.d/main.conf"
+        //             type     = "bind"
+        //         }
+        //     }
 
-        //     // driver = "docker"
+        //     driver = "docker"
 
-        //     // env {
-        //     //     INFLUXD_CONFIG_PATH = "/etc/influxdb2/configs"
-        //     // }
+        //     resources {
+        //         cpu    = 25
+        //         memory = 16
+        //     }
 
-        //     // kill_signal  = "SIGINT"
+        //     template {
+        //         data = <<-EOF
+        //         {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        //         DOCKER_IMAGE="telegraf:{{ index . "telegraf" }}"
+        //         {{- end }}
+        //         EOF
+        //         destination = "secrets/env"
+        //         env         = true
+        //     }
 
-        //     // resources {
-        //     //     cpu    = 100
-        //     //     memory = 128
-        //     // }
-
-        //     // template {
-        //     //     data = <<-EOF
-        //     //     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
-        //     //     DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
-        //     //     {{- end }}
-        //     //     EOF
-        //     //     destination = "secrets/env"
-        //     //     env         = true
-        //     // }
-
-        //     // template {
-        //     //     data = <<-EOF
-        //     //     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-        //     //     ---
-        //     //     bolt-path: /var/lib/influxdb2/influxd.bolt
-        //     //     engine-path: /var/lib/influxdb2/engine
-        //     //     hardening-enabled: true
-        //     //     instance-id: "{{ env "NOMAD_ALLOC_ADDR_http" }}"
-        //     //     log-level: {{ index . "log_level" }}
-        //     //     metrics-disabled: true
-        //     //     pprof-disabled: true
-        //     //     query-concurrency: 2
-        //     //     query-initial-memory-bytes: 8388608
-        //     //     query-memory-bytes: 16777216
-        //     //     query-queue-size: 12
-        //     //     reporting-disabled: true
-        //     //     storage-cache-max-memory-size: 16777216
-        //     //     storage-cache-snapshot-memory-size: 8388608
-        //     //     storage-compact-throughput-burst: 8388608
-        //     //     storage-max-concurrent-compactions: 1
-        //     //     storage-retention-check-interval: 60m0s
-        //     //     storage-shard-precreator-check-interval: 30m0s
-        //     //     strong-passwords: true
-        //     //     ...
-        //     //     {{- end }}
-        //     //     EOF
-        //     //     destination = "local/config.yml"
-        //     //     uid         = 1000
-        //     //     gid         = 1000
-        //     // }
-
-        //     // volume_mount {
-        //     //     destination = "/var/lib/influxdb2"
-        //     //     volume      = "data"
-        //     // }
+        //     template {
+        //         data = <<-EOF
+        //         {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+        //         # # Configuration for sending metrics to InfluxDB 2.0
+        //         [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
+        //         #   ## The URLs of the InfluxDB cluster nodes.
+        //         #   ##
+        //         #   ## Multiple URLs can be specified for a single cluster, only ONE of the
+        //         #   ## urls will be written to each interval.
+        //         #   ##   ex: urls = ["https://us-west-2-1.aws.cloud2.influxdata.com"]
+        //         #   urls = ["http://127.0.0.1:8086"]
+        //         #
+        //         #   ## Local address to bind when connecting to the server
+        //         #   ## If empty or not set, the local address is automatically chosen.
+        //         #   # local_address = ""
+        //         #
+        //         #   ## Token for authentication.
+        //         #   token = ""
+        //         #
+        //         #   ## Organization is the name of the organization you wish to write to.
+        //         #   organization = ""
+        //         #
+        //         #   ## Destination bucket to write into.
+        //         #   bucket = ""
+        //         #
+        //         #   ## The value of this tag will be used to determine the bucket.  If this
+        //         #   ## tag is not set the 'bucket' option is used as the default.
+        //         #   # bucket_tag = ""
+        //         #
+        //         #   ## If true, the bucket tag will not be added to the metric.
+        //         #   # exclude_bucket_tag = false
+        //         #
+        //         #   ## Timeout for HTTP messages.
+        //         #   # timeout = "5s"
+        //         #
+        //         #   ## Additional HTTP headers
+        //         #   # http_headers = {"X-Special-Header" = "Special-Value"}
+        //         #
+        //         #   ## HTTP Proxy override, if unset values the standard proxy environment
+        //         #   ## variables are consulted to determine which proxy, if any, should be used.
+        //         #   # http_proxy = "http://corporate.proxy:3128"
+        //         #
+        //         #   ## HTTP User-Agent
+        //         #   # user_agent = "telegraf"
+        //         #
+        //         #   ## Content-Encoding for write request body, can be set to "gzip" to
+        //         #   ## compress body or "identity" to apply no encoding.
+        //         #   # content_encoding = "gzip"
+        //         #
+        //         #   ## Enable or disable uint support for writing uints influxdb 2.0.
+        //         #   # influx_uint_support = false
+        //         #
+        //         #   ## When true, Telegraf will omit the timestamp on data to allow InfluxDB
+        //         #   ## to set the timestamp of the data during ingestion. This is generally NOT
+        //         #   ## what you want as it can lead to data points captured at different times
+        //         #   ## getting omitted due to similar data.
+        //         #   # influx_omit_timestamp = false
+        //         #
+        //         #   ## HTTP/2 Timeouts
+        //         #   ## The following values control the HTTP/2 client's timeouts. These settings
+        //         #   ## are generally not required unless a user is seeing issues with client
+        //         #   ## disconnects. If a user does see issues, then it is suggested to set these
+        //         #   ## values to "15s" for ping timeout and "30s" for read idle timeout and
+        //         #   ## retry.
+        //         #   ##
+        //         #   ## Note that the timer for read_idle_timeout begins at the end of the last
+        //         #   ## successful write and not at the beginning of the next write.
+        //         #   # ping_timeout = "0s"
+        //         #   # read_idle_timeout = "0s"
+        //         #
+        //         #   ## Optional TLS Config for use on HTTP connections.
+        //         #   # tls_ca = "/etc/telegraf/ca.pem"
+        //         #   # tls_cert = "/etc/telegraf/cert.pem"
+        //         #   # tls_key = "/etc/telegraf/key.pem"
+        //         #   ## Use TLS but skip chain & host verification
+        //         #   # insecure_skip_verify = false
+        //         #
+        //         #   ## Rate limits for sending data (disabled by default)
+        //         #   ## Available, uncompressed payload size e.g. "5MB"
+        //         #   # rate_limit = "unlimited"
+        //         #   ## Fixed time-window for the available payload size e.g. "5m"
+        //         #   # rate_limit_period = "0s"
+        //         #
+        //         #   ## Number of concurrent writes to the output
+        //         #   ## When set to one sequential sending is used (default).
+        //         #   ## NOTE: When using two or more concurrent writes the sending order of
+        //         #   ##       metrics is not guaranteed!
+        //         #   # concurrent_writes = 1
+        //         {{- end }}
+        //         EOF
+        //         destination = "local/main.conf"
+        //         uid         = 100
+        //         gid         = 101
+        //     }
         // }
 
         [[ template "tunnel_mtls" (list . "ingester" (dict "http" 8086)) ]]
@@ -273,8 +325,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         "params.config.organization_name" = "cloud-skeleton"
 
         // Docker images used in job
-        "params.images.influxdb"            = "2.7.12-alpine"
-        "params.images.cleanstart/stunnel"  = "5.75"
+        "params.images.influxdb"           = "2.7.12-alpine"
+        "params.images.cleanstart/stunnel" = "5.75"
+        "params.images.telegraf"           = "1.36.2-alpine"
 
         // Volumes
         "volumes.[[ var "data_volume.id" . ]].id"        = "[[ var "data_volume.id" . ]]"
