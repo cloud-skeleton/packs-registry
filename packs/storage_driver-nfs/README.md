@@ -39,10 +39,9 @@ A lightweight, stateless CSI plugin that mounts directories from an **existing N
 
 ### Security Requirements
 
-| Component          | Requirement / Note |
-|--------------------|--------------------|
-| Privileged         | ✅                 |
-| Extra capabilities | ❌                 |
+| Component  | Requirement / Note |
+|------------|--------------------|
+| Privileged | ✅                 |
 
 ## Configuration
 

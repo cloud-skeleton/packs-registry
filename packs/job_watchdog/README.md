@@ -39,10 +39,9 @@ Automatically creates read/list ACL policies so job workloads can access variabl
 
 ### Security Requirements
 
-| Component          | Requirement / Note |
-|--------------------|--------------------|
-| Privileged         | ❌                 |
-| Extra capabilities | ❌                 |
+| Component  | Requirement / Note |
+|------------|--------------------|
+| Privileged | ❌                 |
 
 ## Configuration
 

@@ -46,10 +46,9 @@ A robust reverse proxy setup using **[Traefik][traefik]** to:
 
 ### Security Requirements
 
-| Component          | Requirement / Note |
-|--------------------|--------------------|
-| Privileged         | ❌                 |
-| Extra capabilities | ❌                 |
+| Component  | Requirement / Note |
+|------------|--------------------|
+| Privileged | ❌                 |
 
 ## Configuration
 
