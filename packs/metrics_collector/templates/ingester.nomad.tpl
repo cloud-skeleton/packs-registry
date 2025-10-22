@@ -95,7 +95,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 INFLUX_PASSWORD={{ index . "admin_password" }}
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-                INFLUX_BUCKET={{ index . "bucket_name" }}
                 INFLUX_ORGANIZATION={{ index . "organization_name" }}
                 INFLUX_DATA_RETENTION={{ index . "data_retention" }}
                 {{- end }}
@@ -124,12 +123,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 INFLUXD_CONFIG_PATH = "/etc/influxdb2/configs"
             }
 
-            kill_signal  = "SIGINT"
-            leader       = true
+            kill_signal = "SIGINT"
 
             resources {
                 cpu    = 100
-                memory = 256
+                memory = 192
             }
 
             template {
@@ -194,9 +192,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             driver = "docker"
 
+            lifecycle {
+                hook    = "poststart"
+                sidecar = true
+            }
+
             resources {
-                cpu    = 50
-                memory = 32
+                cpu    = 75
+                memory = 64
             }
 
             template {
@@ -213,18 +216,30 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 data = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
                 [agent]
-                skip_processors_after_aggregators = true
+                    debug = true
+                    omit_hostname = true
+                    skip_processors_after_aggregators = true
 
-                [[ "[[" ]]inputs.statsd[[ "]]" ]]
-
+                [[ "[[" ]]inputs.prometheus[[ "]]" ]]
+                    {{- $nomad_nodes := .nomad_nodes.Value | parseJSON }}
+                    urls = [
+                    {{- range $nomad_node := $nomad_nodes }}
+                        "https://{{ $nomad_node }}:4646/v1/metrics?format=prometheus",
+                    {{- end }}
+                    ]
+                    insecure_skip_verify = true
+                    tls_enable = true
+                    [inputs.prometheus.tags]
+                        app_name = "nomad"
 
                 [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
-                urls = ["http://127.0.0.1:8086"]
-                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
-                token = "{{ .telegraf_token }}"
-                {{- end }}
-                organization = "{{ .organization_name }}"
-                bucket = "{{ .bucket_name }}"
+                    bucket_tag = "app_name"
+                    exclude_bucket_tag = true
+                    organization = "{{ .organization_name }}"
+                    urls = ["http://127.0.0.1:8086"]
+                    {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+                    token = "{{ .telegraf_token }}"
+                    {{- end }}
                 {{- end }}
                 EOF
                 destination = "local/telegraf.conf"
@@ -248,9 +263,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Dynamic configuration
-        "params.config.bucket_name"       = "system"
         "params.config.data_retention"    = "30d"
         "params.config.log_level"         = "info"
+        "params.config.nomad_nodes"       = "[]"
         "params.config.organization_name" = "cloud-skeleton"
 
         // Docker images used in job
@@ -268,8 +283,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     update {
         auto_revert       = true
-        healthy_deadline  = "2m"
+        healthy_deadline  = "3m"
         min_healthy_time  = "30s"
-        progress_deadline = "3m"
+        progress_deadline = "4m"
     }
 }
