@@ -126,7 +126,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             kill_signal = "SIGINT"
 
             resources {
-                cpu    = 100
+                cpu    = 250
                 memory = 192
             }
 
@@ -263,7 +263,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Dynamic configuration
-        "params.config.data_retention"    = "30d"
+        "params.config.data_retention"    = "7d"
         "params.config.log_level"         = "info"
         "params.config.nomad_nodes"       = "[]"
         "params.config.organization_name" = "cloud-skeleton"
