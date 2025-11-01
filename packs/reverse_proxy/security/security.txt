@@ -2,15 +2,15 @@
 Hash: SHA512
 
 Contact: https://github.com/orgs/cloud-skeleton/discussions
-Expires: 2025-11-01T00:00:00.000Z
+Expires: 2025-12-01T00:00:00.000Z
 Encryption: https://raw.githubusercontent.com/cloud-skeleton/packs-registry/refs/heads/main/packs/reverse_proxy/security/info@cloudskeleton.eu.public.asc
 Preferred-Languages: en, lt
 -----BEGIN PGP SIGNATURE-----
 
-iMAFARYKAEAiIQWNK2EAKpX00bTre/1ak8AxnStskaFq1a/5oEwzY8s+JQUCaNx/
-3BYcaW5mb0BjbG91ZHNrZWxldG9uLmV1AADH/gHHTTYXH4TvrogZqOGV81eARB89
-4deHqaaQGWq+bky8qfAZZAje9ANQzTuDi7pqMX3Z/hvCASzpKiEAAciduyeJzENz
-tMLyCX24Qm6Q20SISAHfTbj8+KgU2rKqH8fbJNrM/WffmE2DZ+mXYlmd6xWBAxku
-NgA=
-=KLsE
+iMAFARYKAEAiIQVos+d6CshrZFL29ABwxr8HrANn38fNVhRhwYk4DIlPGwUCaQVe
+SxYcaW5mb0BjbG91ZHNrZWxldG9uLmV1AADubQHHdKFoLJCFnpdC/th2XEBzr2bz
+ImezY/ndgD9IebnBaY6JufaRn2hlxXU4e6iXXZ96uQb0yiASqzcAAcjz/TyEfWCA
+oz46/M21F6OYcHREox+fxCWrEyGTncRUkH8EU4nSUFuXYdZ7bOyBDG9XWfYG+65y
+BQA=
+=bz9g
 -----END PGP SIGNATURE-----
