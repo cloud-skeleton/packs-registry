@@ -227,17 +227,13 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     omit_hostname = true
                     skip_processors_after_aggregators = true
 
-                [[ "[[" ]]inputs.prometheus[[ "]]" ]]
-                    {{- $nomad_nodes := .nomad_nodes.Value | parseJSON }}
-                    urls = [
-                    {{- range $nomad_node := $nomad_nodes }}
-                        "https://{{ $nomad_node }}:4646/v1/metrics?format=prometheus",
-                    {{- end }}
-                    ]
+                {{- range $nomad_node := .nomad_nodes.Value | parseJSON }}
+                [[ "[[" ]]inputs.nomad[[ "]]" ]]
+                    url = "https://{{ $nomad_node }}:4646"
                     tls_ca = "/run/secrets/nomad-agent-ca.pem"
-                    tls_enable = true
-                    [inputs.prometheus.tags]
+                    [inputs.nomad.tags]
                         app_name = "nomad"
+                {{- end }}
 
                 [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
                     bucket_tag = "app_name"
