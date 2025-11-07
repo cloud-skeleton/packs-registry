@@ -188,6 +188,13 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     target   = "/etc/telegraf/telegraf.conf"
                     type     = "bind"
                 }
+
+                mount {
+                    readonly = true
+                    source   = "/etc/nomad.d/certs/nomad-agent-ca.pem"
+                    target   = "/run/secrets/nomad-agent-ca.pem"
+                    type     = "bind"
+                }
             }
 
             driver = "docker"
@@ -227,7 +234,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                         "https://{{ $nomad_node }}:4646/v1/metrics?format=prometheus",
                     {{- end }}
                     ]
-                    insecure_skip_verify = true
+                    tls_ca = "/run/secrets/nomad-agent-ca.pem"
                     tls_enable = true
                     [inputs.prometheus.tags]
                         app_name = "nomad"
