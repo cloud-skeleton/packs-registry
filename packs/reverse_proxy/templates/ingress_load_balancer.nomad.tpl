@@ -392,7 +392,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         "params.config.ssllabs_cidr"   = "69.67.183.0/24"
 
         // Docker images used in job
-        "params.images.traefik" = "3.5.2"
+        "params.images.traefik" = "3.6.6"
 
         // Volumes
         "volumes.[[ var "certificates_volume.id" . ]].id"        = "[[ var "certificates_volume.id" . ]]"
