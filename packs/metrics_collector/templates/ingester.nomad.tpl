@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 address_mode = "alloc"
 
                 check_restart {
-                    grace = "3m"
+                    grace = "2m"
                     limit = 3
                 }
 
@@ -272,9 +272,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         "params.config.organization_name" = "cloud-skeleton"
 
         // Docker images used in job
-        "params.images.influxdb"           = "2.7.12-alpine"
-        "params.images.cleanstart/stunnel" = "5.75"
-        "params.images.telegraf"           = "1.36.2-alpine"
+        "params.images.influxdb"           = "2.8-alpine"
+        "params.images.cleanstart/stunnel" = "5.76"
+        "params.images.telegraf"           = "1.37-alpine"
 
         // Volumes
         "volumes.[[ var "data_volume.id" . ]].id"        = "[[ var "data_volume.id" . ]]"
@@ -285,9 +285,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     namespace = "system"
 
     update {
-        auto_revert       = true
-        healthy_deadline  = "3m"
-        min_healthy_time  = "30s"
-        progress_deadline = "4m"
+        auto_revert      = true
+        healthy_deadline = "6m"
+        min_healthy_time = "2m"
     }
 }

@@ -407,6 +407,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
         auto_promote     = true
         auto_revert      = true
         canary           = 25
+        healthy_deadline = "6m"
         min_healthy_time = "2m"
     }
 }

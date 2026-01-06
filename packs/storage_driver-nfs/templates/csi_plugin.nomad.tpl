@@ -72,6 +72,6 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
         auto_promote     = true
         auto_revert      = true
         canary           = 25
-        min_healthy_time = "2m"
+        min_healthy_time = "3m"
     }
 }
