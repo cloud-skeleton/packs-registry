@@ -66,8 +66,4 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         "params.state.last_event" = "0"
     }
     namespace = "system"
-
-    update {
-        auto_revert = true
-    }
 }
