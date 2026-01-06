@@ -69,6 +69,9 @@ job "[[ template "job_name" (list . "csi_plugin") ]]" {
     type      = "system"
 
     update {
-        auto_revert = true
+        auto_promote     = true
+        auto_revert      = true
+        canary           = 25
+        min_healthy_time = "2m"
     }
 }
