@@ -126,7 +126,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             kill_signal = "SIGINT"
 
             resources {
-                cpu    = 250
+                cpu    = 400
                 memory = 192
             }
 
@@ -206,7 +206,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             resources {
                 cpu    = 75
-                memory = 64
+                memory = 96
             }
 
             template {
