@@ -112,26 +112,8 @@ set_dashboard() {
     local ORG_ID=$(echo "$STATE" | grep -oE '"org_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
     local DASHBOARD_STACK_ID=$(echo "$STATE" | grep -oE '"dashboard_stack_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
     local APPLY_OUTPUT="$(influx apply -f local/dashboard.json --org-id ${ORG_ID} \
-        --stack-id ${DASHBOARD_STACK_ID} --force yes)"
-    echo "${APPLY_OUTPUT}"
-    local CHANGES_DETECTED=$(echo "$APPLY_OUTPUT" | awk '
-        $1 == "|" && ($2 == "+" || $2 == "-") {
-            $1=""; $2=""; 
-            line=$0;
-            seen[line]++;
-        }
-        END {
-            changes=0
-            for (i in seen) {
-                if (seen[i] == 1) {
-                    changes=1
-                }
-            }
-            print changes
-        }
-    ')
-    echo "${CHANGES_DETECTED}"
-    if [[ ${CHANGES_DETECTED} == 1 ]]; then
+        --stack-id ${DASHBOARD_STACK_ID} --force yes --disable-color --disable-table-borders)"
+    if echo "${APPLY_OUTPUT}" | grep -qE '^[[:space:]]*[+-][[:space:]]*\|'; then
         echo 'Dashboard has been changed.'
     fi
 }
@@ -144,7 +126,7 @@ wait_for_db() {
 
 SLEEP_PID=
 GOT_TERM=0
-trap 'GOT_TERM=1; [ -n "$SLEEP_PID" ] && kill "$SLEEP_PID"' TERM
+trap 'GOT_TERM=1; [ -n "${SLEEP_PID}" ] && kill "${SLEEP_PID}"' TERM
 
 wait_for_db
 if initialize; then
@@ -157,5 +139,5 @@ fi
 
 (( GOT_TERM )) && exit 0
 sleep infinity & SLEEP_PID=$!
-wait "$SLEEP_PID"
+wait "${SLEEP_PID}"
 exit 0
