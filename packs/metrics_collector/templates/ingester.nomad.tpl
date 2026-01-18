@@ -87,6 +87,13 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             template {
                 data        = <<-EOF
+[[ fileContents "files/dashboard.json" | indent 16 ]]
+                EOF
+                destination = "local/dashboard.json"
+            }
+
+            template {
+                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}

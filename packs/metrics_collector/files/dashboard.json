@@ -1,0 +1,778 @@
+[
+    {
+        "apiVersion": "influxdata.com/v2alpha1",
+        "kind": "Label",
+        "metadata": {
+            "name": "gracious-shaw-62c003"
+        },
+        "spec": {
+            "color": "#8e1fc3",
+            "name": "nomad"
+        }
+    },
+    {
+        "apiVersion": "influxdata.com/v2alpha1",
+        "kind": "Label",
+        "metadata": {
+            "name": "hungry-pare-62c001"
+        },
+        "spec": {
+            "color": "#326BBA",
+            "name": "cluster"
+        }
+    },
+    {
+        "apiVersion": "influxdata.com/v2alpha1",
+        "kind": "Dashboard",
+        "metadata": {
+            "name": "rainy-buck-e2c001"
+        },
+        "spec": {
+            "associations": [
+                {
+                    "kind": "Label",
+                    "name": "gracious-shaw-62c003"
+                },
+                {
+                    "kind": "Label",
+                    "name": "hungry-pare-62c001"
+                }
+            ],
+            "charts": [
+                {
+                    "colors": [
+                        {
+                            "id": "base",
+                            "name": "ruby",
+                            "type": "background",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "j0WFaKrKgu1LpBMBphgbw",
+                            "name": "pineapple",
+                            "type": "background",
+                            "hex": "#FFB94A",
+                            "value": 1
+                        },
+                        {
+                            "id": "5lpzQ5fLDNnPR7f7uFh1M",
+                            "name": "viridian",
+                            "type": "background",
+                            "hex": "#32B08C",
+                            "value": 2
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 1,
+                    "kind": "Single_Stat",
+                    "name": "Ingress ::: Uptime",
+                    "queries": [
+                        {
+                            "query": "import \"math\"\n\nfrom(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.uptime\" and\n        r.node_class == \"main-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])\n    |> map(fn: (r) => ({\n        r with\n        _value: math.floor(x: r._value / 86400.0)\n    }))"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " day(s)",
+                    "width": 1
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "base",
+                            "name": "viridian",
+                            "type": "background",
+                            "hex": "#32B08C"
+                        },
+                        {
+                            "id": "j0WFaKrKgu1LpBMBphgbw",
+                            "name": "ruby",
+                            "type": "background",
+                            "hex": "#BF3D5E",
+                            "value": 1
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 1,
+                    "kind": "Single_Stat",
+                    "name": "Ingress ::: Blocked Allocations",
+                    "queries": [
+                        {
+                            "query": "import \"math\"\n\nfrom(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.allocations.blocked\" and\n        r.node_class == \"ingress-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "width": 1,
+                    "yPos": 1
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "base",
+                            "name": "viridian",
+                            "type": "background",
+                            "hex": "#32B08C"
+                        },
+                        {
+                            "id": "j0WFaKrKgu1LpBMBphgbw",
+                            "name": "ruby",
+                            "type": "background",
+                            "hex": "#BF3D5E",
+                            "value": 1
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 1,
+                    "kind": "Single_Stat",
+                    "name": "Ingress ::: OOM Allocations",
+                    "queries": [
+                        {
+                            "query": "import \"join\"\nimport \"array\"\n\nnodes = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r._measurement == \"nomad.client.uptime\"\n    )\n    |> last()\n    |> group()\n    |> keep(columns: [\"host\", \"node_class\"])\n\nrealData = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r._field == \"count\" and\n        r._measurement == \"nomad.client.allocs.oom_killed\"\n    )\n    |> last()\n    |> group()\n    |> keep(columns: [\"_value\", \"host\"])\n\ndummyData = array.from(rows: [{_value: 0, host: \"\"}])\n\njoin.left(\n    left: union(tables: [realData, dummyData]),\n    right: nodes,\n    on: (l, r) => l.host == r.host,\n    as: (l, r) => ({\n        l with node_class: r.node_class\n    })\n)\n    |> filter(fn: (r) =>\n        not exists r.node_class or\n        r.node_class == \"ingress-worker\"\n    )\n    |> sum()"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "width": 1,
+                    "yPos": 2
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "base",
+                            "name": "ruby",
+                            "type": "background",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "GbRdGNwW2HSaIhBWEXzKR",
+                            "name": "pineapple",
+                            "type": "background",
+                            "hex": "#FFB94A",
+                            "value": 1
+                        },
+                        {
+                            "id": "B0iP6sLG6-HtiysRrLF6J",
+                            "name": "viridian",
+                            "type": "background",
+                            "hex": "#32B08C",
+                            "value": 2
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 1,
+                    "kind": "Single_Stat",
+                    "name": "Main ::: Uptime",
+                    "queries": [
+                        {
+                            "query": "import \"math\"\n\nfrom(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.uptime\" and\n        r.node_class == \"ingress-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])\n    |> map(fn: (r) => ({\n        r with\n        _value: math.floor(x: r._value / 86400.0)\n    }))"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " day(s)",
+                    "width": 1,
+                    "yPos": 3
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "base",
+                            "name": "viridian",
+                            "type": "background",
+                            "hex": "#32B08C"
+                        },
+                        {
+                            "id": "j0WFaKrKgu1LpBMBphgbw",
+                            "name": "ruby",
+                            "type": "background",
+                            "hex": "#BF3D5E",
+                            "value": 1
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 1,
+                    "kind": "Single_Stat",
+                    "name": "Main ::: Blocked Allocations",
+                    "queries": [
+                        {
+                            "query": "import \"math\"\n\nfrom(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.allocations.blocked\" and\n        r.node_class == \"main-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "width": 1,
+                    "yPos": 4
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "base",
+                            "name": "viridian",
+                            "type": "background",
+                            "hex": "#32B08C"
+                        },
+                        {
+                            "id": "j0WFaKrKgu1LpBMBphgbw",
+                            "name": "ruby",
+                            "type": "background",
+                            "hex": "#BF3D5E",
+                            "value": 1
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 1,
+                    "kind": "Single_Stat",
+                    "name": "Main ::: OOM Allocations",
+                    "queries": [
+                        {
+                            "query": "import \"join\"\nimport \"array\"\n\nnodes = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r._measurement == \"nomad.client.uptime\"\n    )\n    |> last()\n    |> group()\n    |> keep(columns: [\"host\", \"node_class\"])\n\nrealData = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r._field == \"count\" and\n        r._measurement == \"nomad.client.allocs.oom_killed\"\n    )\n    |> last()\n    |> group()\n    |> keep(columns: [\"_value\", \"host\"])\n\ndummyData = array.from(rows: [{_value: 0, host: \"\"}])\n\njoin.left(\n    left: union(tables: [realData, dummyData]),\n    right: nodes,\n    on: (l, r) => l.host == r.host,\n    as: (l, r) => ({\n        l with node_class: r.node_class\n    })\n)\n    |> filter(fn: (r) =>\n        not exists r.node_class or\n        r.node_class == \"main-worker\"\n    )\n    |> sum()"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "width": 1,
+                    "yPos": 5
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "0",
+                            "name": "ruby",
+                            "type": "min",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "deuJCqtL07FjQjuOd8D02",
+                            "name": "pineapple",
+                            "type": "threshold",
+                            "hex": "#FFB94A",
+                            "value": 500
+                        },
+                        {
+                            "id": "qYoIUXMtqpaJbuNg_ocjT",
+                            "name": "viridian",
+                            "type": "threshold",
+                            "hex": "#32B08C",
+                            "value": 1000
+                        },
+                        {
+                            "id": "1",
+                            "name": "viridian",
+                            "type": "max",
+                            "hex": "#32B08C",
+                            "value": 1600
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 3,
+                    "kind": "Gauge",
+                    "name": "Ingress ::: Unallocated CPU",
+                    "queries": [
+                        {
+                            "query": "from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.unallocated.cpu\" and\n        r.node_class == \"ingress-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " mHz",
+                    "width": 1,
+                    "xPos": 1
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "0",
+                            "name": "ruby",
+                            "type": "min",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "deuJCqtL07FjQjuOd8D02",
+                            "name": "pineapple",
+                            "type": "threshold",
+                            "hex": "#FFB94A",
+                            "value": 1000
+                        },
+                        {
+                            "id": "qYoIUXMtqpaJbuNg_ocjT",
+                            "name": "viridian",
+                            "type": "threshold",
+                            "hex": "#32B08C",
+                            "value": 4000
+                        },
+                        {
+                            "id": "1",
+                            "name": "viridian",
+                            "type": "max",
+                            "hex": "#32B08C",
+                            "value": 15600
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 3,
+                    "kind": "Gauge",
+                    "name": "Main ::: Unallocated CPU",
+                    "queries": [
+                        {
+                            "query": "from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.unallocated.cpu\" and\n        r.node_class == \"main-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " mHz",
+                    "width": 1,
+                    "xPos": 1,
+                    "yPos": 3
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "0",
+                            "name": "ruby",
+                            "type": "min",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "deuJCqtL07FjQjuOd8D02",
+                            "name": "pineapple",
+                            "type": "threshold",
+                            "hex": "#FFB94A",
+                            "value": 128
+                        },
+                        {
+                            "id": "qYoIUXMtqpaJbuNg_ocjT",
+                            "name": "viridian",
+                            "type": "threshold",
+                            "hex": "#32B08C",
+                            "value": 256
+                        },
+                        {
+                            "id": "1",
+                            "name": "viridian",
+                            "type": "max",
+                            "hex": "#32B08C",
+                            "value": 448
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 3,
+                    "kind": "Gauge",
+                    "name": "Ingress ::: Unallocated Memory",
+                    "queries": [
+                        {
+                            "query": "from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.unallocated.memory\" and\n        r.node_class == \"ingress-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " MB",
+                    "width": 1,
+                    "xPos": 2
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "0",
+                            "name": "ruby",
+                            "type": "min",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "deuJCqtL07FjQjuOd8D02",
+                            "name": "pineapple",
+                            "type": "threshold",
+                            "hex": "#FFB94A",
+                            "value": 1024
+                        },
+                        {
+                            "id": "qYoIUXMtqpaJbuNg_ocjT",
+                            "name": "viridian",
+                            "type": "threshold",
+                            "hex": "#32B08C",
+                            "value": 4096
+                        },
+                        {
+                            "id": "1",
+                            "name": "viridian",
+                            "type": "max",
+                            "hex": "#32B08C",
+                            "value": 15479
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 3,
+                    "kind": "Gauge",
+                    "name": "Main ::: Unallocated Memory",
+                    "queries": [
+                        {
+                            "query": "from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.unallocated.memory\" and\n        r.node_class == \"main-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " MB",
+                    "width": 1,
+                    "xPos": 2,
+                    "yPos": 3
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "0",
+                            "name": "ruby",
+                            "type": "min",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "qYoIUXMtqpaJbuNg_ocjT",
+                            "name": "pineapple",
+                            "type": "threshold",
+                            "hex": "#FFB94A",
+                            "value": 1024
+                        },
+                        {
+                            "id": "deuJCqtL07FjQjuOd8D02",
+                            "name": "viridian",
+                            "type": "threshold",
+                            "hex": "#32B08C",
+                            "value": 4096
+                        },
+                        {
+                            "id": "1",
+                            "name": "viridian",
+                            "type": "max",
+                            "hex": "#32B08C",
+                            "value": 20480
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 3,
+                    "kind": "Gauge",
+                    "name": "Ingress ::: Unallocated Disk",
+                    "queries": [
+                        {
+                            "query": "from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.unallocated.disk\" and\n        r.node_class == \"ingress-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " MB",
+                    "width": 1,
+                    "xPos": 3
+                },
+                {
+                    "colors": [
+                        {
+                            "id": "0",
+                            "name": "ruby",
+                            "type": "min",
+                            "hex": "#BF3D5E"
+                        },
+                        {
+                            "id": "qYoIUXMtqpaJbuNg_ocjT",
+                            "name": "pineapple",
+                            "type": "threshold",
+                            "hex": "#FFB94A",
+                            "value": 1024
+                        },
+                        {
+                            "id": "deuJCqtL07FjQjuOd8D02",
+                            "name": "viridian",
+                            "type": "threshold",
+                            "hex": "#32B08C",
+                            "value": 4096
+                        },
+                        {
+                            "id": "1",
+                            "name": "viridian",
+                            "type": "max",
+                            "hex": "#32B08C",
+                            "value": 20480
+                        }
+                    ],
+                    "decimalPlaces": 0,
+                    "height": 3,
+                    "kind": "Gauge",
+                    "name": "Main ::: Unallocated Disk",
+                    "queries": [
+                        {
+                            "query": "from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.unallocated.disk\" and\n        r.node_class == \"main-worker\"\n    )\n    |> last()\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_value\"])"
+                        }
+                    ],
+                    "staticLegend": {},
+                    "suffix": " MB",
+                    "width": 1,
+                    "xPos": 3,
+                    "yPos": 3
+                },
+                {
+                    "axes": [
+                        {
+                            "base": "10",
+                            "name": "x",
+                            "scale": "linear"
+                        },
+                        {
+                            "name": "y",
+                            "scale": "linear"
+                        }
+                    ],
+                    "colorizeRows": true,
+                    "colors": [
+                        {
+                            "id": "cnuOfVRR3LtMrUKrobmCx",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#31C0F6"
+                        },
+                        {
+                            "id": "C0TT2kdZ5lktRNzjkNd8O",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#A500A5"
+                        },
+                        {
+                            "id": "lmPhoG98o7oqvG-rVmGEN",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#FF7E27"
+                        }
+                    ],
+                    "generateYAxisTicks": [
+                        "yTickStep"
+                    ],
+                    "geom": "monotoneX",
+                    "height": 3,
+                    "heightRatio": 0.14,
+                    "hoverDimension": "auto",
+                    "kind": "Xy",
+                    "legendColorizeRows": true,
+                    "legendOpacity": 1,
+                    "legendOrientationThreshold": 100000000,
+                    "name": "Ingress ::: Tasks",
+                    "opacity": 1,
+                    "orientationThreshold": 100000000,
+                    "position": "overlaid",
+                    "queries": [
+                        {
+                            "query": "import \"dict\"\n\nmeasurements = [\n    \"nomad.client.tasks.dead\": \"dead\",\n    \"nomad.client.tasks.pending\": \"pending\",\n    \"nomad.client.tasks.running\": \"running\"\n]\n\nfrom(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => \n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        (r._measurement == \"nomad.client.tasks.running\" or r._measurement == \"nomad.client.tasks.pending\" or r._measurement == \"nomad.client.tasks.dead\") and\n        r.node_class == \"ingress-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_time\", \"_value\", \"_measurement\"])\n    |> map(fn: (r) => ({\n        r with\n        _measurement: dict.get(dict: measurements, key: r._measurement, default: r._measurement)\n    }))"
+                        }
+                    ],
+                    "shade": true,
+                    "staticLegend": {
+                        "colorizeRows": true,
+                        "heightRatio": 0.14,
+                        "opacity": 1,
+                        "orientationThreshold": 100000000,
+                        "valueAxis": "y",
+                        "widthRatio": 1
+                    },
+                    "valueAxis": "y",
+                    "width": 3,
+                    "widthRatio": 1,
+                    "xCol": "_time",
+                    "xPos": 4,
+                    "xTotalTicks": 4,
+                    "yCol": "_value",
+                    "yTickStep": 1
+                },
+                {
+                    "axes": [
+                        {
+                            "base": "10",
+                            "name": "x",
+                            "scale": "linear"
+                        },
+                        {
+                            "name": "y",
+                            "scale": "linear"
+                        }
+                    ],
+                    "colorizeRows": true,
+                    "colors": [
+                        {
+                            "id": "cnuOfVRR3LtMrUKrobmCx",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#31C0F6"
+                        },
+                        {
+                            "id": "C0TT2kdZ5lktRNzjkNd8O",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#A500A5"
+                        },
+                        {
+                            "id": "lmPhoG98o7oqvG-rVmGEN",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#FF7E27"
+                        }
+                    ],
+                    "generateYAxisTicks": [
+                        "yTickStep"
+                    ],
+                    "geom": "monotoneX",
+                    "height": 3,
+                    "heightRatio": 0.14,
+                    "hoverDimension": "auto",
+                    "kind": "Xy",
+                    "legendColorizeRows": true,
+                    "legendOpacity": 1,
+                    "legendOrientationThreshold": 100000000,
+                    "name": "Main ::: Tasks",
+                    "opacity": 1,
+                    "orientationThreshold": 100000000,
+                    "position": "overlaid",
+                    "queries": [
+                        {
+                            "query": "import \"dict\"\n\nmeasurements = [\n    \"nomad.client.tasks.dead\": \"dead\",\n    \"nomad.client.tasks.pending\": \"pending\",\n    \"nomad.client.tasks.running\": \"running\"\n]\n\nfrom(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => \n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        (r._measurement == \"nomad.client.tasks.running\" or r._measurement == \"nomad.client.tasks.pending\" or r._measurement == \"nomad.client.tasks.dead\") and\n        r.node_class == \"main-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_time\", \"_value\", \"_measurement\"])\n    |> map(fn: (r) => ({\n        r with\n        _measurement: dict.get(dict: measurements, key: r._measurement, default: r._measurement)\n    }))"
+                        }
+                    ],
+                    "shade": true,
+                    "staticLegend": {
+                        "colorizeRows": true,
+                        "heightRatio": 0.14,
+                        "opacity": 1,
+                        "orientationThreshold": 100000000,
+                        "valueAxis": "y",
+                        "widthRatio": 1
+                    },
+                    "valueAxis": "y",
+                    "width": 3,
+                    "widthRatio": 1,
+                    "xCol": "_time",
+                    "xPos": 4,
+                    "xTotalTicks": 4,
+                    "yCol": "_value",
+                    "yPos": 3,
+                    "yTickStep": 1
+                },
+                {
+                    "axes": [
+                        {
+                            "base": "10",
+                            "name": "x",
+                            "scale": "linear"
+                        },
+                        {
+                            "base": "10",
+                            "name": "y",
+                            "scale": "linear"
+                        }
+                    ],
+                    "colorizeRows": true,
+                    "colors": [
+                        {
+                            "id": "7-rTK_Lx_N0tJEE0nEUBc",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#31C0F6"
+                        },
+                        {
+                            "id": "Nh5RATXUBkH4LDLAnGJMj",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#A500A5"
+                        },
+                        {
+                            "id": "A2_IgZh2E9GGE926_4xj6",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#FF7E27"
+                        }
+                    ],
+                    "geom": "line",
+                    "height": 3,
+                    "hoverDimension": "auto",
+                    "kind": "Xy",
+                    "legendColorizeRows": true,
+                    "legendOpacity": 1,
+                    "legendOrientationThreshold": 100000000,
+                    "name": "Ingress ::: Host Resource Use",
+                    "opacity": 1,
+                    "orientationThreshold": 100000000,
+                    "position": "overlaid",
+                    "queries": [
+                        {
+                            "query": "import \"dict\"\nimport \"math\"\n\nmeasurements = [\n    \"nomad.client.host.cpu.total_percent\": \"cpu\",\n    \"nomad.client.host.disk.inodes_percent\": \"inodes\",\n    \"nomad.client.host.memory.used_percent\": \"memory\",\n    \"nomad.client.host.disk.used_percent\": \"disk\"\n]\n\ncpuPercentage = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.host.cpu.total_percent\" and\n        r.node_class == \"ingress-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_time\", \"_value\", \"node_class\", \"_measurement\"])\n    |> group(columns: [\"node_class\", \"_time\", \"_measurement\"])\n    |> median(column: \"_value\")\n    |> group(columns: [\"_measurement\"])\n    |> map(fn: (r) => ({\n        r with\n        _value: math.round(x: r._value * 100.0) / 100.0\n    }))\n\nmemoryPercentage = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        (r._measurement == \"nomad.client.host.memory.used\" or r._measurement == \"nomad.client.host.memory.total\") and\n        r.node_class == \"ingress-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> pivot(rowKey: [\"_time\"], columnKey: [\"_measurement\"], valueColumn: \"_value\")\n    |> keep(columns: [\"_time\", \"_measurement\", \"nomad.client.host.memory.used\", \"nomad.client.host.memory.total\"])\n    |> map(fn: (r) => ({\n        r with\n        _measurement: \"nomad.client.host.memory.used_percent\",\n        _value: math.round(x: r[\"nomad.client.host.memory.used\"] * 100.0 / r[\"nomad.client.host.memory.total\"] * 100.0) / 100.0\n    }))\n    |> keep(columns: [\"_time\", \"_measurement\", \"_value\"])\n\ndiskPercentage = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        (r._measurement == \"nomad.client.host.disk.used_percent\" or r._measurement == \"nomad.client.host.disk.inodes_percent\") and\n        r.node_class == \"ingress-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_time\", \"_value\", \"node_class\", \"_measurement\"])\n    |> group(columns: [\"node_class\", \"_time\", \"_measurement\"])\n    |> max(column: \"_value\")\n    |> group(columns: [\"_measurement\"])\n    |> map(fn: (r) => ({\n        r with\n        _value: math.round(x: r._value * 100.0) / 100.0\n    }))\n\nunion(tables: [cpuPercentage, memoryPercentage, diskPercentage])\n    |> map(fn: (r) => ({\n        r with\n        _measurement: dict.get(dict: measurements, key: r._measurement, default: r._measurement)\n    }))"
+                        }
+                    ],
+                    "shade": true,
+                    "staticLegend": {
+                        "colorizeRows": true,
+                        "opacity": 1,
+                        "orientationThreshold": 100000000,
+                        "widthRatio": 1
+                    },
+                    "width": 3,
+                    "widthRatio": 1,
+                    "xCol": "_time",
+                    "xPos": 7,
+                    "yCol": "_value"
+                },
+                {
+                    "axes": [
+                        {
+                            "base": "10",
+                            "name": "x",
+                            "scale": "linear"
+                        },
+                        {
+                            "name": "y",
+                            "scale": "linear",
+                            "suffix": " %"
+                        }
+                    ],
+                    "colorizeRows": true,
+                    "colors": [
+                        {
+                            "id": "0FKcCUVIOxZfVKacag2VR",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#31C0F6"
+                        },
+                        {
+                            "id": "wGKtxKQEt24OOWIteq6yr",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#A500A5"
+                        },
+                        {
+                            "id": "dfZ-2gfsk89703-rlYCNq",
+                            "name": "Nineteen Eighty Four",
+                            "type": "scale",
+                            "hex": "#FF7E27"
+                        }
+                    ],
+                    "geom": "monotoneX",
+                    "height": 3,
+                    "heightRatio": 0.14,
+                    "hoverDimension": "auto",
+                    "kind": "Xy",
+                    "legendColorizeRows": true,
+                    "legendOpacity": 1,
+                    "legendOrientationThreshold": 100000000,
+                    "name": "Main ::: Host Resource Use",
+                    "opacity": 1,
+                    "orientationThreshold": 100000000,
+                    "position": "overlaid",
+                    "queries": [
+                        {
+                            "query": "import \"dict\"\nimport \"math\"\n\nmeasurements = [\n    \"nomad.client.host.cpu.total_percent\": \"cpu\",\n    \"nomad.client.host.disk.inodes_percent\": \"inodes\",\n    \"nomad.client.host.memory.used_percent\": \"memory\",\n    \"nomad.client.host.disk.used_percent\": \"disk\"\n]\n\ncpuPercentage = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        r._measurement == \"nomad.client.host.cpu.total_percent\" and\n        r.node_class == \"main-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_time\", \"_value\", \"node_class\", \"_measurement\"])\n    |> group(columns: [\"node_class\", \"_time\", \"_measurement\"])\n    |> median(column: \"_value\")\n    |> group(columns: [\"_measurement\"])\n    |> map(fn: (r) => ({\n        r with\n        _value: math.round(x: r._value * 100.0) / 100.0\n    }))\n\nmemoryPercentage = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        (r._measurement == \"nomad.client.host.memory.used\" or r._measurement == \"nomad.client.host.memory.total\") and\n        r.node_class == \"main-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> pivot(rowKey: [\"_time\"], columnKey: [\"_measurement\"], valueColumn: \"_value\")\n    |> keep(columns: [\"_time\", \"_measurement\", \"nomad.client.host.memory.used\", \"nomad.client.host.memory.total\"])\n    |> map(fn: (r) => ({\n        r with\n        _measurement: \"nomad.client.host.memory.used_percent\",\n        _value: math.round(x: r[\"nomad.client.host.memory.used\"] * 100.0 / r[\"nomad.client.host.memory.total\"] * 100.0) / 100.0\n    }))\n    |> keep(columns: [\"_time\", \"_measurement\", \"_value\"])\n\ndiskPercentage = from(bucket: \"nomad\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) =>\n        r.node_status == \"ready\" and\n        r._field == \"value\" and\n        (r._measurement == \"nomad.client.host.disk.used_percent\" or r._measurement == \"nomad.client.host.disk.inodes_percent\") and\n        r.node_class == \"main-worker\"\n    )\n    |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: false)\n    |> keep(columns: [\"_time\", \"_value\", \"node_class\", \"_measurement\"])\n    |> group(columns: [\"node_class\", \"_time\", \"_measurement\"])\n    |> max(column: \"_value\")\n    |> group(columns: [\"_measurement\"])\n    |> map(fn: (r) => ({\n        r with\n        _value: math.round(x: r._value * 100.0) / 100.0\n    }))\n\nunion(tables: [cpuPercentage, memoryPercentage, diskPercentage])\n    |> map(fn: (r) => ({\n        r with\n        _measurement: dict.get(dict: measurements, key: r._measurement, default: r._measurement)\n    }))"
+                        }
+                    ],
+                    "shade": true,
+                    "staticLegend": {
+                        "colorizeRows": true,
+                        "heightRatio": 0.14,
+                        "opacity": 1,
+                        "orientationThreshold": 100000000,
+                        "valueAxis": "y",
+                        "widthRatio": 1
+                    },
+                    "valueAxis": "y",
+                    "width": 3,
+                    "widthRatio": 1,
+                    "xCol": "_time",
+                    "xPos": 7,
+                    "xTotalTicks": 12,
+                    "yCol": "_value",
+                    "yPos": 3
+                }
+            ],
+            "description": "Cluster-wide metrics",
+            "name": "Nomad Cluster"
+        }
+    }
+]
