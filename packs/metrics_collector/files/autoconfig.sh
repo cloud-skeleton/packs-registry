@@ -35,16 +35,14 @@ initialize() {
         local NOMAD_BUCKET_ID=$(influx bucket ls -n nomad --org-id ${ORG_ID} --hide-headers | awk '{ print $1 }')
         local TELEGRAF_TOKEN_DATA="$(influx auth create --org-id ${ORG_ID} -d "Telegraf's Token" --write-bucket ${NOMAD_BUCKET_ID} --json)"
         local TELEGRAF_TOKEN="$(echo "$TELEGRAF_TOKEN_DATA" | grep -oE '"token":\s*"[^"]+"' | cut -d' :' -f2 | tr -d '"')"
-        local DASHBOARD_STACK_ID="$(influx stacks init -n Dashboard -d "Stack for dashboard" \
-            --org-id ${ORG_ID} --json | grep -oE '"id": "[0-9a-f]+"' | cut -d' :' -f2 | tr -d '"')"
         curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
             -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
             --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":\
-            {\"dashboard_stack_id\":\"${DASHBOARD_STACK_ID}\",\"nomad_bucket_id\":\"${NOMAD_BUCKET_ID}\",\
+            {\"nomad_bucket_id\":\"${NOMAD_BUCKET_ID}\",\
             \"org_id\":\"${ORG_ID}\",\"admin_token\":\"${INFLUX_TOKEN}\",\"telegraf_token\":\"${TELEGRAF_TOKEN}\",\
             \"user_id\":\"${USER_ID}\"}}"
-        influx apply -q -f local/dashboard.json --org-id ${ORG_ID} --stack-id ${DASHBOARD_STACK_ID} --force yes
+        influx apply -q -f local/dashboard.json --org-id ${ORG_ID} --force yes
         echo 'Database has been initialized.'
         return 1
     fi
@@ -104,20 +102,6 @@ set_user_password() {
     fi
 }
 
-set_dashboard() {
-    local STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
-        -H "Authorization: Bearer ${NOMAD_TOKEN}" \
-        "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
-    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
-    local ORG_ID=$(echo "$STATE" | grep -oE '"org_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
-    local DASHBOARD_STACK_ID=$(echo "$STATE" | grep -oE '"dashboard_stack_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
-    local APPLY_OUTPUT="$(influx apply -f local/dashboard.json --org-id ${ORG_ID} \
-        --stack-id ${DASHBOARD_STACK_ID} --force yes --disable-color --disable-table-borders)"
-    if echo "${APPLY_OUTPUT}" | grep -qE '^[[:space:]]*[+-][[:space:]]*\|'; then
-        echo 'Dashboard has been changed.'
-    fi
-}
-
 wait_for_db() {
     while ! influx ping > /dev/null 2>&1; do
         sleep 5
@@ -134,7 +118,6 @@ if initialize; then
     set_user_password
     set_organization_name
     set_bucket_retention
-    set_dashboard
 fi
 
 (( GOT_TERM )) && exit 0
