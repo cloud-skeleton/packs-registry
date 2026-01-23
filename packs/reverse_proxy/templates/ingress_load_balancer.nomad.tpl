@@ -125,7 +125,7 @@ job "[[ template "job_name" (list . "ingress_load_balancer") ]]" {
 
             resources {
                 cpu    = 150
-                memory = 64
+                memory = 48
             }
 
             template {
