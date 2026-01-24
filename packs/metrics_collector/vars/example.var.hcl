@@ -1,8 +1,8 @@
 # CSI volume configuration for persistent InfluxDB data (ingester files, WAL, indexes).
-data_volume = {
-    id        = "metrics_collector-data"
-    name      = "metrics_collector/data"
-    plugin_id = "nas"
+db_data_volume = {
+    id        = "metrics_collector-db_data"
+    name      = "metrics_collector/db_data"
+    plugin_id = "main"
 }
 
 # The hostname (FQDN) used to access the InfluxDB 2 web UI and API. This is the domain where InfluxDB will be served.

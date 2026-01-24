@@ -42,7 +42,6 @@ initialize() {
             {\"nomad_bucket_id\":\"${NOMAD_BUCKET_ID}\",\
             \"org_id\":\"${ORG_ID}\",\"admin_token\":\"${INFLUX_TOKEN}\",\"telegraf_token\":\"${TELEGRAF_TOKEN}\",\
             \"user_id\":\"${USER_ID}\"}}"
-        influx apply -q -f local/dashboard.json --org-id ${ORG_ID} --force yes
         echo 'Database has been initialized.'
         return 1
     fi

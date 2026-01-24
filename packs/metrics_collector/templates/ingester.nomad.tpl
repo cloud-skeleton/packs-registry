@@ -87,13 +87,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             template {
                 data        = <<-EOF
-[[ fileContents "files/dashboard.json" | indent 16 ]]
-                EOF
-                destination = "local/dashboard.json"
-            }
-
-            template {
-                data        = <<-EOF
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}
@@ -170,6 +163,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 storage-retention-check-interval: 60m0s
                 storage-shard-precreator-check-interval: 30m0s
                 strong-passwords: true
+                # ui-disabled: true
                 ...
                 {{- end }}
                 EOF
@@ -264,7 +258,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             access_mode     = "multi-node-multi-writer"
             attachment_mode = "file-system"
             read_only       = false
-            source          = "[[ var "data_volume.id" . ]]"
+            source          = "[[ var "db_data_volume.id" . ]]"
             type            = "csi"
         }
     }
@@ -284,9 +278,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         "params.images.telegraf"           = "1.37-alpine"
 
         // Volumes
-        "volumes.[[ var "data_volume.id" . ]].id"        = "[[ var "data_volume.id" . ]]"
-        "volumes.[[ var "data_volume.id" . ]].name"      = "[[ var "data_volume.name" . ]]"
-        "volumes.[[ var "data_volume.id" . ]].plugin_id" = "[[ var "data_volume.plugin_id" . ]]"
+        "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"
+        "volumes.[[ var "db_data_volume.id" . ]].name"      = "[[ var "db_data_volume.name" . ]]"
+        "volumes.[[ var "db_data_volume.id" . ]].plugin_id" = "[[ var "db_data_volume.plugin_id" . ]]"
     }
 
     namespace = "system"

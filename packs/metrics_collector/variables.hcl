@@ -1,4 +1,4 @@
-variable "data_volume" {
+variable "db_data_volume" {
     description = "CSI volume configuration for persistent InfluxDB data (ingester files, WAL, indexes)."
     type = object({
         id        = string
