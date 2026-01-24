@@ -16,3 +16,12 @@ variable "id" {
     description = "Unique identifier used to distinguish multiple deployments of this pack with different variables."
     type        = string
 }
+
+variable "ui_data_volume" {
+    description = "CSI volume configuration for persistent Grafana data."
+    type = object({
+        id        = string
+        name      = string
+        plugin_id = string
+    })
+}

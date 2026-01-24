@@ -31,8 +31,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 }
 
                 interval = "30s"
-                path     = "/health"
-                port     = 8086
+                path     = "/api/health"
+                port     = 3000
                 timeout  = "2s"
                 type     = "http"
             }
@@ -47,6 +47,40 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.server.scheme=https"
             ]
             task = "tunnel"
+        }
+
+        task "grafana-service" {
+            config {
+                cpu_hard_limit = true
+                image          = "${DOCKER_IMAGE}"
+            }
+
+            driver = "docker"
+
+            resources {
+                cpu    = 1500
+                memory = 192
+            }
+
+            template {
+                data = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+                DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
+                {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+                GF_LOG_LEVEL="{{ index . "log_level" }}"
+                {{- end }}
+                EOF
+                destination = "secrets/env"
+                env         = true
+            }
+
+            user = "root"
+
+            volume_mount {
+                destination = "/var/lib/grafana"
+                volume      = "ui_data"
+            }
         }
 
         task "influxdb-autoconfig" {
@@ -163,7 +197,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 storage-retention-check-interval: 60m0s
                 storage-shard-precreator-check-interval: 30m0s
                 strong-passwords: true
-                # ui-disabled: true
+                ui-disabled: true
                 ...
                 {{- end }}
                 EOF
@@ -174,7 +208,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             volume_mount {
                 destination = "/var/lib/influxdb2"
-                volume      = "data"
+                volume      = "db_data"
             }
         }
 
@@ -252,13 +286,21 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
         }
 
-        [[ template "tunnel_mtls" (list . "ingester" (dict "http" 8086)) ]]
+        [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
-        volume "data" {
+        volume "db_data" {
             access_mode     = "multi-node-multi-writer"
             attachment_mode = "file-system"
             read_only       = false
             source          = "[[ var "db_data_volume.id" . ]]"
+            type            = "csi"
+        }
+
+        volume "ui_data" {
+            access_mode     = "multi-node-multi-writer"
+            attachment_mode = "file-system"
+            read_only       = false
+            source          = "[[ var "ui_data_volume.id" . ]]"
             type            = "csi"
         }
     }
@@ -273,14 +315,18 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         "params.config.organization_name" = "cloud-skeleton"
 
         // Docker images used in job
-        "params.images.influxdb"           = "2.8-alpine"
         "params.images.cleanstart/stunnel" = "5.76"
+        "params.images.grafana/grafana"    = "12.3.1"
+        "params.images.influxdb"           = "2.8-alpine"
         "params.images.telegraf"           = "1.37-alpine"
 
         // Volumes
         "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"
         "volumes.[[ var "db_data_volume.id" . ]].name"      = "[[ var "db_data_volume.name" . ]]"
         "volumes.[[ var "db_data_volume.id" . ]].plugin_id" = "[[ var "db_data_volume.plugin_id" . ]]"
+        "volumes.[[ var "ui_data_volume.id" . ]].id"        = "[[ var "ui_data_volume.id" . ]]"
+        "volumes.[[ var "ui_data_volume.id" . ]].name"      = "[[ var "ui_data_volume.name" . ]]"
+        "volumes.[[ var "ui_data_volume.id" . ]].plugin_id" = "[[ var "ui_data_volume.plugin_id" . ]]"
     }
 
     namespace = "system"

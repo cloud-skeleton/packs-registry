@@ -10,3 +10,10 @@ hostname = "metrics.cluster.domain.com"
 
 # Unique identifier used to distinguish multiple deployments of this pack with different variables.
 id = "main"
+
+# CSI volume configuration for persistent Grafana data.
+ui_data_volume = {
+    id        = "metrics_collector-ui_data"
+    name      = "metrics_collector/ui_data"
+    plugin_id = "main"
+}

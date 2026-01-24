@@ -66,7 +66,7 @@
             }
 
             resources {
-                cpu    = 75
+                cpu    = 200
                 memory = 32
             }
 
