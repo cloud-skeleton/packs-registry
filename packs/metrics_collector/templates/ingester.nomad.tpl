@@ -57,6 +57,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             driver = "docker"
 
+            env {
+                GF_PATHS_CONFIG = "/local/grafana.ini"
+            }
+
             resources {
                 cpu    = 1500
                 memory = 192
@@ -67,12 +71,23 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
                 DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
                 {{- end }}
-                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-                GF_LOG_LEVEL="{{ index . "log_level" }}"
-                {{- end }}
                 EOF
                 destination = "secrets/env"
                 env         = true
+            }
+
+            template {
+                data        = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+                [feature_toggles]
+                enable = newInfluxDSConfigPageDesign
+
+                [log]
+                level = {{ index . "log_level" }}
+                mode = console
+                {{- end }}
+                EOF
+                destination = "local/grafana.ini"
             }
 
             user = "root"

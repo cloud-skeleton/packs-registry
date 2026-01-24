@@ -33,15 +33,17 @@ initialize() {
         local ORG_ID=$(influx org ls -n "${INFLUX_ORGANIZATION}" --hide-headers | awk '{ print $1 }')
         local USER_ID=$(influx user ls -n "${INFLUX_USER}" --hide-headers | awk '{ print $1 }')
         local NOMAD_BUCKET_ID=$(influx bucket ls -n nomad --org-id ${ORG_ID} --hide-headers | awk '{ print $1 }')
-        local TELEGRAF_TOKEN_DATA="$(influx auth create --org-id ${ORG_ID} -d "Telegraf's Token" --write-bucket ${NOMAD_BUCKET_ID} --json)"
+        local TELEGRAF_TOKEN_DATA="$(influx auth create --org-id ${ORG_ID} -d "Telegraf's Token" --write-buckets --json)"
         local TELEGRAF_TOKEN="$(echo "$TELEGRAF_TOKEN_DATA" | grep -oE '"token":\s*"[^"]+"' | cut -d' :' -f2 | tr -d '"')"
+        local GRAFANA_TOKEN_DATA="$(influx auth create --org-id ${ORG_ID} -d "Grafana's Token" --read-buckets --json)"
+        local GRAFANA_TOKEN="$(echo "$GRAFANA_TOKEN_DATA" | grep -oE '"token":\s*"[^"]+"' | cut -d' :' -f2 | tr -d '"')"
         curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
             -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
             --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":\
             {\"nomad_bucket_id\":\"${NOMAD_BUCKET_ID}\",\
             \"org_id\":\"${ORG_ID}\",\"admin_token\":\"${INFLUX_TOKEN}\",\"telegraf_token\":\"${TELEGRAF_TOKEN}\",\
-            \"user_id\":\"${USER_ID}\"}}"
+            \"grafana_token\":\"${GRAFANA_TOKEN}\",\"user_id\":\"${USER_ID}\"}}"
         echo 'Database has been initialized.'
         return 1
     fi
