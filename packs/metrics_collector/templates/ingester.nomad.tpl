@@ -49,7 +49,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             task = "tunnel"
         }
 
-        task "grafana-service" {
+        task "grafana" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
@@ -101,7 +101,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         task "influxdb-autoconfig" {
             config {
                 args = [
-                    "local/autoconfig.sh"
+                    "local/autoconfig_influxdb.sh"
                 ]
                 command        = "bash"
                 cpu_hard_limit = true
@@ -129,9 +129,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             template {
                 data        = <<-EOF
-[[ fileContents "files/autoconfig.sh" | indent 16 ]]
+[[ fileContents "files/autoconfig_influxdb.sh" | indent 16 ]]
                 EOF
-                destination = "local/autoconfig.sh"
+                destination = "local/autoconfig_influxdb.sh"
             }
 
             template {
@@ -153,7 +153,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
         }
 
-        task "influxdb-service" {
+        task "influxdb" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
@@ -175,7 +175,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             kill_signal = "SIGINT"
 
             resources {
-                cpu    = 400
+                cpu    = 200
                 memory = 256
             }
 
@@ -227,7 +227,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             }
         }
 
-        task "telegraf-service" {
+        task "telegraf" {
             config {
                 cpu_hard_limit = true
                 image          = "${DOCKER_IMAGE}"
