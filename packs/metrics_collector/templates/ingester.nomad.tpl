@@ -5,7 +5,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         value     = "main-worker"
     }
 
-    group "influxdb" {
+    group "main" {
         network {
             mode = "bridge"
 
@@ -256,7 +256,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             resources {
                 cpu    = 75
-                memory = 64
+                memory = 96
             }
 
             template {
