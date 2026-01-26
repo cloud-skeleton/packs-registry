@@ -1,0 +1,1141 @@
+apiVersion: dashboard.grafana.app/v2beta1
+kind: Dashboard
+metadata:
+  name: adxvpzw
+  generation: 57
+  creationTimestamp: '2026-01-25T11:47:32Z'
+  labels: {}
+  annotations: {}
+spec:
+  annotations:
+    - kind: AnnotationQuery
+      spec:
+        builtIn: true
+        enable: true
+        hide: true
+        iconColor: rgba(0, 211, 255, 1)
+        name: Annotations & Alerts
+        query:
+          group: grafana
+          kind: DataQuery
+          spec: {}
+          version: v0
+  cursorSync: 'Off'
+  editable: true
+  elements:
+    panel-1:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: $tag_host
+                      query: |-
+                        SELECT
+                            LAST("value")
+                        FROM
+                            "nomad.client.uptime"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time(1d)
+                      rawQuery: true
+                      resultFormat: time_series
+                    version: v0
+                  refId: A
+            queryOptions:
+              timeFrom: 30d
+            transformations: []
+        description: ''
+        id: 1
+        links: []
+        title: Uptime
+        vizConfig:
+          group: status-history
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: thresholds
+                custom:
+                  axisPlacement: auto
+                  fillOpacity: 70
+                  hideFrom:
+                    legend: false
+                    tooltip: false
+                    viz: false
+                  lineWidth: 1
+                displayName: $host
+                noValue: '0'
+                thresholds:
+                  mode: absolute
+                  steps:
+                    - color: dark-red
+                      value: 0
+                    - color: dark-yellow
+                      value: 1
+                    - color: dark-green
+                      value: 86400
+                unit: s
+              overrides: []
+            options:
+              colWidth: 0.5
+              legend:
+                displayMode: table
+                placement: bottom
+                showLegend: false
+              rowHeight: 0.9
+              showValue: never
+              tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          version: 12.3.1
+    panel-2:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: $tag_host
+                      query: |-
+                        SELECT
+                            SUM("value")
+                        FROM
+                            "nomad.client.allocations.blocked"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time(1d)
+                      rawQuery: true
+                      resultFormat: time_series
+                    version: v0
+                  refId: A
+            queryOptions:
+              timeFrom: 30d
+            transformations: []
+        description: ''
+        id: 2
+        links: []
+        title: Blocked Allocations
+        vizConfig:
+          group: status-history
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: thresholds
+                custom:
+                  axisPlacement: auto
+                  fillOpacity: 70
+                  hideFrom:
+                    legend: false
+                    tooltip: false
+                    viz: false
+                  lineWidth: 1
+                displayName: $host
+                noValue: '0'
+                thresholds:
+                  mode: absolute
+                  steps:
+                    - color: dark-green
+                      value: 0
+                    - color: dark-red
+                      value: 1
+              overrides: []
+            options:
+              colWidth: 0.5
+              legend:
+                displayMode: table
+                placement: bottom
+                showLegend: false
+              rowHeight: 0.9
+              showValue: never
+              tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          version: 12.3.1
+    panel-3:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: $tag_host
+                      query: |-
+                        SELECT
+                            SUM("count")
+                        FROM
+                            "nomad.client.allocs.oom_killed"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time(1d)
+                      rawQuery: true
+                      resultFormat: time_series
+                    version: v0
+                  refId: A
+            queryOptions:
+              timeFrom: 30d
+            transformations: []
+        description: ''
+        id: 3
+        links: []
+        title: OOM allocations
+        vizConfig:
+          group: status-history
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: thresholds
+                custom:
+                  axisPlacement: auto
+                  fillOpacity: 70
+                  hideFrom:
+                    legend: false
+                    tooltip: false
+                    viz: false
+                  lineWidth: 1
+                displayName: $host
+                noValue: '0'
+                thresholds:
+                  mode: absolute
+                  steps:
+                    - color: dark-green
+                      value: 0
+                    - color: dark-red
+                      value: 1
+              overrides: []
+            options:
+              colWidth: 0.5
+              legend:
+                displayMode: table
+                placement: bottom
+                showLegend: false
+              rowHeight: 0.9
+              showValue: never
+              tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          version: 12.3.1
+    panel-4:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      query: |-
+                        SELECT
+                            LAST("value") AS "unallocated_cpu"
+                        FROM
+                            "nomad.client.unallocated.cpu"
+                        WHERE
+                           $timeFilter
+                           AND "host" =~ /^$host$/
+                      rawQuery: true
+                      resultFormat: table
+                    version: v0
+                  refId: A
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      query: |-
+                        SELECT
+                            LAST("value") AS "allocated_cpu"
+                        FROM
+                            "nomad.client.allocated.cpu"
+                        WHERE
+                           $timeFilter
+                           AND "host" =~ /^$host$/
+                      rawQuery: true
+                      resultFormat: table
+                    version: v0
+                  refId: B
+            queryOptions: {}
+            transformations:
+              - kind: calculateField
+                spec:
+                  id: calculateField
+                  options:
+                    alias: allocatable_cpu
+                    binary:
+                      left:
+                        matcher:
+                          id: byName
+                          options: unallocated_cpu
+                      right:
+                        matcher:
+                          id: byName
+                          options: allocated_cpu
+                    mode: binary
+                    reduce:
+                      reducer: sum
+              - kind: configFromData
+                spec:
+                  id: configFromData
+                  options:
+                    applyTo:
+                      id: byName
+                      options: allocated_cpu
+                    configRefId: joinByField-A-B
+                    mappings:
+                      - fieldName: allocatable_cpu
+                        handlerKey: max
+              - kind: organize
+                spec:
+                  id: organize
+                  options:
+                    excludeByName:
+                      Time: false
+                      allocatable_cpu: true
+                      allocatable_critical: true
+                      allocatable_ok: true
+                      allocatable_warning: true
+                      allocated_cpu: false
+                      unallocated_cpu: true
+                    includeByName: {}
+                    indexByName: {}
+                    orderByMode: manual
+                    renameByName: {}
+        description: ''
+        id: 4
+        links: []
+        title: CPU Allocation
+        vizConfig:
+          group: gauge
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: thresholds
+                displayName: $host
+                min: 0
+                noValue: '0'
+                thresholds:
+                  mode: percentage
+                  steps:
+                    - color: dark-green
+                      value: 0
+                    - color: dark-yellow
+                      value: 70
+                    - color: dark-red
+                      value: 90
+                unit: rotmhz
+              overrides: []
+            options:
+              minVizHeight: 75
+              minVizWidth: 75
+              orientation: auto
+              reduceOptions:
+                calcs:
+                  - lastNotNull
+                fields: ''
+                values: false
+              showThresholdLabels: false
+              showThresholdMarkers: true
+              sizing: auto
+          version: 12.3.1
+    panel-5:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      query: |-
+                        SELECT
+                            LAST("value") AS "unallocated_memory"
+                        FROM
+                            "nomad.client.unallocated.memory"
+                        WHERE
+                           $timeFilter
+                           AND "host" =~ /^$host$/
+                      rawQuery: true
+                      resultFormat: table
+                    version: v0
+                  refId: A
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      query: |-
+                        SELECT
+                            LAST("value") AS "allocated_memory"
+                        FROM
+                            "nomad.client.allocated.memory"
+                        WHERE
+                           $timeFilter
+                           AND "host" =~ /^$host$/
+                      rawQuery: true
+                      resultFormat: table
+                    version: v0
+                  refId: B
+            queryOptions: {}
+            transformations:
+              - kind: calculateField
+                spec:
+                  id: calculateField
+                  options:
+                    alias: allocatable_memory
+                    binary:
+                      left:
+                        matcher:
+                          id: byName
+                          options: unallocated_memory
+                      right:
+                        matcher:
+                          id: byName
+                          options: allocated_memory
+                    mode: binary
+                    reduce:
+                      reducer: sum
+              - kind: configFromData
+                spec:
+                  id: configFromData
+                  options:
+                    applyTo:
+                      id: byName
+                      options: allocated_memory
+                    configRefId: joinByField-A-B
+                    mappings:
+                      - fieldName: allocatable_memory
+                        handlerKey: max
+              - kind: organize
+                spec:
+                  id: organize
+                  options:
+                    excludeByName:
+                      Time: false
+                      allocatable_cpu: true
+                      allocatable_critical: true
+                      allocatable_memory: true
+                      allocatable_ok: true
+                      allocatable_warning: true
+                      allocated_cpu: false
+                      allocated_memory: false
+                      unallocated_cpu: true
+                      unallocated_memory: true
+                    includeByName: {}
+                    indexByName: {}
+                    orderByMode: manual
+                    renameByName: {}
+        description: ''
+        id: 5
+        links: []
+        title: Memory Allocation
+        vizConfig:
+          group: gauge
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: thresholds
+                displayName: $host
+                min: 0
+                noValue: '0'
+                thresholds:
+                  mode: percentage
+                  steps:
+                    - color: dark-green
+                      value: 0
+                    - color: dark-yellow
+                      value: 70
+                    - color: dark-red
+                      value: 90
+                unit: decmbytes
+              overrides: []
+            options:
+              minVizHeight: 75
+              minVizWidth: 75
+              orientation: auto
+              reduceOptions:
+                calcs:
+                  - lastNotNull
+                fields: ''
+                values: false
+              showThresholdLabels: false
+              showThresholdMarkers: true
+              sizing: auto
+          version: 12.3.1
+    panel-6:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      query: |-
+                        SELECT
+                            LAST("value") AS "unallocated_disk"
+                        FROM
+                            "nomad.client.unallocated.disk"
+                        WHERE
+                           $timeFilter
+                           AND "host" =~ /^$host$/
+                      rawQuery: true
+                      resultFormat: table
+                    version: v0
+                  refId: A
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      query: |-
+                        SELECT
+                            LAST("value") AS "allocated_disk"
+                        FROM
+                            "nomad.client.allocated.disk"
+                        WHERE
+                           $timeFilter
+                           AND "host" =~ /^$host$/
+                      rawQuery: true
+                      resultFormat: table
+                    version: v0
+                  refId: B
+            queryOptions: {}
+            transformations:
+              - kind: calculateField
+                spec:
+                  id: calculateField
+                  options:
+                    alias: allocatable_disk
+                    binary:
+                      left:
+                        matcher:
+                          id: byName
+                          options: unallocated_disk
+                      right:
+                        matcher:
+                          id: byName
+                          options: allocated_disk
+                    mode: binary
+                    reduce:
+                      reducer: sum
+              - kind: configFromData
+                spec:
+                  id: configFromData
+                  options:
+                    applyTo:
+                      id: byName
+                      options: allocated_disk
+                    configRefId: joinByField-A-B
+                    mappings:
+                      - fieldName: allocatable_disk
+                        handlerKey: max
+              - kind: organize
+                spec:
+                  id: organize
+                  options:
+                    excludeByName:
+                      Time: true
+                      allocatable_cpu: true
+                      allocatable_critical: true
+                      allocatable_disk: true
+                      allocatable_memory: true
+                      allocatable_ok: true
+                      allocatable_warning: true
+                      allocated_cpu: false
+                      allocated_memory: false
+                      unallocated_cpu: true
+                      unallocated_disk: true
+                      unallocated_memory: true
+                    includeByName: {}
+                    indexByName: {}
+                    orderByMode: manual
+                    renameByName: {}
+        description: ''
+        id: 6
+        links: []
+        title: Disk Allocation
+        vizConfig:
+          group: gauge
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: thresholds
+                displayName: $host
+                min: 0
+                noValue: '0'
+                thresholds:
+                  mode: percentage
+                  steps:
+                    - color: dark-green
+                      value: 0
+                    - color: dark-yellow
+                      value: 70
+                    - color: dark-red
+                      value: 90
+                unit: decmbytes
+              overrides: []
+            options:
+              minVizHeight: 75
+              minVizWidth: 75
+              orientation: auto
+              reduceOptions:
+                calcs:
+                  - lastNotNull
+                fields: ''
+                values: false
+              showThresholdLabels: false
+              showThresholdMarkers: true
+              sizing: auto
+          version: 12.3.1
+    panel-7:
+      kind: Panel
+      spec:
+        data:
+          kind: QueryGroup
+          spec:
+            queries:
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: CPU
+                      groupBy:
+                        - params:
+                            - $__interval
+                          type: time
+                        - params:
+                            - 'null'
+                          type: fill
+                      orderByTime: ASC
+                      policy: default
+                      query: |-
+                        SELECT
+                            PERCENTILE("value", 95)
+                        FROM
+                            "nomad.client.host.cpu.total_percent"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time($__interval)
+                      rawQuery: true
+                      resultFormat: time_series
+                      select:
+                        - - params:
+                              - value
+                            type: field
+                          - params: []
+                            type: mean
+                      tags: []
+                    version: v0
+                  refId: A
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: Disk
+                      groupBy:
+                        - params:
+                            - $__interval
+                          type: time
+                        - params:
+                            - 'null'
+                          type: fill
+                      orderByTime: ASC
+                      policy: default
+                      query: |-
+                        SELECT
+                            MAX("value")
+                        FROM
+                            "nomad.client.host.disk.used_percent"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time($__interval)
+                      rawQuery: true
+                      resultFormat: time_series
+                      select:
+                        - - params:
+                              - value
+                            type: field
+                          - params: []
+                            type: mean
+                      tags: []
+                    version: v0
+                  refId: B
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: Inodes
+                      groupBy:
+                        - params:
+                            - $__interval
+                          type: time
+                        - params:
+                            - 'null'
+                          type: fill
+                      orderByTime: ASC
+                      policy: default
+                      query: |-
+                        SELECT
+                            MAX("value")
+                        FROM
+                            "nomad.client.host.disk.inodes_percent"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time($__interval)
+                      rawQuery: true
+                      resultFormat: time_series
+                      select:
+                        - - params:
+                              - value
+                            type: field
+                          - params: []
+                            type: mean
+                      tags: []
+                    version: v0
+                  refId: C
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      groupBy:
+                        - params:
+                            - $__interval
+                          type: time
+                        - params:
+                            - 'null'
+                          type: fill
+                      orderByTime: ASC
+                      policy: default
+                      query: |-
+                        SELECT
+                            MAX("value")
+                        FROM
+                            "nomad.client.host.memory.used"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time($__interval)
+                      rawQuery: true
+                      resultFormat: time_series
+                      select:
+                        - - params:
+                              - value
+                            type: field
+                          - params: []
+                            type: mean
+                      tags: []
+                    version: v0
+                  refId: D
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: influxdb
+                    kind: DataQuery
+                    spec:
+                      alias: ''
+                      groupBy:
+                        - params:
+                            - $__interval
+                          type: time
+                        - params:
+                            - 'null'
+                          type: fill
+                      orderByTime: ASC
+                      policy: default
+                      query: |-
+                        SELECT
+                            MAX("value")
+                        FROM
+                            "nomad.client.host.memory.total"
+                        WHERE
+                            $timeFilter
+                            AND
+                            "host" =~ /^$host$/
+                        GROUP BY
+                            time($__interval)
+                      rawQuery: true
+                      resultFormat: time_series
+                      select:
+                        - - params:
+                              - value
+                            type: field
+                          - params: []
+                            type: mean
+                      tags: []
+                    version: v0
+                  refId: E
+            queryOptions:
+              timeFrom: 2d
+            transformations:
+              - kind: calculateField
+                spec:
+                  id: calculateField
+                  options:
+                    alias: memory_used_percent
+                    binary:
+                      left:
+                        matcher:
+                          id: byName
+                          options: nomad.client.host.memory.used.max
+                      operator: '*'
+                      right:
+                        fixed: '100'
+                    mode: binary
+                    reduce:
+                      reducer: sum
+              - kind: calculateField
+                spec:
+                  id: calculateField
+                  options:
+                    alias: Memory
+                    binary:
+                      left:
+                        matcher:
+                          id: byName
+                          options: memory_used_percent
+                      operator: /
+                      right:
+                        matcher:
+                          id: byName
+                          options: nomad.client.host.memory.total.max
+                    mode: binary
+                    reduce:
+                      reducer: sum
+              - kind: organize
+                spec:
+                  id: organize
+                  options:
+                    excludeByName:
+                      Time: false
+                      allocatable_cpu: true
+                      allocatable_critical: true
+                      allocatable_disk: true
+                      allocatable_memory: true
+                      allocatable_ok: true
+                      allocatable_warning: true
+                      allocated_cpu: false
+                      allocated_memory: false
+                      memory_used_percent: true
+                      nomad.client.host.memory.total.max: true
+                      nomad.client.host.memory.used.max: true
+                      unallocated_cpu: true
+                      unallocated_disk: true
+                      unallocated_memory: true
+                    includeByName: {}
+                    indexByName: {}
+                    orderByMode: manual
+                    renameByName: {}
+        description: ''
+        id: 7
+        links: []
+        title: Host Resources » $host
+        vizConfig:
+          group: timeseries
+          kind: VizConfig
+          spec:
+            fieldConfig:
+              defaults:
+                color:
+                  mode: palette-classic
+                custom:
+                  axisBorderShow: false
+                  axisCenteredZero: false
+                  axisColorMode: text
+                  axisLabel: ''
+                  axisPlacement: auto
+                  barAlignment: 0
+                  barWidthFactor: 0.6
+                  drawStyle: line
+                  fillOpacity: 5
+                  gradientMode: none
+                  hideFrom:
+                    legend: false
+                    tooltip: false
+                    viz: false
+                  insertNulls: false
+                  lineInterpolation: smooth
+                  lineWidth: 2
+                  pointSize: 5
+                  scaleDistribution:
+                    type: linear
+                  showPoints: auto
+                  showValues: false
+                  spanNulls: false
+                  stacking:
+                    group: A
+                    mode: none
+                  thresholdsStyle:
+                    mode: 'off'
+                decimals: 2
+                max: 100
+                min: 0
+                thresholds:
+                  mode: percentage
+                  steps:
+                    - color: dark-green
+                      value: 0
+                    - color: dark-yellow
+                      value: 70
+                    - color: dark-red
+                      value: 90
+                unit: percent
+              overrides: []
+            options:
+              legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+              tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          version: 12.3.1
+  layout:
+    kind: GridLayout
+    spec:
+      items:
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-1
+            height: 3
+            repeat:
+              direction: h
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 0
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-2
+            height: 3
+            repeat:
+              direction: h
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 3
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-3
+            height: 3
+            repeat:
+              direction: h
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 6
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-4
+            height: 6
+            repeat:
+              direction: h
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 9
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-5
+            height: 6
+            repeat:
+              direction: h
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 15
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-6
+            height: 6
+            repeat:
+              direction: h
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 21
+        - kind: GridLayoutItem
+          spec:
+            element:
+              kind: ElementReference
+              name: panel-7
+            height: 8
+            repeat:
+              direction: v
+              maxPerRow: 2
+              mode: variable
+              value: host
+            width: 24
+            x: 0
+            'y': 27
+  links: []
+  liveNow: false
+  preload: false
+  tags: []
+  timeSettings:
+    autoRefresh: auto
+    autoRefreshIntervals:
+      - 5s
+      - 10s
+      - 30s
+      - 1m
+      - 5m
+      - 15m
+      - 30m
+      - 1h
+      - 2h
+      - 1d
+    fiscalYearStartMonth: 0
+    from: now-7d
+    hideTimepicker: false
+    timezone: browser
+    to: now
+  title: Nomad
+  variables:
+    - kind: QueryVariable
+      spec:
+        allowCustomValue: false
+        current:
+          text: ''
+          value: ''
+        definition: SHOW TAG VALUES FROM "nomad.client.unallocated.cpu" WITH KEY = "host"
+        hide: dontHide
+        includeAll: false
+        multi: true
+        name: host
+        options: []
+        query:
+          group: influxdb
+          kind: DataQuery
+          spec:
+            query: >-
+              SHOW TAG VALUES FROM "nomad.client.unallocated.cpu" WITH KEY =
+              "host"
+            refId: InfluxVariableQueryEditor-VariableQuery
+          version: v0
+        refresh: onTimeRangeChanged
+        regex: ''
+        skipUrlSync: false
+        sort: alphabeticalAsc
+status: {}
