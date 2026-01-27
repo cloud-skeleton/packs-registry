@@ -61,7 +61,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -86,7 +85,6 @@
           },
           "displayName": "$host",
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -173,7 +171,6 @@
           },
           "displayName": "$host",
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -255,7 +252,6 @@
           },
           "displayName": "$host",
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -328,7 +324,6 @@
           "displayName": "$host",
           "mappings": [],
           "min": 0,
-          "noValue": "0",
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -477,7 +472,6 @@
           "displayName": "$host",
           "mappings": [],
           "min": 0,
-          "noValue": "0",
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -629,7 +623,6 @@
           "displayName": "$host",
           "mappings": [],
           "min": 0,
-          "noValue": "0",
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -1185,13 +1178,14 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Nomad",
   "uid": "adxvpzw",
-  "version": 57,
-  "weekStart": ""
+  "version": 59,
+  "weekStart": "",
+  "id": null
 }
