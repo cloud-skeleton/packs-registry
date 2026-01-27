@@ -131,7 +131,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 enable = newInfluxDSConfigPageDesign
 
                 [log]
-                level = {{ index . "log_level" }}
+                level = {{ index . "influxdb.log_level" }}
                 mode = console
                 {{- end }}
                 EOF
@@ -193,8 +193,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 INFLUX_PASSWORD={{ index . "influxdb.admin_password" }}
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-                INFLUX_ORGANIZATION={{ index . "organization_name" }}
-                INFLUX_DATA_RETENTION={{ index . "data_retention" }}
+                INFLUX_ORGANIZATION={{ index . "influxdb.organization_name" }}
+                INFLUX_DATA_RETENTION={{ index . "influxdb.data_retention" }}
                 {{- end }}
                 EOF
                 destination = "secrets/env"
@@ -246,7 +246,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 engine-path: /var/lib/influxdb2/engine
                 hardening-enabled: true
                 instance-id: "{{ env "NOMAD_ALLOC_ADDR_http" }}"
-                log-level: {{ index . "log_level" }}
+                log-level: {{ index . "influxdb.log_level" }}
                 metrics-disabled: true
                 pprof-disabled: true
                 query-concurrency: 2
@@ -326,7 +326,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     omit_hostname = true
                     skip_processors_after_aggregators = true
 
-                {{- range $nomad_node := .nomad_nodes.Value | parseJSON }}
+                {{- range $nomad_node := (index . "influxdb.nomad_nodes").Value | parseJSON }}
                 [[ "[[" ]]inputs.nomad[[ "]]" ]]
                     url = "https://{{ $nomad_node }}:4646"
                     tls_ca = "/run/secrets/nomad-agent-ca.pem"
@@ -337,7 +337,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
                     bucket_tag = "app_name"
                     exclude_bucket_tag = true
-                    organization = "{{ .organization_name }}"
+                    organization = "{{ index . "influxdb.organization_name" }}"
                     urls = ["http://127.0.0.1:8086"]
                     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
                     token = "{{ .telegraf_token }}"
