@@ -14,19 +14,19 @@
 
 [[- define "job_name" -]]
 [[- $root := index . 0 -]]
-[[- $name  := index . 1 -]]
+[[- $name := index . 1 -]]
 [[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
 [[- end -]]
 
 [[- define "job_policy_description" -]]
 [[- $root := index . 0 -]]
-[[- $name  := index . 1 -]]
+[[- $name := index . 1 -]]
 [[ printf "JOB POLICY: Allow extra permissions for %s-%s-%s job" (meta "pack.name" $root) $name (var "id" $root) ]]
 [[- end -]]
 
 [[- define "job_policy_name" -]]
 [[- $root := index . 0 -]]
-[[- $name  := index . 1 -]]
+[[- $name := index . 1 -]]
 [[ printf "JOB-POLICY-%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" ]]
 [[- end -]]
 
@@ -121,4 +121,17 @@
                 destination = "secrets/main.key"
             }
         }
+[[- end -]]
+
+[[- define "set_parameter_command" -]]
+[[- $root := index . 0 -]]
+[[- $job_name := index . 1 -]]
+[[- $parameter_name := index . 2 -]]
+[[- $parameter_namespace := "default" -]]
+[[- if ge (len .) 4 -]]
+    [[- $parameter_namespace = index . 3 -]]
+[[- end -]]
+[[- $variable := printf "params/%s-%s-%s/%s" (meta "pack.name" $root) $job_name (var "id" $root) $parameter_name -]]
+[[ printf "nomad var get -namespace=%s %s \\\n| nomad var put -force -namespace=%s %s -"
+$parameter_namespace $variable $parameter_namespace $variable ]]
 [[- end -]]

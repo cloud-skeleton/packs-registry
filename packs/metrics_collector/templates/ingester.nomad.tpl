@@ -189,8 +189,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
-                INFLUX_USER={{ index . "admin_user" }}
-                INFLUX_PASSWORD={{ index . "admin_password" }}
+                INFLUX_USER={{ index . "influxdb.admin_user" }}
+                INFLUX_PASSWORD={{ index . "influxdb.admin_password" }}
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
                 INFLUX_ORGANIZATION={{ index . "organization_name" }}
@@ -373,10 +373,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Dynamic configuration
-        "params.config.data_retention"    = "7d"
-        "params.config.log_level"         = "info"
-        "params.config.nomad_nodes"       = "[]"
-        "params.config.organization_name" = "cloud-skeleton"
+        "params.config.influxdb.data_retention"    = "7d"
+        "params.config.influxdb.log_level"         = "info"
+        "params.config.influxdb.nomad_nodes"       = "[]"
+        "params.config.influxdb.organization_name" = "cloud-skeleton"
 
         // Docker images used in job
         "params.images.cleanstart/stunnel" = "5.76"
