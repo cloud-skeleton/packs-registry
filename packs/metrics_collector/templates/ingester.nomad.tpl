@@ -131,7 +131,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 enable = newInfluxDSConfigPageDesign
 
                 [log]
-                level = {{ index . "influxdb.log_level" }}
+                level = {{ index . "grafana.log_level" }}
                 mode = console
                 {{- end }}
                 EOF
@@ -373,6 +373,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Dynamic configuration
+        "params.config.grafana.log_level"          = "info"
         "params.config.influxdb.data_retention"    = "7d"
         "params.config.influxdb.log_level"         = "info"
         "params.config.influxdb.nomad_nodes"       = "[]"
