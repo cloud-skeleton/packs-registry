@@ -41,9 +41,9 @@ initialize() {
             -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" \
             --data "{\"Namespace\":\"${NOMAD_NAMESPACE}\",\"Items\":\
-            {\"nomad_bucket_id\":\"${NOMAD_BUCKET_ID}\",\
-            \"org_id\":\"${ORG_ID}\",\"admin_token\":\"${INFLUX_TOKEN}\",\"telegraf_token\":\"${TELEGRAF_TOKEN}\",\
-            \"grafana_token\":\"${GRAFANA_TOKEN}\",\"user_id\":\"${USER_ID}\"}}"
+            {\"influxdb.nomad_bucket_id\":\"${NOMAD_BUCKET_ID}\",\"influxdb.organisation_id\":\"${ORG_ID}\",\
+            \"influxdb.admin_token\":\"${INFLUX_TOKEN}\",\"influxdb.telegraf_token\":\"${TELEGRAF_TOKEN}\",\
+            \"influxdb.grafana_token\":\"${GRAFANA_TOKEN}\",\"influxdb.admin_id\":\"${USER_ID}\"}}"
         echo 'Database has been initialized.'
         return 1
     fi
@@ -54,9 +54,9 @@ set_bucket_retention() {
     local STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
         -H "Authorization: Bearer ${NOMAD_TOKEN}" \
         "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
-    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
-    local BUCKET_ID=$(echo "$STATE" | grep -oE '"nomad_bucket_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
-    local ORG_ID=$(echo "$STATE" | grep -oE '"org_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"influxdb.admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
+    local BUCKET_ID=$(echo "$STATE" | grep -oE '"influxdb.nomad_bucket_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+    local ORG_ID=$(echo "$STATE" | grep -oE '"influxdb.organisation_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
     local BUCKET_RETENTION=$(influx bucket ls --org-id ${ORG_ID} -i ${BUCKET_ID} --hide-headers | awk '{ print $3 }')
     if [ $(duration_to_seconds ${BUCKET_RETENTION}) != $(duration_to_seconds ${INFLUX_DATA_RETENTION}) ]; then
         influx bucket update -i ${BUCKET_ID} -r "${INFLUX_DATA_RETENTION}" > /dev/null
@@ -68,8 +68,8 @@ set_organization_name() {
     local STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
         -H "Authorization: Bearer ${NOMAD_TOKEN}" \
         "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
-    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
-    local ORG_ID=$(echo "$STATE" | grep -oE '"org_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"influxdb.admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
+    local ORG_ID=$(echo "$STATE" | grep -oE '"influxdb.organisation_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
     if [ "$(influx org ls -i ${ORG_ID} --hide-headers | awk '{ print $2 }')" != "${INFLUX_ORGANIZATION}" ]; then
         influx org update -i ${ORG_ID} -n "${INFLUX_ORGANIZATION}" > /dev/null
         echo 'Organization name has been changed.'
@@ -80,8 +80,8 @@ set_user_name() {
     local STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
         -H "Authorization: Bearer ${NOMAD_TOKEN}" \
         "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
-    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
-    local USER_ID=$(echo "$STATE" | grep -oE '"user_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"influxdb.admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
+    local USER_ID=$(echo "$STATE" | grep -oE '"influxdb.admin_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
     if [ "$(influx user ls -i ${USER_ID} --hide-headers | awk '{ print $2 }')" != "${INFLUX_USER}" ]; then
         influx user update -i ${USER_ID} -n "${INFLUX_USER}" > /dev/null
         echo 'User name has been changed.'
@@ -92,8 +92,8 @@ set_user_password() {
     local STATE=$(curl -s --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" \
         -H "Authorization: Bearer ${NOMAD_TOKEN}" \
         "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")
-    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
-    local USER_ID=$(echo "$STATE" | grep -oE '"user_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
+    export INFLUX_TOKEN=$(echo "$STATE" | grep -oE '"influxdb.admin_token":"[0-9a-zA-Z]+"' | cut -d':' -f2 | tr -d '"')
+    local USER_ID=$(echo "$STATE" | grep -oE '"influxdb.admin_id":"[0-9a-f]+"' | cut -d':' -f2 | tr -d '"')
     local CREDENTIALS_STATUS_CODE=$(curl -so /dev/null -w "%%{http_code}" \
         -X POST http://127.0.0.1:8086/api/v2/signin \
         -u "${INFLUX_USER}:${INFLUX_PASSWORD}")

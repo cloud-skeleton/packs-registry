@@ -340,7 +340,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     organization = "{{ index . "influxdb.organization_name" }}"
                     urls = ["http://127.0.0.1:8086"]
                     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
-                    token = "{{ .telegraf_token }}"
+                    token = "{{ index . "influxdb.telegraf_token" }}"
                     {{- end }}
                 {{- end }}
                 EOF
