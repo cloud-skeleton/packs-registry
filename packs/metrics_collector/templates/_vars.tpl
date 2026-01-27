@@ -132,6 +132,6 @@
     [[- $parameter_namespace = index . 3 -]]
 [[- end -]]
 [[- $variable := printf "params/%s-%s-%s/%s" (meta "pack.name" $root) $job_name (var "id" $root) $parameter_name -]]
-[[ printf "nomad var get -namespace=%s %s \\\n| nomad var put -force -namespace=%s %s -"
+[[ printf "nomad var get -namespace=%s %s \\\n    | nomad var put -force -namespace=%s %s -"
 $parameter_namespace $variable $parameter_namespace $variable ]]
 [[- end -]]
