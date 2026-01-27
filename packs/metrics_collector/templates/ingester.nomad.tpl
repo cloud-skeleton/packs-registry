@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 address_mode = "alloc"
 
                 check_restart {
-                    grace = "2m"
+                    grace = "10m"
                     limit = 3
                 }
 
@@ -91,9 +91,20 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
                 DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
                 {{- end }}
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+                GRAFANA_USER="{{ index . "grafana.admin_user" }}"
+                GRAFANA_PASSWORD="{{ index . "grafana.admin_password" }}"
+                {{- end }}
                 EOF
                 destination = "secrets/env"
                 env         = true
+            }
+
+            user = "root"
+
+            volume_mount {
+                destination = "/var/lib/grafana"
+                volume      = "ui_data"
             }
         }
 
@@ -189,12 +200,12 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
-                INFLUX_USER={{ index . "influxdb.admin_user" }}
-                INFLUX_PASSWORD={{ index . "influxdb.admin_password" }}
+                INFLUX_USER="{{ index . "influxdb.admin_user" }}"
+                INFLUX_PASSWORD="{{ index . "influxdb.admin_password" }}"
                 {{- end }}
                 {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-                INFLUX_ORGANIZATION={{ index . "influxdb.organization_name" }}
-                INFLUX_DATA_RETENTION={{ index . "influxdb.data_retention" }}
+                INFLUX_ORGANIZATION="{{ index . "influxdb.organization_name" }}"
+                INFLUX_DATA_RETENTION="{{ index . "influxdb.data_retention" }}"
                 {{- end }}
                 EOF
                 destination = "secrets/env"
@@ -397,8 +408,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     namespace = "system"
 
     update {
-        auto_revert      = true
-        healthy_deadline = "6m"
-        min_healthy_time = "2m"
+        auto_revert       = true
+        healthy_deadline  = "14m"
+        min_healthy_time  = "2m"
+        progress_deadline = "16m"
     }
 }
