@@ -49,6 +49,54 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             task = "tunnel"
         }
 
+        task "grafana-autoconfig" {
+            config {
+                args = [
+                    "/local/autoconfig_grafana.sh"
+                ]
+                command        = "bash"
+                cpu_hard_limit = true
+                entrypoint     = []
+                image          = "${DOCKER_IMAGE}"
+            }
+
+            driver = "docker"
+
+            identity {
+                change_mode = "restart"
+                env         = true
+            }
+
+            kill_timeout = "30s"
+
+            lifecycle {
+                hook    = "poststart"
+                sidecar = true
+            }
+
+            resources {
+                cpu    = 25
+                memory = 16
+            }
+
+            template {
+                data        = <<-EOF
+[[ fileContents "files/autoconfig_grafana.sh" | indent 16 ]]
+                EOF
+                destination = "local/autoconfig_grafana.sh"
+            }
+
+            template {
+                data        = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+                DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
+                {{- end }}
+                EOF
+                destination = "secrets/env"
+                env         = true
+            }
+        }
+
         task "grafana" {
             config {
                 cpu_hard_limit = true
@@ -101,10 +149,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         task "influxdb-autoconfig" {
             config {
                 args = [
-                    "local/autoconfig_influxdb.sh"
+                    "/local/autoconfig_influxdb.sh"
                 ]
                 command        = "bash"
                 cpu_hard_limit = true
+                entrypoint     = []
                 image          = "${DOCKER_IMAGE}"
             }
 
