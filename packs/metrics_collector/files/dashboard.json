@@ -21,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "12.3.1"
+      "version": "12.3.2"
     },
     {
       "type": "datasource",
@@ -113,7 +113,8 @@
         "y": 0
       },
       "id": 1,
-      "maxPerRow": 2,
+      "interval": "1d",
+      "maxPerRow": 3,
       "options": {
         "colWidth": 0.5,
         "legend": {
@@ -129,7 +130,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "h",
       "targets": [
@@ -139,13 +140,13 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "SELECT\n    LAST(\"value\")\nFROM\n    \"nomad.client.uptime\"\nWHERE\n    $timeFilter\n    AND\n    \"host\" =~ /^$host$/\nGROUP BY\n    time(1d)",
+          "query": "SELECT\n    LAST(\"value\")\nFROM\n    \"nomad.client.uptime\"\nWHERE\n    $timeFilter\n    AND\n    \"host\" =~ /^$host$/\nGROUP BY\n    time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
-      "timeFrom": "30d",
+      "timeFrom": "7d",
       "title": "Uptime",
       "type": "status-history"
     },
@@ -194,7 +195,8 @@
         "y": 3
       },
       "id": 2,
-      "maxPerRow": 2,
+      "interval": "1d",
+      "maxPerRow": 3,
       "options": {
         "colWidth": 0.5,
         "legend": {
@@ -210,7 +212,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "h",
       "targets": [
@@ -220,13 +222,13 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "SELECT\n    SUM(\"value\")\nFROM\n    \"nomad.client.allocations.blocked\"\nWHERE\n    $timeFilter\n    AND\n    \"host\" =~ /^$host$/\nGROUP BY\n    time(1d)",
+          "query": "SELECT\n    SUM(\"value\")\nFROM\n    \"nomad.client.allocations.blocked\"\nWHERE\n    $timeFilter\n    AND\n    \"host\" =~ /^$host$/\nGROUP BY\n    time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
-      "timeFrom": "30d",
+      "timeFrom": "7d",
       "title": "Blocked Allocations",
       "type": "status-history"
     },
@@ -275,7 +277,8 @@
         "y": 6
       },
       "id": 3,
-      "maxPerRow": 2,
+      "interval": "1d",
+      "maxPerRow": 3,
       "options": {
         "colWidth": 0.5,
         "legend": {
@@ -291,7 +294,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "h",
       "targets": [
@@ -301,13 +304,13 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "SELECT\n    SUM(\"count\")\nFROM\n    \"nomad.client.allocs.oom_killed\"\nWHERE\n    $timeFilter\n    AND\n    \"host\" =~ /^$host$/\nGROUP BY\n    time(1d)",
+          "query": "SELECT\n    SUM(\"count\")\nFROM\n    \"nomad.client.allocs.oom_killed\"\nWHERE\n    $timeFilter\n    AND\n    \"host\" =~ /^$host$/\nGROUP BY\n    time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
-      "timeFrom": "30d",
+      "timeFrom": "7d",
       "title": "OOM allocations",
       "type": "status-history"
     },
@@ -368,7 +371,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "h",
       "targets": [
@@ -516,7 +519,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "h",
       "targets": [
@@ -667,7 +670,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "h",
       "targets": [
@@ -782,7 +785,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 5,
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -791,12 +794,15 @@
             },
             "insertNulls": false,
             "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "showValues": false,
             "spanNulls": false,
             "stacking": {
@@ -839,6 +845,7 @@
         "y": 27
       },
       "id": 7,
+      "interval": "5m",
       "maxPerRow": 2,
       "options": {
         "legend": {
@@ -853,7 +860,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.3.2",
       "repeat": "host",
       "repeatDirection": "v",
       "targets": [
@@ -1185,7 +1192,7 @@
   "timezone": "browser",
   "title": "Nomad",
   "uid": "adxvpzw",
-  "version": 59,
+  "version": 6,
   "weekStart": "",
   "id": null
 }
