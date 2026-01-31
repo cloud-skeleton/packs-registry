@@ -5,7 +5,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     value     = "main-worker"
   }
 
-  group "main" {
+  group "grafana" {
     network {
       mode = "bridge"
 
@@ -190,7 +190,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
               password: {{ index . "influxdb.grafana_token" }}
             type: influxdb
             user: grafana
-            url: http://localhost:8086
+            {{- range nomadService "[[ template "service_name" (list . "ingester" "influxdb") ]]" }}
+            url: http://{{ .Address }}:{{ .Port }}
+            {{- end }}
             uid: 0000-0000-0000-0000
         {{- end }}
         EOF
@@ -203,6 +205,53 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         destination = "/var/lib/grafana"
         volume      = "ui_data"
       }
+    }
+
+[[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
+
+    volume "ui_data" {
+      access_mode     = "multi-node-multi-writer"
+      attachment_mode = "file-system"
+      read_only       = false
+      source          = "[[ var "ui_data_volume.id" . ]]"
+      type            = "csi"
+    }
+  }
+
+  group "influxdb" {
+    network {
+      mode = "bridge"
+
+      port "influxdb" {
+        to = 8086
+      }
+    }
+
+    restart {
+      attempts         = 2
+      interval         = "2m"
+      mode             = "delay"
+      render_templates = true
+    }
+
+    service {
+      check {
+        check_restart {
+          grace = "1m"
+          limit = 3
+        }
+
+        interval = "30s"
+        path     = "/health"
+        port     = "influxdb"
+        timeout  = "2s"
+        type     = "http"
+      }
+
+      name     = "[[ template "service_name" (list . "ingester" "influxdb") ]]"
+      port     = "influxdb"
+      provider = "nomad"
+      task     = "influxdb"
     }
 
     task "influxdb-autoconfig" {
@@ -335,6 +384,27 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
+    volume "db_data" {
+      access_mode     = "multi-node-multi-writer"
+      attachment_mode = "file-system"
+      read_only       = false
+      source          = "[[ var "db_data_volume.id" . ]]"
+      type            = "csi"
+    }
+  }
+
+  group "telegraf" {
+    network {
+      mode = "bridge"
+    }
+
+    restart {
+      attempts         = 2
+      interval         = "2m"
+      mode             = "delay"
+      render_templates = true
+    }
+
     task "telegraf" {
       config {
         cpu_hard_limit = true
@@ -356,11 +426,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
 
       driver = "docker"
-
-      lifecycle {
-        hook    = "poststart"
-        sidecar = true
-      }
 
       resources {
         cpu    = 75
@@ -385,19 +450,24 @@ job "[[ template "job_name" (list . "ingester") ]]" {
           omit_hostname = true
           skip_processors_after_aggregators = true
 
-        {{- range $nomad_node := (index . "influxdb.nomad_nodes").Value | parseJSON }}
+        {{ range $nomad_node := (index . "influxdb.nomad_nodes").Value | parseJSON -}}
         [[ "[[" ]]inputs.nomad[[ "]]" ]]
           url = "https://{{ $nomad_node }}:4646"
           tls_ca = "/run/secrets/nomad-agent-ca.pem"
           [inputs.nomad.tags]
             app_name = "nomad"
-        {{- end }}
+
+        {{ end -}}
 
         [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
           bucket_tag = "app_name"
           exclude_bucket_tag = true
           organization = "{{ index . "influxdb.organization_name" }}"
-          urls = ["http://127.0.0.1:8086"]
+          urls = [
+            {{- range nomadService "[[ template "service_name" (list . "ingester" "influxdb") ]]" -}}
+            "http://{{ .Address }}:{{ .Port }}"
+            {{- end -}}
+          ]
           {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
           token = "{{ index . "influxdb.telegraf_token" }}"
           {{- end }}
@@ -407,24 +477,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         uid         = 100
         gid         = 101
       }
-    }
-
-[[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
-
-    volume "db_data" {
-      access_mode     = "multi-node-multi-writer"
-      attachment_mode = "file-system"
-      read_only       = false
-      source          = "[[ var "db_data_volume.id" . ]]"
-      type            = "csi"
-    }
-
-    volume "ui_data" {
-      access_mode     = "multi-node-multi-writer"
-      attachment_mode = "file-system"
-      read_only       = false
-      source          = "[[ var "ui_data_volume.id" . ]]"
-      type            = "csi"
     }
   }
 
