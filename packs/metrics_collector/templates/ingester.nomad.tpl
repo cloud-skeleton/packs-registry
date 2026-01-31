@@ -148,9 +148,35 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 [log]
                 level = {{ index . "grafana.log_level" }}
                 mode = console
+
+                [paths]
+                provisioning = /local
                 {{- end }}
                 EOF
                 destination = "../alloc/grafana.ini"
+            }
+
+            template {
+                data        = <<-EOF
+                {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+                apiVersion: 1
+                datasources:
+                  - access: proxy
+                    isDefault: true
+                    jsonData:
+                      dbName: nomad
+                      httpMode: POST
+                      product: InfluxDB OSS 2.x
+                      version: InfluxQL
+                    name: influxdb
+                    secureJsonData:
+                      password: {{ index . "influxdb.grafana_token" }}
+                    type: influxdb
+                    user: grafana
+                    url: http://localhost:8086
+                {{- end }}
+                EOF
+                destination = "local/datasources/influxdb.yml"
             }
 
             user = "root"
