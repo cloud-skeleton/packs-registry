@@ -209,6 +209,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
 [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
+    update {
+      healthy_deadline  = "14m"
+      progress_deadline = "29m"
+    }
+
     volume "ui_data" {
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
@@ -384,6 +389,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
+    update {
+      healthy_deadline  = "5m"
+      progress_deadline = "11m"
+    }
+
     volume "db_data" {
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
@@ -478,6 +488,12 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         gid         = 101
       }
     }
+
+    update {
+      health_check      = "task_states"
+      healthy_deadline  = "3m"
+      progress_deadline = "7m"
+    }
   }
 
   meta = {
@@ -509,8 +525,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
   update {
     auto_revert       = true
-    healthy_deadline  = "14m"
     min_healthy_time  = "2m"
-    progress_deadline = "16m"
   }
 }
