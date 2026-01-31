@@ -121,7 +121,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             driver = "docker"
 
             env {
-                GF_PATHS_CONFIG = "/alloc/grafana.ini"
+                GF_PATHS_CONFIG       = "/alloc/grafana.ini"
+                GF_PATHS_PROVISIONING = "/local"
             }
 
             resources {
@@ -147,13 +148,28 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
                 [log]
                 level = {{ index . "grafana.log_level" }}
-                mode = console
-
-                [paths]
-                provisioning = /local
                 {{- end }}
                 EOF
                 destination = "../alloc/grafana.ini"
+            }
+
+            template {
+                data        = <<-EOF
+[[ fileContents "files/nomad.json" | indent 16 ]]
+                EOF
+                destination = "local/dashboards/nomad.json"
+            }
+
+            template {
+                data        = <<-EOF
+                apiVersion: 1
+                providers:
+                  - disableDeletion: true
+                    name: dashboards
+                    options:
+                      path: /local/dashboards
+                EOF
+                destination = "local/dashboards/dashboards.yml"
             }
 
             template {
@@ -174,6 +190,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                     type: influxdb
                     user: grafana
                     url: http://localhost:8086
+                    uid: 0000-0000-0000-0000
                 {{- end }}
                 EOF
                 destination = "local/datasources/influxdb.yml"
