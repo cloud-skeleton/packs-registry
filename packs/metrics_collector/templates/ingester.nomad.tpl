@@ -62,6 +62,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
             driver = "docker"
 
+            env {
+                GF_PATHS_CONFIG = "/alloc/grafana.ini"
+            }
+
             identity {
                 change_mode = "restart"
                 env         = true
@@ -117,7 +121,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             driver = "docker"
 
             env {
-                GF_PATHS_CONFIG = "/local/grafana.ini"
+                GF_PATHS_CONFIG = "/alloc/grafana.ini"
             }
 
             resources {
@@ -146,7 +150,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
                 mode = console
                 {{- end }}
                 EOF
-                destination = "local/grafana.ini"
+                destination = "../alloc/grafana.ini"
             }
 
             user = "root"
