@@ -1169,7 +1169,8 @@
         "allowCustomValue": false,
         "current": {},
         "definition": "SHOW TAG VALUES FROM \"nomad.client.unallocated.cpu\" WITH KEY = \"host\"",
-        "includeAll": false,
+        "hide": 2,
+        "includeAll": true,
         "multi": true,
         "name": "host",
         "options": [],
@@ -1177,7 +1178,7 @@
           "query": "SHOW TAG VALUES FROM \"nomad.client.unallocated.cpu\" WITH KEY = \"host\"",
           "refId": "InfluxVariableQueryEditor-VariableQuery"
         },
-        "refresh": 2,
+        "refresh": 1,
         "regex": "",
         "sort": 1,
         "type": "query"
@@ -1192,7 +1193,7 @@
   "timezone": "browser",
   "title": "Nomad",
   "uid": "adxvpzw",
-  "version": 6,
+  "version": 2,
   "weekStart": "",
   "id": null
 }
