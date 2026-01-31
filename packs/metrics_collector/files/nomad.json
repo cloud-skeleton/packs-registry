@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -743,8 +743,8 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -773,7 +773,6 @@
           },
           "decimals": 2,
           "mappings": [],
-          "max": 100,
           "min": 0,
           "thresholds": {
             "mode": "percentage",
@@ -803,7 +802,7 @@
         "y": 27
       },
       "id": 7,
-      "interval": "5m",
+      "interval": "15m",
       "maxPerRow": 2,
       "options": {
         "legend": {
@@ -1117,10 +1116,13 @@
       "type": "timeseries"
     }
   ],
-  "preload": false,
+  "preload": true,
   "refresh": "auto",
   "schemaVersion": 42,
-  "tags": [],
+  "tags": [
+    "Nomad",
+    "cluster"
+  ],
   "templating": {
     "list": [
       {
@@ -1151,6 +1153,5 @@
   "timezone": "browser",
   "title": "Nomad",
   "uid": "adxvpzw",
-  "version": 1,
-  "weekStart": ""
+  "version": 3
 }

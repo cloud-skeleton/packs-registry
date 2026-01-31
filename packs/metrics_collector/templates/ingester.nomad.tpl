@@ -63,7 +63,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
             driver = "docker"
 
             env {
-                GF_PATHS_CONFIG = "/alloc/grafana.ini"
+                GF_PATHS_CONFIG       = "/alloc/grafana.ini"
+                GF_PATHS_PROVISIONING = "/local"
             }
 
             identity {
