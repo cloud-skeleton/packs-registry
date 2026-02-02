@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         address_mode = "alloc"
 
         check_restart {
-          grace = "10m"
+          grace = "12m"
           limit = 3
         }
 
@@ -210,8 +210,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "14m"
-      progress_deadline = "29m"
+      healthy_deadline  = "15m"
+      progress_deadline = "31m"
     }
 
     volume "ui_data" {
@@ -491,8 +491,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     update {
       health_check      = "task_states"
-      healthy_deadline  = "3m"
-      progress_deadline = "7m"
+      healthy_deadline  = "5m"
+      progress_deadline = "11m"
     }
   }
 
