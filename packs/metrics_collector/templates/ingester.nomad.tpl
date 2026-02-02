@@ -453,7 +453,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
 
       template {
-        data = <<-EOF
+        // @TODO: https://github.com/influxdata/telegraf/issues/18285
+        // change_mode   = "signal"
+        // change_signal = "SIGHUP"
+        data        = <<-EOF
         {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
         [agent]
           debug = true
