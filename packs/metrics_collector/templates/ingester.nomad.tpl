@@ -286,7 +286,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       resources {
         cpu    = 25
-        memory = 16
+        memory = 64
       }
 
       template {
@@ -352,6 +352,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
 
       template {
+        // @TODO: https://github.com/influxdata/influxdb/issues/7037
+        // change_mode   = "signal"
+        // change_signal = "SIGHUP"
         data        = <<-EOF
         {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
         ---
@@ -504,7 +507,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     // Dynamic configuration
     "params.config.grafana.log_level"          = "info"
-    "params.config.influxdb.data_retention"    = "7d"
+    "params.config.influxdb.data_retention"    = "604800"
     "params.config.influxdb.log_level"         = "info"
     "params.config.influxdb.nomad_nodes"       = "[]"
     "params.config.influxdb.organization_name" = "cloud-skeleton"

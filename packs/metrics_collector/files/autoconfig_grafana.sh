@@ -26,7 +26,9 @@ set_credentials() {
     if ! curl -sfo /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" http://localhost:3000/api/user; then
         local STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
-        local USER_ID="$(echo "${STATE}" | jq -r '.Items ."grafana.admin_id"')"
+        eval "$(echo "${STATE}" | jq -r '.Items | {
+            "local USER_ID": .["grafana.admin_id"]
+        } | to_entries[] | "\(.key)=\(.value | @sh)"')"
         sqlite3 -cmd '.timeout 10000' /var/lib/grafana/grafana.db \
             "UPDATE user SET login = '${GRAFANA_USER}' WHERE id = ${USER_ID}"
         grafana cli admin reset-admin-password "${GRAFANA_PASSWORD}" --user-id "${USER_ID}" > /dev/null 2>&1
