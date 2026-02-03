@@ -145,6 +145,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         data        = <<-EOF
         [feature_toggles]
         enable = newInfluxDSConfigPageDesign
+
+        [plugins]
+        disable_plugins = \
+          grafana-lokiexplore-app,grafana-metricsdrilldown-app,grafana-pyroscope-app,grafana-exploretraces-app,\
+          alertmanager,grafana-azure-monitor-datasource,cloudwatch,elasticsearch,stackdriver,\
+          grafana-pyroscope-datasource,graphite,jaeger,loki,mssql,mysql,opentsdb,parca,grafana-postgresql-datasource,\
+          prometheus,tempo,grafana-testdata-datasource,zipkin
+        plugin_admin_enabled = false
         EOF
         destination = "../alloc/grafana.ini"
       }
