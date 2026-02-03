@@ -438,7 +438,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         }
       }
 
-      driver = "docker"
+      driver       = "docker"
+      kill_timeout = "15s"
 
       resources {
         cpu    = 75
