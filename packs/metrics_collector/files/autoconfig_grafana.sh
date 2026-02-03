@@ -4,11 +4,11 @@ install_deps() {
 
 initialize() {
     if curl -sfo /dev/null -u admin:admin http://localhost:3000/api/user; then
-        local USER_ID="$(curl -su admin:admin http://localhost:3000/api/user | jq '.id')"
+        USER_ID="$(curl -su admin:admin http://localhost:3000/api/user | jq '.id')"
         curl -so /dev/null -u admin:admin -H 'Content-Type: application/json' -X PUT "http://localhost:3000/api/users/${USER_ID}" \
             -d "{\"login\":\"${GRAFANA_USER}\"}"
         grafana cli admin reset-admin-password "${GRAFANA_PASSWORD}" --user-id "${USER_ID}" > /dev/null 2>&1
-        local STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+        STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         if [ $? != 0 ]; then
             STATE="{}"
@@ -24,10 +24,10 @@ initialize() {
 
 set_credentials() {
     if ! curl -sfo /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" http://localhost:3000/api/user; then
-        local STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+        STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         eval "$(echo "${STATE}" | jq -r '.Items | {
-            "local USER_ID": .["grafana.admin_id"]
+            "USER_ID": .["grafana.admin_id"]
         } | to_entries[] | "\(.key)=\(.value | @sh)"')"
         sqlite3 -cmd '.timeout 10000' /var/lib/grafana/grafana.db \
             "UPDATE user SET login = '${GRAFANA_USER}' WHERE id = ${USER_ID}"
