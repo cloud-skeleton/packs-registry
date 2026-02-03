@@ -143,13 +143,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
         [feature_toggles]
         enable = newInfluxDSConfigPageDesign
-
-        [log]
-        level = {{ index . "grafana.log_level" }}
-        {{- end }}
         EOF
         destination = "../alloc/grafana.ini"
       }
@@ -352,17 +347,12 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
 
       template {
-        // @TODO: https://github.com/influxdata/influxdb/issues/7037
-        // change_mode   = "signal"
-        // change_signal = "SIGHUP"
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
         ---
         bolt-path: /var/lib/influxdb2/influxd.bolt
         engine-path: /var/lib/influxdb2/engine
         hardening-enabled: true
         instance-id: "{{ env "NOMAD_ALLOC_ADDR_http" }}"
-        log-level: {{ index . "influxdb.log_level" }}
         metrics-disabled: true
         pprof-disabled: true
         query-concurrency: 2
@@ -379,7 +369,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         strong-passwords: true
         ui-disabled: true
         ...
-        {{- end }}
         EOF
         destination = "local/config.yml"
         uid         = 1000
@@ -457,9 +446,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
 
       template {
-        // @TODO: https://github.com/influxdata/telegraf/issues/18285
-        // change_mode   = "signal"
-        // change_signal = "SIGHUP"
         data        = <<-EOF
         {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
         [agent]
@@ -507,9 +493,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     [[- template "extra_pack_meta" . ]]
 
     // Dynamic configuration
-    "params.config.grafana.log_level"          = "info"
     "params.config.influxdb.data_retention"    = "604800"
-    "params.config.influxdb.log_level"         = "info"
     "params.config.influxdb.nomad_nodes"       = "[]"
     "params.config.influxdb.organization_name" = "cloud-skeleton"
 
