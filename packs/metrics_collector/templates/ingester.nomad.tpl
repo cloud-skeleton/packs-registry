@@ -161,7 +161,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         data        = <<-EOF
 [[ fileContents "files/nomad.json" | indent 8 ]]
         EOF
-        destination = "local/dashboards/nomad.json"
+        destination = "local/dashboards/built-in/nomad.json"
       }
 
       template {
@@ -169,11 +169,12 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         apiVersion: 1
         providers:
           - disableDeletion: true
+            folder: Cloud Skeleton
             name: dashboards
             options:
-              path: /local/dashboards
+              path: /local/dashboards/built-in
         EOF
-        destination = "local/dashboards/dashboards.yml"
+        destination = "local/dashboards/builtin-dashboards.yml"
       }
 
       template {
