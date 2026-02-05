@@ -67,7 +67,7 @@
 
       resources {
         cpu    = 200
-        memory = 32
+        memory = 48
       }
 
       template {
