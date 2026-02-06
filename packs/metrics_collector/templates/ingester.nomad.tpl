@@ -65,6 +65,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       env {
         GF_PATHS_CONFIG       = "/alloc/grafana.ini"
         GF_PATHS_PROVISIONING = "/local"
+        GF_SERVER_DOMAIN      = "[[ var "hostname" . ]]"
+        GF_SERVER_ROOT_URL    = "https://[[ var "hostname" . ]]"
       }
 
       identity {

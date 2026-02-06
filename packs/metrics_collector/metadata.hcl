@@ -5,5 +5,5 @@ app {
 pack {
     name        = "metrics_collector"
     description = "Deploys InfluxDB with a Telegraf-powered ingest gateway. Accepts OpenTelemetry (traces, metrics, logs) over gRPC and forwards them to InfluxDB, providing a single endpoint for other jobs."
-    version     = "26.2.5"
+    version     = "26.2.6"
 }
