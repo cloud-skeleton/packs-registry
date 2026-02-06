@@ -13,7 +13,14 @@ initialize() {
         if [ $? != 0 ]; then
             STATE="{}"
         fi
-        STATE="$(echo "${STATE}" | jq -c --arg user_id "${USER_ID}" '.Items += { "grafana.admin_id": $user_id }')"
+        SECRET_KEY="$(head -c 32 /dev/urandom | base64)"
+        STATE="$(echo "${STATE}" | jq -c \
+            --arg admin_id "${USER_ID}" \
+            --arg secret_key "${SECRET_KEY}" \
+            '.Items += {
+                "grafana.admin_id": $admin_id,
+                "grafana.secret_key": $secret_key
+            }')"
         curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" -d "${STATE}"
         echo 'Grafana has been initialized.'

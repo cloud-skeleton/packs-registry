@@ -140,6 +140,9 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
         DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
         {{- end }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+        GF_SECURITY_SECRET_KEY="{{ index . "grafana.secret_key" }}"
+        {{- end }}
         EOF
         destination = "secrets/env"
         env         = true
@@ -209,8 +212,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "15m"
-      progress_deadline = "31m"
+      healthy_deadline  = "11m"
+      progress_deadline = "23m"
     }
 
     volume "ui_data" {
