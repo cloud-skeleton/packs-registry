@@ -33,7 +33,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         interval = "30s"
         path     = "/api/health"
         port     = 3000
-        timeout  = "2s"
+        timeout  = "30s"
         type     = "http"
       }
 
