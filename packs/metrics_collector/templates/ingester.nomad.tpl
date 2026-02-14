@@ -26,14 +26,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         address_mode = "alloc"
 
         check_restart {
-          grace = "12m"
+          grace = "13m"
           limit = 3
         }
 
         interval = "30s"
         path     = "/api/health"
         port     = 3000
-        timeout  = "30s"
+        timeout  = "2s"
         type     = "http"
       }
 
@@ -212,8 +212,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "11m"
-      progress_deadline = "23m"
+      healthy_deadline  = "15m"
+      progress_deadline = "31m"
     }
 
     volume "ui_data" {
