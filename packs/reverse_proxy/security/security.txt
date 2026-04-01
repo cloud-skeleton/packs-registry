@@ -2,15 +2,15 @@
 Hash: SHA512
 
 Contact: https://github.com/orgs/cloud-skeleton/discussions
-Expires: 2026-04-01T00:00:00.000Z
+Expires: 2026-05-01T00:00:00.000Z
 Encryption: https://raw.githubusercontent.com/cloud-skeleton/packs-registry/refs/heads/main/packs/reverse_proxy/security/info@cloudskeleton.eu.public.asc
 Preferred-Languages: en, lt
 -----BEGIN PGP SIGNATURE-----
 
-iMAFARYKAEAiIQXOhkvKgN/NJtafqmvB2XXHkxFn508SJj8d843Knn5LfAUCaaOb
-JxYcaW5mb0BjbG91ZHNrZWxldG9uLmV1AABE3gHImVn9OFzpzTCpDdki8VJFVBzj
-8XH0xhYztJfEEG0ey8X/c0hU/DQMEzruDxAVXg+lj69n4BtxRUUAAcjYGRUAdeEc
-vMWLOGvMPl//FUSDIcE6owFx9fyf8Wv35sLNo3tMuQL7OrW7jZnye6nmmloYI6KX
-CwA=
-=7ML4
+iMAFARYKAEAiIQVkFypSfwf/VgPYlhgrOa70V6U2QqcjJepqRN3ZzhaIKQUCacx8
+kRYcaW5mb0BjbG91ZHNrZWxldG9uLmV1AACrEAHFGx1b4oeIJRbOUFS6QUb7GBlg
+QTX+Y2DqS+XhRRx1M/zv/Pmnl2c9id1dqSeGsvySfLDTFMGbaH6AAcd+HoiXXbk1
+ZSvQJs3a35tgRgGgB2cXbMj8hwfH5EIw18HwatVW/OU/O2bgZ2F58/8tTiFL1lPq
+IwA=
+=XV+s
 -----END PGP SIGNATURE-----
