@@ -49,72 +49,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       task = "tunnel"
     }
 
-    task "grafana-autoconfig" {
-      config {
-        args = [
-          "/local/autoconfig_grafana.sh"
-        ]
-        command        = "bash"
-        cpu_hard_limit = true
-        entrypoint     = []
-        image          = "${DOCKER_IMAGE}"
-      }
-
-      driver = "docker"
-
-      env {
-        GF_PATHS_CONFIG       = "/alloc/grafana.ini"
-        GF_PATHS_PROVISIONING = "/local"
-        GF_SERVER_DOMAIN      = "[[ var "hostname" . ]]"
-        GF_SERVER_ROOT_URL    = "https://[[ var "hostname" . ]]"
-      }
-
-      identity {
-        change_mode = "restart"
-        env         = true
-      }
-
-      kill_timeout = "30s"
-
-      lifecycle {
-        hook    = "poststart"
-        sidecar = true
-      }
-
-      resources {
-        cpu    = 25
-        memory = 64
-      }
-
-      template {
-        data        = <<-EOF
-[[ fileContents "files/autoconfig_grafana.sh" | indent 8 ]]
-        EOF
-        destination = "local/autoconfig_grafana.sh"
-      }
-
-      template {
-        data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
-        DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
-        {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
-        GRAFANA_USER="{{ index . "grafana.admin_user" }}"
-        GRAFANA_PASSWORD="{{ index . "grafana.admin_password" }}"
-        {{- end }}
-        EOF
-        destination = "secrets/env"
-        env         = true
-      }
-
-      user = "root"
-
-      volume_mount {
-        destination = "/var/lib/grafana"
-        volume      = "ui_data"
-      }
-    }
-
     task "grafana" {
       config {
         cpu_hard_limit = true
@@ -211,6 +145,96 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
+    task "grafana-postconfig" {
+      config {
+        args = [
+          "/local/postconfig_grafana.sh"
+        ]
+        command        = "bash"
+        cpu_hard_limit = true
+        entrypoint     = []
+        image          = "${DOCKER_IMAGE}"
+      }
+
+      driver = "docker"
+
+      env {
+        GF_PATHS_CONFIG       = "/alloc/grafana.ini"
+        GF_PATHS_PROVISIONING = "/local"
+        GF_SERVER_DOMAIN      = "[[ var "hostname" . ]]"
+        GF_SERVER_ROOT_URL    = "https://[[ var "hostname" . ]]"
+      }
+
+      identity {
+        change_mode = "restart"
+        env         = true
+      }
+
+      kill_timeout = "30s"
+
+      lifecycle {
+        hook    = "poststart"
+        sidecar = true
+      }
+
+      resources {
+        cpu    = 25
+        memory = 64
+      }
+
+      template {
+        data        = <<-EOF
+[[ fileContents "files/postconfig_grafana.sh" | indent 8 ]]
+        EOF
+        destination = "local/postconfig_grafana.sh"
+      }
+
+      template {
+        data        = <<-EOF
+        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
+        {{- end }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+        GRAFANA_USER="{{ index . "grafana.admin_user" }}"
+        GRAFANA_PASSWORD="{{ index . "grafana.admin_password" }}"
+        {{- end }}
+        EOF
+        destination = "secrets/env"
+        env         = true
+      }
+
+      user = "root"
+
+      volume_mount {
+        destination = "/var/lib/grafana"
+        volume      = "ui_data"
+      }
+    }
+
+    // task "grafana-image-renderer" {
+    //   config {
+    //     cpu_hard_limit = true
+    //     image          = "${DOCKER_IMAGE}"
+    //   }
+
+    //   driver = "docker"
+
+    //   resources {
+    //     cpu    = 500
+    //     memory = 512
+    //   }
+
+    //   template {
+    //     data        = <<-EOF
+    //     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+    //     DOCKER_IMAGE="grafana/grafana-image-renderer:{{ index . "grafana/grafana-image-renderer" }}"
+    //     {{- end }}
+    //     EOF
+    //     destination = "secrets/env"
+    //     env         = true
+    //   }
+    // }
+
 [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
     update {
@@ -261,62 +285,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       port     = "influxdb"
       provider = "nomad"
       task     = "influxdb"
-    }
-
-    task "influxdb-autoconfig" {
-      config {
-        args = [
-          "/local/autoconfig_influxdb.sh"
-        ]
-        command        = "bash"
-        cpu_hard_limit = true
-        entrypoint     = []
-        image          = "${DOCKER_IMAGE}"
-      }
-
-      driver = "docker"
-
-      identity {
-        change_mode = "restart"
-        env         = true
-      }
-
-      kill_timeout = "30s"
-
-      lifecycle {
-        hook    = "poststart"
-        sidecar = true
-      }
-
-      resources {
-        cpu    = 25
-        memory = 64
-      }
-
-      template {
-        data        = <<-EOF
-[[ fileContents "files/autoconfig_influxdb.sh" | indent 8 ]]
-        EOF
-        destination = "local/autoconfig_influxdb.sh"
-      }
-
-      template {
-        data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
-        DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
-        {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
-        INFLUX_USER="{{ index . "influxdb.admin_user" }}"
-        INFLUX_PASSWORD="{{ index . "influxdb.admin_password" }}"
-        {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-        INFLUX_ORGANIZATION="{{ index . "influxdb.organization_name" }}"
-        INFLUX_DATA_RETENTION="{{ index . "influxdb.data_retention" }}"
-        {{- end }}
-        EOF
-        destination = "secrets/env"
-        env         = true
-      }
     }
 
     task "influxdb" {
@@ -390,6 +358,62 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
+    task "influxdb-postconfig" {
+      config {
+        args = [
+          "/local/postconfig_influxdb.sh"
+        ]
+        command        = "bash"
+        cpu_hard_limit = true
+        entrypoint     = []
+        image          = "${DOCKER_IMAGE}"
+      }
+
+      driver = "docker"
+
+      identity {
+        change_mode = "restart"
+        env         = true
+      }
+
+      kill_timeout = "30s"
+
+      lifecycle {
+        hook    = "poststart"
+        sidecar = true
+      }
+
+      resources {
+        cpu    = 25
+        memory = 64
+      }
+
+      template {
+        data        = <<-EOF
+[[ fileContents "files/postconfig_influxdb.sh" | indent 8 ]]
+        EOF
+        destination = "local/postconfig_influxdb.sh"
+      }
+
+      template {
+        data        = <<-EOF
+        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
+        {{- end }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+        INFLUX_USER="{{ index . "influxdb.admin_user" }}"
+        INFLUX_PASSWORD="{{ index . "influxdb.admin_password" }}"
+        {{- end }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+        INFLUX_ORGANIZATION="{{ index . "influxdb.organization_name" }}"
+        INFLUX_DATA_RETENTION="{{ index . "influxdb.data_retention" }}"
+        {{- end }}
+        EOF
+        destination = "secrets/env"
+        env         = true
+      }
+    }
+
     update {
       healthy_deadline  = "5m"
       progress_deadline = "11m"
@@ -437,7 +461,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
 
       driver       = "docker"
-      kill_timeout = "15s"
+      kill_timeout = "30s"
 
       resources {
         cpu    = 75
@@ -507,10 +531,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     "params.config.influxdb.organization_name" = "cloud-skeleton"
 
     // Docker images used in job
-    "params.images.cleanstart/stunnel" = "5.76"
-    "params.images.grafana/grafana"    = "12.3.1"
-    "params.images.influxdb"           = "2.8-alpine"
-    "params.images.telegraf"           = "1.37-alpine"
+    "params.images.cleanstart/stunnel"             = "5.76"
+    "params.images.grafana/grafana"                = "12.3.1"
+    "params.images.grafana/grafana-image-renderer" = "v5.8.2"
+    "params.images.influxdb"                       = "2.8-alpine"
+    "params.images.telegraf"                       = "1.37-alpine"
 
     // Volumes
     "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"

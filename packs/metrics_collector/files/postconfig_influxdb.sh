@@ -22,21 +22,6 @@ initialize() {
         if [ $? != 0 ]; then
             STATE="{}"
         fi
-        STATE="$(echo "${STATE}" | jq -c \
-            --arg admin_id "${USER_ID}" \
-            --arg admin_token "${INFLUX_TOKEN}" \
-            --arg grafana_token "${GRAFANA_TOKEN}" \
-            --arg nomad_bucket_id "${NOMAD_BUCKET_ID}" \
-            --arg organisation_id "${ORG_ID}" \
-            --arg telegraf_token "${TELEGRAF_TOKEN}" \
-            '.Items += {
-                "influxdb.admin_id": $admin_id,
-                "influxdb.admin_token": $admin_token,
-                "influxdb.grafana_token": $grafana_token,
-                "influxdb.nomad_bucket_id": $nomad_bucket_id,
-                "influxdb.organisation_id": $organisation_id,
-                "influxdb.telegraf_token": $telegraf_token
-            }')"
         curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" -d "${STATE}"
         echo 'InfluxDB has been initialized.'
