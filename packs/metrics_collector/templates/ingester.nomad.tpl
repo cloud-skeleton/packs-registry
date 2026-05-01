@@ -130,6 +130,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         GF_SERVER_ROOT_URL    = "https://[[ var "hostname" . ]]"
       }
 
+      kill_signal = "SIGINT"
+
       resources {
         cpu    = 400
         memory = 192
