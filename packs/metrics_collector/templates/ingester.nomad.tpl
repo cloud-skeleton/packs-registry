@@ -507,11 +507,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     "params.config.influxdb.organization_name" = "cloud-skeleton"
 
     // Docker images used in job
-    "params.images.cleanstart/stunnel"             = "5.76"
-    "params.images.grafana/grafana"                = "12.3.1"
-    "params.images.grafana/grafana-image-renderer" = "v5.8.2"
-    "params.images.influxdb"                       = "2.8-alpine"
-    "params.images.telegraf"                       = "1.37-alpine"
+    "params.images.cleanstart/stunnel" = "5.76"
+    "params.images.grafana/grafana"    = "12.3.1"
+    "params.images.influxdb"           = "2.8-alpine"
+    "params.images.telegraf"           = "1.37-alpine"
 
     // Volumes
     "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"
