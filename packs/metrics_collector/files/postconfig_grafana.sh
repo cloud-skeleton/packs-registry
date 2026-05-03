@@ -13,7 +13,7 @@ initialize() {
         if [ $? != 0 ]; then
             STATE="{}"
         fi
-        SECRET_KEY="$(head -c 32 /dev/urandom | base64)"
+        SECRET_KEY="$(head -c 32 /dev/urandom | base64 -w 0)"
         STATE="$(echo "${STATE}" | jq -c \
             --arg admin_id "${USER_ID}" \
             --arg secret_key "${SECRET_KEY}" \

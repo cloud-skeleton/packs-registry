@@ -211,30 +211,6 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
-    // task "grafana-image-renderer" {
-    //   config {
-    //     cpu_hard_limit = true
-    //     image          = "${DOCKER_IMAGE}"
-    //   }
-
-    //   driver = "docker"
-
-    //   resources {
-    //     cpu    = 500
-    //     memory = 512
-    //   }
-
-    //   template {
-    //     data        = <<-EOF
-    //     {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
-    //     DOCKER_IMAGE="grafana/grafana-image-renderer:{{ index . "grafana/grafana-image-renderer" }}"
-    //     {{- end }}
-    //     EOF
-    //     destination = "secrets/env"
-    //     env         = true
-    //   }
-    // }
-
 [[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
 
     update {
