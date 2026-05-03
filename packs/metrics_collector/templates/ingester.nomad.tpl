@@ -68,7 +68,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       resources {
         cpu    = 400
-        memory = 192
+        memory = 384
       }
 
       template {
@@ -508,7 +508,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     // Docker images used in job
     "params.images.cleanstart/stunnel" = "5.77"
-    "params.images.grafana/grafana"    = "12.4.3"
+    "params.images.grafana/grafana"    = "13.0.1"
     "params.images.influxdb"           = "2.8-alpine"
     "params.images.telegraf"           = "1.38.3-alpine"
 
