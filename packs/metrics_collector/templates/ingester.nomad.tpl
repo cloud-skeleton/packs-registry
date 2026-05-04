@@ -68,7 +68,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       resources {
         cpu    = 400
-        memory = 384
+        memory = 512
       }
 
       template {
