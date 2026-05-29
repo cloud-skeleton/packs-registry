@@ -54,7 +54,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.5"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.5.1"
 
         // Dynamic configuration
         "params.config.certificates_root_path" = "certs"

@@ -509,8 +509,8 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     // Docker images used in job
     "params.images.cleanstart/stunnel" = "5.77"
     "params.images.grafana/grafana"    = "13.0.1"
-    "params.images.influxdb"           = "2.8-alpine"
-    "params.images.telegraf"           = "1.38.3-alpine"
+    "params.images.influxdb"           = "2.9.1-alpine"
+    "params.images.telegraf"           = "1.38.4-alpine"
 
     // Volumes
     "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"
