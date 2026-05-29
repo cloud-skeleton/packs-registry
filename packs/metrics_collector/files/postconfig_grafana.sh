@@ -8,12 +8,12 @@ initialize() {
         curl -so /dev/null -u admin:admin -H 'Content-Type: application/json' -X PUT "${GF_SERVER_ROOT_URL}/api/users/${USER_ID}" \
             -d "{\"login\":\"${GRAFANA_USER}\"}"
         grafana cli admin reset-admin-password "${GRAFANA_PASSWORD}" --user-id "${USER_ID}" > /dev/null 2>&1
+        SECRET_KEY="$(head -c 32 /dev/urandom | base64 -w 0)"
         STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         if [ $? != 0 ]; then
             STATE="{}"
         fi
-        SECRET_KEY="$(head -c 32 /dev/urandom | base64 -w 0)"
         STATE="$(echo "${STATE}" | jq -c \
             --arg admin_id "${USER_ID}" \
             --arg secret_key "${SECRET_KEY}" \
