@@ -4,6 +4,6 @@ app {
 
 pack {
     name        = "storage_driver-nfs"
-    description = "NFS CSI storage driver."
+    description = "NFS CSI storage driver for Nomad filesystem volumes."
     version     = "26.5.29"
 }

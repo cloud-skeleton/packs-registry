@@ -4,6 +4,6 @@ app {
 
 pack {
     name        = "reverse_proxy"
-    description = "Traefik HTTP reverse proxy and load balancer."
+    description = "Traefik HTTP/HTTPS reverse proxy and load balancer for Nomad services."
     version     = "26.5.29"
 }

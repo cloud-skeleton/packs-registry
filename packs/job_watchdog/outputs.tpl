@@ -7,7 +7,7 @@ nomad var put -force -namespace=system params/[[ template "job_name" (list . "wa
 
 3. Set images variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/images \
-    ghcr.io/cloud-skeleton/nomad-job-watchdog=v1.2
+    ghcr.io/cloud-skeleton/nomad-job-watchdog=v1.5.1
 
 4. Set config variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/config \
