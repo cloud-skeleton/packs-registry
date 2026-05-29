@@ -42,8 +42,8 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
                 {{- with nomadVar "params/[[ template "job_name" (list . "autoupdater") ]]/config" }}
                 CERTS_VAR_ROOT_PATH="{{ .certificates_root_path }}"
                 IMAGES_VARIABLE_NAME="{{ .images_variable_name }}"
-                INGRESS_WORKER_IPS={{ .ingress_worker_ips | toJSON }}
-                MAIN_WORKER_IPS={{ .main_worker_ips | toJSON }}
+                INGRESS_WORKER_IPS={{ .ingress_worker_ips.Value | toJSON }}
+                MAIN_WORKER_IPS={{ .main_worker_ips.Value | toJSON }}
                 PARAMS_VAR_ROOT_PATH="{{ .parameters_root_path }}"
                 {{- $lock := .version_update_lock.Value | parseJSON }}
                 DO_NOT_ALLOW_UPDATE_MAJOR_VERSION="{{ if $lock.major }}true{{ else }}false{{ end }}"
