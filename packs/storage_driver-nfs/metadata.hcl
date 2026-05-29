@@ -5,5 +5,5 @@ app {
 pack {
     name        = "storage_driver-nfs"
     description = "NFS CSI storage driver."
-    version     = "26.2.5"
+    version     = "26.5.29"
 }

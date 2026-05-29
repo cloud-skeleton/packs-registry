@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 SHARED_HELPERS=($(find shared/ -mindepth 1))
 
