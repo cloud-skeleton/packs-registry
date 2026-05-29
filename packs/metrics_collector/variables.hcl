@@ -8,7 +8,7 @@ variable "db_data_volume" {
 }
 
 variable "hostname" {
-  description = "The hostname (FQDN) used to access the InfluxDB 2 web UI and API. This is the domain where InfluxDB will be served."
+  description = "The hostname (FQDN) used to access the Grafana monitoring UI."
   type        = string
 }
 
