@@ -30,7 +30,7 @@ if not (JOB_NAME := getenv("NOMAD_JOB_NAME", "")):
 
 NOMAD_SOCKET: str = f"unix://{NOMAD_SECRETS_DIR}/api.sock"
 CERTS_VAR_ROOT_PATH: str = getenv("CERTS_VAR_ROOT_PATH", "certs")
-PARAMS_META_PREFIX: str = getenv("DEFAULTS_META_PREFIX", "params")
+PARAMS_META_PREFIX: str = getenv("PARAMS_META_PREFIX", "params")
 VOLUMES_META_PREFIX: str = getenv("VOLUMES_META_PREFIX", "volumes")
 PARAMS_VAR_ROOT_PATH: str = getenv("PARAMS_VAR_ROOT_PATH", "params")
 STATE_VAR_PATH: str = f"{PARAMS_VAR_ROOT_PATH}/{JOB_NAME}/state"
