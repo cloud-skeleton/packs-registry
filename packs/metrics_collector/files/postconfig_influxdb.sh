@@ -37,7 +37,7 @@ initialize() {
                 "influxdb.organisation_id": $organisation_id,
                 "influxdb.telegraf_token": $telegraf_token
             }')"
-        curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+        curl -fso /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" -d "${STATE}"
         echo 'InfluxDB has been initialized.'
         return 1

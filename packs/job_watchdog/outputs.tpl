@@ -11,13 +11,18 @@ nomad var put -force -namespace=system params/[[ template "job_name" (list . "wa
 
 4. Set config variable:
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "watcher") ]]/config \
-    parameters_meta_prefix=params parameters_root_path=params volumes_meta_prefix=volumes
+    certificates_root_path=certs \
+    parameters_meta_prefix=params \
+    parameters_root_path=params \
+    volumes_meta_prefix=volumes
 
 nomad var put -force -namespace=system params/[[ template "job_name" (list . "autoupdater") ]]/config \
-    ingress_worker_ips=$(nomad node status -filter 'NodeClass == "ingress-worker"' -json \
-    | jq -c '[.[] .Address]') \
-    main_worker_ips=$(nomad node status -filter 'NodeClass == "main-worker"' -json \
-    | jq -c '[.[] .Address]')
+    certificates_root_path=certs \
+    images_variable_name=images \
+    ingress_worker_ips="$(nomad node status -filter 'NodeClass == "ingress-worker"' -json | jq -c '[.[] .Address]')" \
+    main_worker_ips="$(nomad node status -filter 'NodeClass == "main-worker"' -json | jq -c '[.[] .Address]')" \
+    parameters_root_path=params \
+    version_update_lock='{"major": true, "minor": false, "patch": false, "prerelease": true, "build": true}'
 
 5. Create ACL policy to allow access to token (& other) variables:
 cat << POLICY | nomad acl policy apply -namespace system -job [[ template "job_name" (list . "watcher") ]] \

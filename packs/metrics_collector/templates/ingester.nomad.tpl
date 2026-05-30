@@ -305,7 +305,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         bolt-path: /var/lib/influxdb2/influxd.bolt
         engine-path: /var/lib/influxdb2/engine
         hardening-enabled: true
-        instance-id: "{{ env "NOMAD_ALLOC_ADDR_http" }}"
+        instance-id: "{{ env "NOMAD_ALLOC_ADDR_influxdb" }}"
         metrics-disabled: true
         pprof-disabled: true
         query-concurrency: 2

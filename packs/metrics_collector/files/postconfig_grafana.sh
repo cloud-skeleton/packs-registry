@@ -21,7 +21,7 @@ initialize() {
                 "grafana.admin_id": $admin_id,
                 "grafana.secret_key": $secret_key
             }')"
-        curl -so /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+        curl -fso /dev/null --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             -X PUT "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}" -d "${STATE}"
         echo 'Grafana has been initialized.'
         return 1
