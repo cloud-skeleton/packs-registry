@@ -71,7 +71,7 @@ job "[[ template "job_name" (list . "autoupdater") ]]" {
         "params.config.version_update_lock"    = "{\"major\": true, \"minor\": false, \"patch\": false, \"prerelease\": true, \"build\": true}"
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.2"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog-autoupdater" = "v1.2.1"
     }
 
     namespace = "system"

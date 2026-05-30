@@ -176,8 +176,8 @@ def _create_volumes(data: dict[str, Any]) -> None:
             nomad.volume.create_csi_volume(volume_id, volume_payload)
             should_reevaluate = True
     if should_reevaluate:
-        print(f"Triggering re-evaluation of job '{data['job']}'")
-        nomad.job.evaluate_job(data["job"])
+        print(f"Triggering re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'")
+        nomad.job.evaluate_job(data["job"], True, data["namespace"])
 
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]
@@ -220,8 +220,8 @@ def _reevaluate_jobs_with_csi_plugins(data: dict[str, Any]) -> None:
         job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
         if job_data["Stable"]:
             continue
-        print(f"Triggering re-evaluation of job '{job_data['ID']}'")
-        nomad.job.evaluate_job(job_data["ID"])
+        print(f"Triggering re-evaluation of job '{job_data['ID']}' in namespace '{job['Namespace']}'")
+        nomad.job.evaluate_job(job_data["ID"], True, job["Namespace"])
 
 def _process_csi_plugin_event(event: dict[str, Any]) -> None:
     plugin: dict[str, Any] = event["Payload"]["Plugin"]

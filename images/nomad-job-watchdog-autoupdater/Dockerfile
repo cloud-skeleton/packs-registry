@@ -1,4 +1,4 @@
-FROM ghcr.io/cloud-skeleton/nomad-job-watchdog:v1.5.1
+FROM ghcr.io/cloud-skeleton/nomad-job-watchdog:v1.5.2
 ENV IMAGES_VARIABLE_NAME=images
 ENV DO_NOT_ALLOW_UPDATE_MAJOR_VERSION=true
 ENV DO_NOT_ALLOW_UPDATE_MINOR_VERSION=false
