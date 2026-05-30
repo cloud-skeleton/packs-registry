@@ -18,6 +18,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
 
+      - id: wait-for-parent-image-tags
+        name: Wait for parent image tags
+        run: |
+          PARENT_TAGS=($(grep -oP '^FROM\s+\K\S+' images/${{ matrix.image }}/Dockerfile))
+          for PARENT_TAG in "${PARENT_TAGS[@]}"; do
+            while true; do
+              if docker buildx imagetools inspect "${PARENT_TAG}" > /dev/null 2>&1; then
+                break
+              fi
+              sleep 5
+            done
+          done
+        timeout-minutes: 2
+
       - id: read-version-file
         name: Read version file
         run: |
