@@ -11,6 +11,8 @@
 **[Grafana][grafana]**, **[InfluxDB][influxdb]** and **[Telegraf][telegraf]** metrics collector for **[Nomad][hashicorp-nomad]** clusters.  
 A compact monitoring stack that uses **[Telegraf][telegraf]** to collect metrics from **[Nomad][hashicorp-nomad]** nodes, stores them in **[InfluxDB][influxdb]**, and exposes dashboards through **[Grafana][grafana]**. **[Grafana][grafana]** is published through the **[Traefik][traefik]** reverse proxy using the internal mTLS tunnel, while **[InfluxDB][influxdb]** remains an internal service used by **[Grafana][grafana]** and **[Telegraf][telegraf]**.
 
+![Nomad dashboard](./assets/nomad-dashboard.png)
+
 ## Table of Contents
 
 - [Compatibility & Requirements](#compatibility--requirements)
