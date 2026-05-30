@@ -47,12 +47,12 @@ A compact monitoring stack that uses **[Telegraf][telegraf]** to collect metrics
 
 ### Pack Variables
 
-| Variable         | Type                                                         | Default | Required | Description                                                                                           |
-|------------------|--------------------------------------------------------------|---------|----------|-------------------------------------------------------------------------------------------------------|
-| `db_data_volume` | *object({ id = string, name = string, plugin_id = string })* |         | ✅       | CSI volume configuration for persistent **[InfluxDB][influxdb]** data (ingester files, WAL, indexes). |
-| `hostname`       | *string*                                                     |         | ✅       | The hostname (FQDN) used to access the **[Grafana][grafana]** monitoring UI.                          |
-| `id`             | *string*                                                     |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.     |
-| `ui_data_volume` | *object({ id = string, name = string, plugin_id = string })* |         | ✅       | CSI volume configuration for persistent **[Grafana][grafana]** data.                                  |
+| Variable         | Type                                                                                                       | Default | Required | Description                                                                                           |
+|------------------|------------------------------------------------------------------------------------------------------------|---------|----------|-------------------------------------------------------------------------------------------------------|
+| `db_data_volume` | object({<br>&nbsp;&nbsp;id = string,<br>&nbsp;&nbsp;name = string,<br>&nbsp;&nbsp;plugin_id = string<br>}) |         | ✅       | CSI volume configuration for persistent **[InfluxDB][influxdb]** data (ingester files, WAL, indexes). |
+| `hostname`       | string                                                                                                     |         | ✅       | The hostname (FQDN) used to access the **[Grafana][grafana]** monitoring UI.                          |
+| `id`             | string                                                                                                     |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.     |
+| `ui_data_volume` | object({<br>&nbsp;&nbsp;id = string,<br>&nbsp;&nbsp;name = string,<br>&nbsp;&nbsp;plugin_id = string<br>}) |         | ✅       | CSI volume configuration for persistent **[Grafana][grafana]** data.                                  |
 
 #### Example `vars.hcl`
 
