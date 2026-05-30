@@ -3,7 +3,7 @@ install_deps() {
 }
 
 initialize() {
-    if curl -s http://127.0.0.1:8086/api/v2/setup | grep -q '"allowed": true'; then
+    if curl -fs http://127.0.0.1:8086/api/v2/setup | grep -q '"allowed": true'; then
         export INFLUX_TOKEN="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)"
         influx setup \
             -u "${INFLUX_USER}" \
@@ -17,7 +17,7 @@ initialize() {
         NOMAD_BUCKET_ID="$(influx bucket ls -n nomad --org-id "${ORG_ID}" --json | jq -r '.[0] .id')"
         TELEGRAF_TOKEN="$(influx auth create --org-id "${ORG_ID}" -d "Telegraf's Token" --write-buckets --json | jq -r '.token')"
         GRAFANA_TOKEN="$(influx auth create --org-id "${ORG_ID}" -d "Grafana's Token" --read-buckets --json | jq -r '.token')"
-        STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+        STATE="$(curl -fs --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         if [ $? != 0 ]; then
             STATE="{}"
@@ -46,7 +46,7 @@ initialize() {
 }
 
 set_bucket_retention() {
-    STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+    STATE="$(curl -fs --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
         "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
     eval "$(echo "${STATE}" | jq -r '.Items | {
         "export INFLUX_TOKEN": .["influxdb.admin_token"],
@@ -62,7 +62,7 @@ set_bucket_retention() {
 }
 
 set_organization_name() {
-    STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+    STATE="$(curl -fs --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
         "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
     eval "$(echo "${STATE}" | jq -r '.Items | {
         "export INFLUX_TOKEN": .["influxdb.admin_token"],
@@ -75,8 +75,8 @@ set_organization_name() {
 }
 
 set_credentials() {
-    if ! curl -sfo /dev/null -u "${INFLUX_USER}:${INFLUX_PASSWORD}" -X POST http://127.0.0.1:8086/api/v2/signin; then
-        STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+    if ! curl -fso /dev/null -u "${INFLUX_USER}:${INFLUX_PASSWORD}" -X POST http://127.0.0.1:8086/api/v2/signin; then
+        STATE="$(curl -fs --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         eval "$(echo "${STATE}" | jq -r '.Items | {
             "export INFLUX_TOKEN": .["influxdb.admin_token"],

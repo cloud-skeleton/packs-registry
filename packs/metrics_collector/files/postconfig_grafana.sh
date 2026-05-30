@@ -3,13 +3,13 @@ install_deps() {
 }
 
 initialize() {
-    if curl -sfo /dev/null -u admin:admin "${GF_SERVER_ROOT_URL}/api/user"; then
-        USER_ID="$(curl -su admin:admin "${GF_SERVER_ROOT_URL}/api/user" | jq '.id')"
-        curl -so /dev/null -u admin:admin -H 'Content-Type: application/json' -X PUT "${GF_SERVER_ROOT_URL}/api/users/${USER_ID}" \
+    if curl -fso /dev/null -u admin:admin "${GF_SERVER_ROOT_URL}/api/user"; then
+        USER_ID="$(curl -fsu admin:admin "${GF_SERVER_ROOT_URL}/api/user" | jq '.id')"
+        curl -fso /dev/null -u admin:admin -H 'Content-Type: application/json' -X PUT "${GF_SERVER_ROOT_URL}/api/users/${USER_ID}" \
             -d "{\"login\":\"${GRAFANA_USER}\"}"
         grafana cli admin reset-admin-password "${GRAFANA_PASSWORD}" --user-id "${USER_ID}" > /dev/null 2>&1
         SECRET_KEY="$(head -c 32 /dev/urandom | base64 -w 0)"
-        STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+        STATE="$(curl -fs --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         if [ $? != 0 ]; then
             STATE="{}"
@@ -30,8 +30,8 @@ initialize() {
 }
 
 set_credentials() {
-    if ! curl -sfo /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" "${GF_SERVER_ROOT_URL}/api/user"; then
-        STATE="$(curl -sf --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
+    if ! curl -fso /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" "${GF_SERVER_ROOT_URL}/api/user"; then
+        STATE="$(curl -fs --unix-socket "${NOMAD_SECRETS_DIR}/api.sock" -H "Authorization: Bearer ${NOMAD_TOKEN}" \
             "http://localhost/v1/var/params/${NOMAD_JOB_NAME}/state?namespace=${NOMAD_NAMESPACE}")"
         eval "$(echo "${STATE}" | jq -r '.Items | {
             "USER_ID": .["grafana.admin_id"]
@@ -44,7 +44,7 @@ set_credentials() {
 }
 
 wait_for_app() {
-    while ! curl -sfo /dev/null "${GF_SERVER_ROOT_URL}/api/health"; do
+    while ! curl -fso /dev/null "${GF_SERVER_ROOT_URL}/api/health"; do
         sleep 5
     done
 }

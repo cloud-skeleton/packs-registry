@@ -9,4 +9,3 @@ ENV INGRESS_WORKER_IPS="[]"
 ENV MAIN_WORKER_IPS="[]"
 RUN pip install --no-cache-dir python-dxf==12.1.1 semantic-version==2.10.0 cryptography==46.0.1
 COPY ./script /bin/script
-
