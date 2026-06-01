@@ -14,36 +14,48 @@
 
 [[- define "job_name" -]]
 [[- $root := index . 0 -]]
-[[- $name := index . 1 -]]
-[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- if ge (len .) 2 -]]
+  [[- $name := index . 1 -]]
+  [[- printf "%s-%s-%s" $pack_name $name $id -]]
+[[- else -]]
+  [[- printf "%s-%s" $pack_name $id -]]
+[[- end -]]
 [[- end -]]
 
 [[- define "job_policy_description" -]]
-[[- $root := index . 0 -]]
-[[- $name := index . 1 -]]
-[[ printf "JOB POLICY: Allow extra permissions for %s-%s-%s job" (meta "pack.name" $root) $name (var "id" $root) ]]
+JOB POLICY: Allow extra permissions for [[ template "job_name" . ]] job
 [[- end -]]
 
 [[- define "job_policy_name" -]]
 [[- $root := index . 0 -]]
-[[- $name := index . 1 -]]
-[[ printf "JOB-POLICY-%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" ]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- if ge (len .) 2 -]]
+  [[- $name := index . 1 -]]
+  [[- printf "JOB-POLICY-%s-%s-%s" $pack_name $name $id | replace "_" "-" -]]
+[[- else -]]
+  [[- printf "JOB-POLICY-%s-%s" $pack_name $id | replace "_" "-" -]]
+[[- end -]]
 [[- end -]]
 
 [[- define "service_name" -]]
 [[- $root := index . 0 -]]
-[[- $name := index . 1 -]]
-[[- $suffix := index . 2 -]]
-[[- if $suffix -]]
-[[- $suffix = printf "-%s" $suffix -]]
+[[- $port := index . 1 -]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- $service_name := printf "%s-%s-%s" $pack_name $port $id -]]
+[[- if ge (len .) 3 -]]
+  [[- $name := index . 2 -]]
+  [[- $service_name := printf "%s-%s-%s-%s" $pack_name $name $port $id -]]
 [[- end -]]
-[[ printf "%s-%s%s-%s" (meta "pack.name" $root) $name $suffix (var "id" $root) | replace "_" "-" | trunc 63 ]]
+[[- $service_name | replace "_" "-" | trunc 63 -]]
 [[- end -]]
 
 [[- define "tunnel_mtls" -]]
 [[- $root := index . 0 -]]
-[[- $job_name := index . 1 -]]
-[[- $ports := index . 2 -]]
+[[- $ports := index . 1 -]]
     task "tunnel" {
       config {
         args = [
@@ -52,8 +64,8 @@
         cpu_hard_limit = true
         image          = "${DOCKER_IMAGE}"
         ports = [
-          [[- range $name, $port := $ports ]]
-          "[[ $name ]]",
+          [[- range $port_name, $port := $ports ]]
+          "[[ $port_name ]]",
           [[- end ]]
         ]
       }
@@ -74,10 +86,10 @@
         data = <<-EOF
         debug = notice
         foreground = yes
-        [[- range $name, $port := $ports ]]
+        [[- range $port_name, $port := $ports ]]
 
-        [[ printf "[%s]" $name ]]
-        accept = 0.0.0.0:{{ env "NOMAD_PORT_[[ $name ]]" }}
+        [[ printf "[%s]" $port_name ]]
+        accept = 0.0.0.0:{{ env "NOMAD_PORT_[[ $port_name ]]" }}
         CAfile = /secrets/ca.cert
         cert = /secrets/main.cert
         connect = 127.0.0.1:[[ $port ]]
@@ -92,7 +104,7 @@
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list $root $job_name) ]]/images" }}
+        {{- with nomadVar "params/[[- if ge (len .) 3 -]][[ template "job_name" (list $root (index . 2)) ]][[- else -]][[ template "job_name" (list $root) ]][[- end -]]/images" }}
         DOCKER_IMAGE="cleanstart/stunnel:{{ index . "cleanstart/stunnel" }}"
         {{- end }}
         EOF
@@ -125,13 +137,18 @@
 
 [[- define "set_parameter_command" -]]
 [[- $root := index . 0 -]]
-[[- $job_name := index . 1 -]]
-[[- $parameter_name := index . 2 -]]
-[[- $parameter_namespace := "default" -]]
-[[- if ge (len .) 4 -]]
-  [[- $parameter_namespace = index . 3 -]]
+[[- $parameter := index . 1 -]]
+[[- $namespace := "default" -]]
+[[- if ge (len .) 3 -]]
+  [[- $namespace = index . 2 -]]
 [[- end -]]
-[[- $variable := printf "params/%s-%s-%s/%s" (meta "pack.name" $root) $job_name (var "id" $root) $parameter_name -]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- $variable := printf "params/%s-%s/%s" $pack_name $id $parameter -]]
+[[- if ge (len .) 4 -]]
+  [[- $name := index . 3 -]]
+  [[- $variable = printf "params/%s-%s-%s/%s" $pack_name $name $id $parameter -]]
+[[- end -]]
 [[ printf "nomad var get -namespace=%s %s \\\n    | nomad var put -force -namespace=%s %s -"
-$parameter_namespace $variable $parameter_namespace $variable ]]
+$namespace $variable $namespace $variable ]]
 [[- end -]]

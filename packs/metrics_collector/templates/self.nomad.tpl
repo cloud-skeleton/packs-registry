@@ -1,4 +1,4 @@
-job "[[ template "job_name" (list . "ingester") ]]" {
+job "[[ template "job_name" (list .) ]]" {
   constraint {
     attribute = "${node.class}"
     operator  = "="
@@ -37,14 +37,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         type     = "http"
       }
 
-      name     = "[[ template "service_name" (list . "ingester" "http") ]]"
+      name     = "[[ template "service_name" (list . "http") ]]"
       port     = "http"
       provider = "nomad"
       tags = [
         "traefik.enable=true",
         "traefik.hostname=[[ var "hostname" . ]]",
-        "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.serversTransport=mtls@file",
-        "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.server.scheme=https"
+        "traefik.http.services.[[ template "service_name" (list . "http") ]].loadbalancer.serversTransport=mtls@file",
+        "traefik.http.services.[[ template "service_name" (list . "http") ]].loadbalancer.server.scheme=https"
       ]
       task = "tunnel"
     }
@@ -73,10 +73,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/images" }}
         DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/state" }}
         GF_SECURITY_SECRET_KEY="{{ index . "grafana.secret_key" }}"
         {{- end }}
         EOF
@@ -113,7 +113,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/state" }}
         apiVersion: 1
         datasources:
           - access: proxy
@@ -128,7 +128,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
               password: {{ index . "influxdb.grafana_token" }}
             type: influxdb
             user: grafana
-            {{- range nomadService "[[ template "service_name" (list . "ingester" "influxdb") ]]" }}
+            {{- range nomadService "[[ template "service_name" (list . "influxdb") ]]" }}
             url: http://{{ .Address }}:{{ .Port }}
             {{- end }}
             uid: 0000-0000-0000-0000
@@ -191,10 +191,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/images" }}
         DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/secrets" }}
         GRAFANA_USER="{{ index . "grafana.admin_user" }}"
         GRAFANA_PASSWORD="{{ index . "grafana.admin_password" }}"
         {{- end }}
@@ -211,7 +211,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
-[[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
+[[ template "tunnel_mtls" (list . (dict "http" 3000)) ]]
 
     update {
       healthy_deadline  = "15m"
@@ -257,7 +257,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         type     = "http"
       }
 
-      name     = "[[ template "service_name" (list . "ingester" "influxdb") ]]"
+      name     = "[[ template "service_name" (list . "influxdb") ]]"
       port     = "influxdb"
       provider = "nomad"
       task     = "influxdb"
@@ -291,7 +291,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/images" }}
         DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
         {{- end }}
         EOF
@@ -373,14 +373,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/images" }}
         DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/secrets" }}
         INFLUX_USER="{{ index . "influxdb.admin_user" }}"
         INFLUX_PASSWORD="{{ index . "influxdb.admin_password" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/config" }}
         INFLUX_ORGANIZATION="{{ index . "influxdb.organization_name" }}"
         INFLUX_DATA_RETENTION="{{ index . "influxdb.data_retention" }}"
         {{- end }}
@@ -446,7 +446,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/images" }}
         DOCKER_IMAGE="telegraf:{{ index . "telegraf" }}"
         {{- end }}
         EOF
@@ -456,7 +456,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+        {{- with nomadVar "params/[[ template "job_name" (list .) ]]/config" }}
         [agent]
           debug = true
           omit_hostname = true
@@ -476,11 +476,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
           exclude_bucket_tag = true
           organization = "{{ index . "influxdb.organization_name" }}"
           urls = [
-            {{- range nomadService "[[ template "service_name" (list . "ingester" "influxdb") ]]" -}}
+            {{- range nomadService "[[ template "service_name" (list . "influxdb") ]]" -}}
             "http://{{ .Address }}:{{ .Port }}"
             {{- end -}}
           ]
-          {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+          {{- with nomadVar "params/[[ template "job_name" (list .) ]]/state" }}
           token = "{{ index . "influxdb.telegraf_token" }}"
           {{- end }}
         {{- end }}
