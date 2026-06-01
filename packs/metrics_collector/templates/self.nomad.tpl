@@ -289,6 +289,8 @@ job "[[ template "job_name" (list .) ]]" {
         memory = 256
       }
 
+      shutdown_delay = "5s"
+
       template {
         data        = <<-EOF
         {{- with nomadVar "params/[[ template "job_name" (list .) ]]/images" }}

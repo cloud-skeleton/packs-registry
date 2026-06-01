@@ -82,6 +82,8 @@ JOB POLICY: Allow extra permissions for [[ template "job_name" . ]] job
         memory = 48
       }
 
+      shutdown_delay = "5s"
+
       template {
         data = <<-EOF
         debug = notice
