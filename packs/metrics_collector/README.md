@@ -82,19 +82,19 @@ ui_data_volume = {
 
 ### Nomad Variables (Parameters)
 
-| Job          | Variable  | Key                          | Default          | Description                                                                                                                                    |
-|--------------|-----------|------------------------------|------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| **ingester** | `config`  | `influxdb.data_retention`    | `604800`         | Retention period, in seconds, for the **[InfluxDB][influxdb]** `nomad` bucket. Default is 7 days.                                              |
-| **ingester** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of **[Nomad][hashicorp-nomad]** node DNS names or IP addresses that **[Telegraf][telegraf]** will scrape over HTTPS on port `4646`. |
-| **ingester** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | **[InfluxDB][influxdb]** organization name used for the `nomad` bucket and generated service tokens.                                           |
-| **ingester** | `images`  | `cleanstart/stunnel`         | `5.77`           | Container image tag for the mTLS tunnel sidecar used by **[Grafana][grafana]**.                                                                |
-| **ingester** | `images`  | `grafana/grafana`            | `13.0.1`         | Container image tag for **[Grafana][grafana]**.                                                                                                |
-| **ingester** | `images`  | `influxdb`                   | `2.9.1-alpine`   | Container image tag for **[InfluxDB][influxdb]**.                                                                                              |
-| **ingester** | `images`  | `telegraf`                   | `1.38.4-alpine`  | Container image tag for **[Telegraf][telegraf]**.                                                                                              |
-| **ingester** | `secrets` | `grafana.admin_user`         |                  | **[Grafana][grafana]** administrator username.                                                                                                 |
-| **ingester** | `secrets` | `grafana.admin_password`     |                  | **[Grafana][grafana]** administrator password.                                                                                                 |
-| **ingester** | `secrets` | `influxdb.admin_user`        |                  | **[InfluxDB][influxdb]** administrator username.                                                                                               |
-| **ingester** | `secrets` | `influxdb.admin_password`    |                  | **[InfluxDB][influxdb]** administrator password.                                                                                               |
+| Job      | Variable  | Key                          | Default          | Description                                                                                                                                    |
+|----------|-----------|------------------------------|------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| **self** | `config`  | `influxdb.data_retention`    | `604800`         | Retention period, in seconds, for the **[InfluxDB][influxdb]** `nomad` bucket. Default is 7 days.                                              |
+| **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of **[Nomad][hashicorp-nomad]** node DNS names or IP addresses that **[Telegraf][telegraf]** will scrape over HTTPS on port `4646`. |
+| **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | **[InfluxDB][influxdb]** organization name used for the `nomad` bucket and generated service tokens.                                           |
+| **self** | `images`  | `cleanstart/stunnel`         | `5.77`           | Container image tag for the mTLS tunnel sidecar used by **[Grafana][grafana]**.                                                                |
+| **self** | `images`  | `grafana/grafana`            | `13.0.1`         | Container image tag for **[Grafana][grafana]**.                                                                                                |
+| **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | Container image tag for **[InfluxDB][influxdb]**.                                                                                              |
+| **self** | `images`  | `telegraf`                   | `1.38.4-alpine`  | Container image tag for **[Telegraf][telegraf]**.                                                                                              |
+| **self** | `secrets` | `grafana.admin_user`         |                  | **[Grafana][grafana]** administrator username.                                                                                                 |
+| **self** | `secrets` | `grafana.admin_password`     |                  | **[Grafana][grafana]** administrator password.                                                                                                 |
+| **self** | `secrets` | `influxdb.admin_user`        |                  | **[InfluxDB][influxdb]** administrator username.                                                                                               |
+| **self** | `secrets` | `influxdb.admin_password`    |                  | **[InfluxDB][influxdb]** administrator password.                                                                                               |
 
 ## Pack Layout
 
@@ -109,7 +109,7 @@ packs/metrics_collector/
 ├─ outputs.tpl
 ├─ README.md
 ├─ templates/
-│  ├─ ingester.nomad.tpl
+│  ├─ self.nomad.tpl
 │  └─ _vars.tpl
 ├─ variables.hcl
 └─ vars/
@@ -118,10 +118,10 @@ packs/metrics_collector/
 
 ## Services & Ports
 
-| Service Name                                | Port Name  | Host Port | Task Port | Description                                                                                             |
-|---------------------------------------------|------------|-----------|-----------|---------------------------------------------------------------------------------------------------------|
-| `metrics-collector-ingester-http-${id}`     | `http`     | *dynamic* | `443`     | **[Grafana][grafana]** HTTPS endpoint exposed through the mTLS tunnel and reverse proxy.                |
-| `metrics-collector-ingester-influxdb-${id}` | `influxdb` | *dynamic* | `8086`    | Internal **[InfluxDB][influxdb]** HTTP API used by **[Grafana][grafana]** and **[Telegraf][telegraf]**. |
+| Service Name                       | Port Name  | Host Port | Task Port | Description                                                                                             |
+|------------------------------------|------------|-----------|-----------|---------------------------------------------------------------------------------------------------------|
+| `metrics-collector-http-${id}`     | `http`     | *dynamic* | `443`     | **[Grafana][grafana]** HTTPS endpoint exposed through the mTLS tunnel and reverse proxy.                |
+| `metrics-collector-influxdb-${id}` | `influxdb` | *dynamic* | `8086`    | Internal **[InfluxDB][influxdb]** HTTP API used by **[Grafana][grafana]** and **[Telegraf][telegraf]**. |
 
 ## Storage
 
