@@ -16,7 +16,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
-      interval         = "9m"
+      interval         = "12m"
       mode             = "delay"
       render_templates = true
     }
@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "self") ]]" {
         address_mode = "alloc"
 
         check_restart {
-          grace = "6m"
+          grace = "8m"
           limit = 3
         }
 
@@ -214,8 +214,8 @@ job "[[ template "job_name" (list . "self") ]]" {
 [[ template "tunnel_mtls" (list . "self" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "9m"
-      progress_deadline = "19m"
+      healthy_deadline  = "12m"
+      progress_deadline = "25m"
     }
 
     volume "ui_data" {
