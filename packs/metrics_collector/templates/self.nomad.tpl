@@ -393,8 +393,9 @@ job "[[ template "job_name" (list .) ]]" {
     }
 
     update {
-      healthy_deadline  = "5m"
-      progress_deadline = "11m"
+      healthy_deadline  = "7m"
+      min_healthy_time  = "30s"
+      progress_deadline = "15m"
     }
 
     volume "db_data" {
@@ -495,8 +496,9 @@ job "[[ template "job_name" (list .) ]]" {
 
     update {
       health_check      = "task_states"
-      healthy_deadline  = "5m"
-      progress_deadline = "11m"
+      healthy_deadline  = "3m"
+      min_healthy_time  = "30s"
+      progress_deadline = "7m"
     }
   }
 
