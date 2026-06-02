@@ -238,7 +238,7 @@ job "[[ template "job_name" (list .) ]]" {
 
     restart {
       attempts         = 2
-      interval         = "2m"
+      interval         = "7m"
       mode             = "delay"
       render_templates = true
     }
@@ -246,7 +246,7 @@ job "[[ template "job_name" (list .) ]]" {
     service {
       check {
         check_restart {
-          grace = "1m"
+          grace = "4m"
           limit = 3
         }
 
