@@ -15,34 +15,35 @@
 [[- define "job_name" -]]
 [[- $root := index . 0 -]]
 [[- $name := index . 1 -]]
-[[ printf "%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) ]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- printf "%s-%s-%s" $pack_name $name $id -]]
 [[- end -]]
 
 [[- define "job_policy_description" -]]
-[[- $root := index . 0 -]]
-[[- $name := index . 1 -]]
-[[ printf "JOB POLICY: Allow extra permissions for %s-%s-%s job" (meta "pack.name" $root) $name (var "id" $root) ]]
+JOB POLICY: Allow extra permissions for [[ template "job_name" . ]] job
 [[- end -]]
 
 [[- define "job_policy_name" -]]
 [[- $root := index . 0 -]]
 [[- $name := index . 1 -]]
-[[ printf "JOB-POLICY-%s-%s-%s" (meta "pack.name" $root) $name (var "id" $root) | replace "_" "-" ]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- printf "JOB-POLICY-%s-%s-%s" $pack_name $name $id | replace "_" "-" -]]
 [[- end -]]
 
 [[- define "service_name" -]]
 [[- $root := index . 0 -]]
 [[- $name := index . 1 -]]
-[[- $suffix := index . 2 -]]
-[[- if $suffix -]]
-[[- $suffix = printf "-%s" $suffix -]]
-[[- end -]]
-[[ printf "%s-%s%s-%s" (meta "pack.name" $root) $name $suffix (var "id" $root) | replace "_" "-" | trunc 63 ]]
+[[- $port := index . 2 -]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- printf "%s-%s-%s-%s" $pack_name $name $port $id | replace "_" "-" | trunc 63 -]]
 [[- end -]]
 
 [[- define "tunnel_mtls" -]]
 [[- $root := index . 0 -]]
-[[- $job_name := index . 1 -]]
+[[- $name := index . 1 -]]
 [[- $ports := index . 2 -]]
     task "tunnel" {
       config {
@@ -52,8 +53,8 @@
         cpu_hard_limit = true
         image          = "${DOCKER_IMAGE}"
         ports = [
-          [[- range $name, $port := $ports ]]
-          "[[ $name ]]",
+          [[- range $port_name, $port := $ports ]]
+          "[[ $port_name ]]",
           [[- end ]]
         ]
       }
@@ -70,14 +71,16 @@
         memory = 48
       }
 
+      shutdown_delay = "5s"
+
       template {
         data = <<-EOF
         debug = notice
         foreground = yes
-        [[- range $name, $port := $ports ]]
+        [[- range $port_name, $port := $ports ]]
 
-        [[ printf "[%s]" $name ]]
-        accept = 0.0.0.0:{{ env "NOMAD_PORT_[[ $name ]]" }}
+        [[ printf "[%s]" $port_name ]]
+        accept = 0.0.0.0:{{ env "NOMAD_PORT_[[ $port_name ]]" }}
         CAfile = /secrets/ca.cert
         cert = /secrets/main.cert
         connect = 127.0.0.1:[[ $port ]]
@@ -92,7 +95,7 @@
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list $root $job_name) ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list $root $name) ]]/images" }}
         DOCKER_IMAGE="cleanstart/stunnel:{{ index . "cleanstart/stunnel" }}"
         {{- end }}
         EOF
@@ -125,13 +128,15 @@
 
 [[- define "set_parameter_command" -]]
 [[- $root := index . 0 -]]
-[[- $job_name := index . 1 -]]
-[[- $parameter_name := index . 2 -]]
-[[- $parameter_namespace := "default" -]]
+[[- $name := index . 1 -]]
+[[- $parameter := index . 2 -]]
+[[- $namespace := "default" -]]
 [[- if ge (len .) 4 -]]
-  [[- $parameter_namespace = index . 3 -]]
+  [[- $namespace = index . 3 -]]
 [[- end -]]
-[[- $variable := printf "params/%s-%s-%s/%s" (meta "pack.name" $root) $job_name (var "id" $root) $parameter_name -]]
+[[- $pack_name := meta "pack.name" $root -]]
+[[- $id := var "id" $root -]]
+[[- $variable := printf "params/%s-%s-%s/%s" $pack_name $name $id $parameter -]]
 [[ printf "nomad var get -namespace=%s %s \\\n    | nomad var put -force -namespace=%s %s -"
-$parameter_namespace $variable $parameter_namespace $variable ]]
+$namespace $variable $namespace $variable ]]
 [[- end -]]
