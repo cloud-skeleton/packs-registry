@@ -14,14 +14,10 @@
 
 [[- define "job_name" -]]
 [[- $root := index . 0 -]]
+[[- $name := index . 1 -]]
 [[- $pack_name := meta "pack.name" $root -]]
 [[- $id := var "id" $root -]]
-[[- if ge (len .) 2 -]]
-  [[- $name := index . 1 -]]
-  [[- printf "%s-%s-%s" $pack_name $name $id -]]
-[[- else -]]
-  [[- printf "%s-%s" $pack_name $id -]]
-[[- end -]]
+[[- printf "%s-%s-%s" $pack_name $name $id -]]
 [[- end -]]
 
 [[- define "job_policy_description" -]]
@@ -30,32 +26,25 @@ JOB POLICY: Allow extra permissions for [[ template "job_name" . ]] job
 
 [[- define "job_policy_name" -]]
 [[- $root := index . 0 -]]
+[[- $name := index . 1 -]]
 [[- $pack_name := meta "pack.name" $root -]]
 [[- $id := var "id" $root -]]
-[[- if ge (len .) 2 -]]
-  [[- $name := index . 1 -]]
-  [[- printf "JOB-POLICY-%s-%s-%s" $pack_name $name $id | replace "_" "-" -]]
-[[- else -]]
-  [[- printf "JOB-POLICY-%s-%s" $pack_name $id | replace "_" "-" -]]
-[[- end -]]
+[[- printf "JOB-POLICY-%s-%s-%s" $pack_name $name $id | replace "_" "-" -]]
 [[- end -]]
 
 [[- define "service_name" -]]
 [[- $root := index . 0 -]]
-[[- $port := index . 1 -]]
+[[- $name := index . 1 -]]
+[[- $port := index . 2 -]]
 [[- $pack_name := meta "pack.name" $root -]]
 [[- $id := var "id" $root -]]
-[[- $service_name := printf "%s-%s-%s" $pack_name $port $id -]]
-[[- if ge (len .) 3 -]]
-  [[- $name := index . 2 -]]
-  [[- $service_name := printf "%s-%s-%s-%s" $pack_name $name $port $id -]]
-[[- end -]]
-[[- $service_name | replace "_" "-" | trunc 63 -]]
+[[- printf "%s-%s-%s-%s" $pack_name $name $port $id | replace "_" "-" | trunc 63 -]]
 [[- end -]]
 
 [[- define "tunnel_mtls" -]]
 [[- $root := index . 0 -]]
-[[- $ports := index . 1 -]]
+[[- $name := index . 1 -]]
+[[- $ports := index . 2 -]]
     task "tunnel" {
       config {
         args = [
@@ -106,7 +95,7 @@ JOB POLICY: Allow extra permissions for [[ template "job_name" . ]] job
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[- if ge (len .) 3 -]][[ template "job_name" (list $root (index . 2)) ]][[- else -]][[ template "job_name" (list $root) ]][[- end -]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list $root $name) ]]/images" }}
         DOCKER_IMAGE="cleanstart/stunnel:{{ index . "cleanstart/stunnel" }}"
         {{- end }}
         EOF
@@ -139,18 +128,15 @@ JOB POLICY: Allow extra permissions for [[ template "job_name" . ]] job
 
 [[- define "set_parameter_command" -]]
 [[- $root := index . 0 -]]
-[[- $parameter := index . 1 -]]
+[[- $name := index . 1 -]]
+[[- $parameter := index . 2 -]]
 [[- $namespace := "default" -]]
-[[- if ge (len .) 3 -]]
-  [[- $namespace = index . 2 -]]
+[[- if ge (len .) 4 -]]
+  [[- $namespace = index . 3 -]]
 [[- end -]]
 [[- $pack_name := meta "pack.name" $root -]]
 [[- $id := var "id" $root -]]
-[[- $variable := printf "params/%s-%s/%s" $pack_name $id $parameter -]]
-[[- if ge (len .) 4 -]]
-  [[- $name := index . 3 -]]
-  [[- $variable = printf "params/%s-%s-%s/%s" $pack_name $name $id $parameter -]]
-[[- end -]]
+[[- $variable := printf "params/%s-%s-%s/%s" $pack_name $name $id $parameter -]]
 [[ printf "nomad var get -namespace=%s %s \\\n    | nomad var put -force -namespace=%s %s -"
 $namespace $variable $namespace $variable ]]
 [[- end -]]
