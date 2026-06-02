@@ -7,6 +7,10 @@
 
 2. Define the DNS name list for all Nomad cluster nodes in JSON list format:
 ```
+NOMAD_NODES="$({
+  nomad server members -json | jq -r '.[].Name | sub("\\.[^.]+$"; "")'
+  nomad node status -json | jq -r '.[].Name'
+} | jq -Rsc 'split("\n")[:-1]')"
 [[ template "set_parameter_command" (list . "config" "system") ]] \
-        influxdb.nomad_nodes='["${NOMAD_MANAGER}", "${NOMAD_MAIN_WORKER}", "${NOMAD_INGRESS_WORKER}"]'
+        influxdb.nomad_nodes="${NOMAD_NODES}"
 ```
