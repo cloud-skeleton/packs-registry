@@ -4,6 +4,7 @@ from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
 
+from json import dumps
 from copy import deepcopy
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
@@ -184,6 +185,7 @@ def _process_job_event(event: dict[str, Any]) -> None:
     if job["ParentID"]:
         print(f"Skipping child job '{job["Name"]}'")
         return
+    print("JOB EVENT RECEIVED:", dumps(event, indent = 2))
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
         "job": job["Name"],
