@@ -213,7 +213,13 @@ def _process_job_event(event: dict[str, Any]) -> None:
             _create_variables(data)
             _create_volumes(data)
         case "JobDeregistered":
-            _remove_acl(data)
+            if event.get("Payload", {}).get("Deleted") is True:
+                _remove_acl(data)
+            else:
+                print(
+                    f"{_now()} Keeping ACL policy for {data['job']} job; "
+                    f"JobDeregistered deleted={event.get('Payload', {}).get('Deleted')}"
+                )
 
 def _reevaluate_jobs_with_csi_plugins(data: dict[str, Any]) -> None:
     if not data["is_healthy"]:
