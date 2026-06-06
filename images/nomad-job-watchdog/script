@@ -191,7 +191,7 @@ def _create_volumes(data: dict[str, Any]) -> None:
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]
     if job["ParentID"]:
-        print(f"{_now()} Skipped child job '{job["Name"]}'!")
+        print(f"{_now()} Skipped child job '{job['Name']}'!")
         return
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
@@ -262,7 +262,6 @@ def _get_last_event() -> tuple[int, int]:
     return state_var_index, last_event_value
 
 def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
-    print(f"{_now()} Opening event stream from index {index}...")
     stream, stream_exit, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
@@ -275,21 +274,25 @@ def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
         )
     )
     stream.start()
-    print(f"{_now()} Opened event stream from index {index}!")
     return stream, stream_exit, events_queue
 
 def start() -> None:
     _, last_event_value = _get_last_event()
-    stream, stream_exit, events_queue = _open_event_stream(last_event_value + 1)
+    stream, stream_exit, events_queue = _open_event_stream(
+        last_event_value + 1 if last_event_value else 0
+    )
     while True:
         try:
             events: dict[str, Any] = events_queue.get(timeout = 5)
         except Empty:
-            print(f"{_now()} Event stream timeout; reconnecting...")
+            if SHOULD_STOP.is_set():
+                break
             stream_exit.set()
             stream.join(timeout = 1)
             _, last_event_value = _get_last_event()
-            stream, stream_exit, events_queue = _open_event_stream(last_event_value + 1)
+            stream, stream_exit, events_queue = _open_event_stream(
+                last_event_value + 1 if last_event_value else 0
+            )
             continue
         try:
             state_var_index, last_event_value = _get_last_event()
