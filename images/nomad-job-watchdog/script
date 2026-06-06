@@ -280,16 +280,16 @@ def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
 
 def start() -> None:
     _, last_event_value = _get_last_event()
-    stream, stream_exit, events_queue = _open_event_stream(last_event_value)
+    stream, stream_exit, events_queue = _open_event_stream(last_event_value + 1)
     while True:
         try:
-            events: dict[str, Any] = events_queue.get(timeout=5)
+            events: dict[str, Any] = events_queue.get(timeout = 5)
         except Empty:
             print(f"{_now()} Event stream timeout; reconnecting...")
             stream_exit.set()
-            stream.join(timeout = 5)
+            stream.join(timeout = 1)
             _, last_event_value = _get_last_event()
-            stream, stream_exit, events_queue = _open_event_stream(last_event_value)
+            stream, stream_exit, events_queue = _open_event_stream(last_event_value + 1)
             continue
         try:
             state_var_index, last_event_value = _get_last_event()
@@ -345,6 +345,7 @@ def start() -> None:
         finally:
             events_queue.task_done()
     stream_exit.set()
+    stream.join(timeout = 1)
 
 if __name__ == "__main__":
     start()
