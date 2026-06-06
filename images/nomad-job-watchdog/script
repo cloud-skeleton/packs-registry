@@ -9,7 +9,7 @@ from copy import deepcopy
 from nomad import Nomad
 from nomad.api.exceptions import URLNotFoundNomadException
 from os import getenv
-from queue import Queue
+from queue import Queue, Empty
 from signal import signal, SIGINT
 from threading import Thread, Event
 from time import sleep
@@ -253,10 +253,20 @@ def _process_csi_plugin_event(event: dict[str, Any]) -> None:
         case "NodeRegistration":
             _reevaluate_jobs_with_csi_plugins(data)
 
-def start() -> None:
+def _get_last_event() -> tuple[int, int]:
+    state_var_index: int = 0
+    last_event_value: int = 0
+    if _is_var(STATE_VAR_PATH):
+        state_var_index, state_value = _get_var(STATE_VAR_PATH)
+        last_event_value = int(state_value["last_event"])
+    return state_var_index, last_event_value
+
+def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
+    print(f"{_now()} Opening event stream from index {index}...")
     stream, stream_exit, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
+            index = index,
             namespace = "*",
             topic = {
                 "Job": "*",
@@ -265,14 +275,24 @@ def start() -> None:
         )
     )
     stream.start()
+    print(f"{_now()} Opened event stream from index {index}!")
+    return stream, stream_exit, events_queue
+
+def start() -> None:
+    _, last_event_value = _get_last_event()
+    stream, stream_exit, events_queue = _open_event_stream(last_event_value)
     while True:
-        events: dict[str, Any] = events_queue.get()
         try:
-            state_var_index: int = 0
-            last_event_value: int = 0
-            if _is_var(STATE_VAR_PATH):
-                state_var_index, state_value = _get_var(STATE_VAR_PATH)
-                last_event_value = int(state_value["last_event"])
+            events: dict[str, Any] = events_queue.get(timeout=5)
+        except Empty:
+            print(f"{_now()} Event stream timeout; reconnecting...")
+            stream_exit.set()
+            stream.join(timeout = 5)
+            _, last_event_value = _get_last_event()
+            stream, stream_exit, events_queue = _open_event_stream(last_event_value)
+            continue
+        try:
+            state_var_index, last_event_value = _get_last_event()
             print(f"{_now()} INDEX: {events['Index']} vs LAST EVENT: {last_event_value}")
             for event in events["Events"]:
                 job = event.get("Payload", {}).get("Job", {})
@@ -293,8 +313,8 @@ def start() -> None:
                             "job_modify_index": job.get("ModifyIndex"),
                             "job_version": job.get("Version"),
                         },
-                        indent=2,
-                        default=str,
+                        indent = 2,
+                        default = str,
                     )
                 )
             if SHOULD_STOP.is_set():
