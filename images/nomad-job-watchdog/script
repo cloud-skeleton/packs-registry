@@ -128,14 +128,15 @@ def _attach_acl(data: dict[str, Any]) -> None:
     except URLNotFoundNomadException:
         should_create = True
     if should_create:
-        print(f"{_now()} Creating ACL policy for {data['job']} job")
+        print(f"{_now()} Creating ACL policy for {data['job']} job...")
         nomad.acl.create_policy(policy_id, policy)
-        print(f"{_now()} Created ACL policy for {data['job']} job")
+        print(f"{_now()} Created ACL policy for {data['job']} job!")
 
 def _remove_acl(data: dict[str, Any]) -> None:
-    print(f"{_now()} Deleting ACL policy for {data['job']} job")
+    print(f"{_now()} Deleting ACL policy for {data['job']} job...")
     policy_id: str = f"AUTOACL-{data['job']}".replace("_", "-")
     nomad.acl.delete_policy(policy_id)
+    print(f"{_now()} Deleted ACL policy for {data['job']} job!")
 
 def _create_variables(data: dict[str, Any]) -> None:
     param_vars: dict[str, dict[str, str]] = {}
@@ -151,8 +152,9 @@ def _create_variables(data: dict[str, Any]) -> None:
             if current_value == value | current_value:
                 continue
             value |= current_value
-        print(f"{_now()} Creating variable from params metadata for {data['job']} job @ {path}")
+        print(f"{_now()} Creating variable from params metadata for {data['job']} job @ {path}...")
         _set_var(path, value, index, data["namespace"])
+        print(f"{_now()} Created variable from params metadata for {data['job']} job @ {path}!")
 
 def _create_volumes(data: dict[str, Any]) -> None:
     volumes: dict[str, dict[str, Any]] = {}
@@ -177,17 +179,19 @@ def _create_volumes(data: dict[str, Any]) -> None:
         try:
             nomad.volume.get_csi_volume(volume_id, data["namespace"])
         except URLNotFoundNomadException:
-            print(f"{_now()} Creating volume '{volume_id}' with payload: {volume_payload}")
+            print(f"{_now()} Creating volume '{volume_id}' with payload: {volume_payload}...")
             nomad.volume.create_csi_volume(volume_id, volume_payload)
+            print(f"{_now()} Created volume '{volume_id}' with payload: {volume_payload}!")
             should_reevaluate = True
     if should_reevaluate:
-        print(f"{_now()} Triggering re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'")
+        print(f"{_now()} Triggering re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'...")
         nomad.job.evaluate_job(data["job"], True, data["namespace"])
+        print(f"{_now()} Triggered re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'!")
 
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]
     if job["ParentID"]:
-        print(f"{_now()} Skipping child job '{job["Name"]}'")
+        print(f"{_now()} Skipped child job '{job["Name"]}'!")
         return
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
@@ -225,8 +229,9 @@ def _reevaluate_jobs_with_csi_plugins(data: dict[str, Any]) -> None:
         job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
         if job_data["Stable"]:
             continue
-        print(f"{_now()} Triggering re-evaluation of job '{job_data['ID']}' in namespace '{job['Namespace']}'")
+        print(f"{_now()} Triggering re-evaluation of job '{job_data['ID']}' in namespace '{job['Namespace']}'...")
         nomad.job.evaluate_job(job_data["ID"], True, job["Namespace"])
+        print(f"{_now()} Triggered re-evaluation of job '{job_data['ID']}' in namespace '{job['Namespace']}'!")
 
 def _process_csi_plugin_event(event: dict[str, Any]) -> None:
     plugin: dict[str, Any] = event["Payload"]["Plugin"]
