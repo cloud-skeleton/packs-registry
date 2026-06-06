@@ -3,7 +3,7 @@
 from warnings import filterwarnings
 from urllib3.exceptions import InsecureRequestWarning
 filterwarnings("ignore", category = InsecureRequestWarning)
-
+from datetime import datetime, timezone
 from json import dumps
 from copy import deepcopy
 from nomad import Nomad
@@ -21,6 +21,9 @@ def STOP() -> None:
     SHOULD_STOP.set()
 
 signal(SIGINT, lambda *_: STOP())
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec = "milliseconds")
 
 if not (NOMAD_SECRETS_DIR := getenv("NOMAD_SECRETS_DIR", "")):
     raise ValueError("NOMAD_SECRETS_DIR environment variable is not set.")
@@ -125,11 +128,12 @@ def _attach_acl(data: dict[str, Any]) -> None:
     except URLNotFoundNomadException:
         should_create = True
     if should_create:
-        print(f"Creating ACL policy for {data['job']} job")
+        print(f"{_now()} Creating ACL policy for {data['job']} job")
         nomad.acl.create_policy(policy_id, policy)
+        print(f"{_now()} Created ACL policy for {data['job']} job")
 
 def _remove_acl(data: dict[str, Any]) -> None:
-    print(f"Deleting ACL policy for {data['job']} job")
+    print(f"{_now()} Deleting ACL policy for {data['job']} job")
     policy_id: str = f"AUTOACL-{data['job']}".replace("_", "-")
     nomad.acl.delete_policy(policy_id)
 
@@ -147,7 +151,7 @@ def _create_variables(data: dict[str, Any]) -> None:
             if current_value == value | current_value:
                 continue
             value |= current_value
-        print(f"Creating variable from params metadata for {data['job']} job @ {path}")
+        print(f"{_now()} Creating variable from params metadata for {data['job']} job @ {path}")
         _set_var(path, value, index, data["namespace"])
 
 def _create_volumes(data: dict[str, Any]) -> None:
@@ -173,17 +177,17 @@ def _create_volumes(data: dict[str, Any]) -> None:
         try:
             nomad.volume.get_csi_volume(volume_id, data["namespace"])
         except URLNotFoundNomadException:
-            print(f"Creating volume '{volume_id}' with payload: {volume_payload}")
+            print(f"{_now()} Creating volume '{volume_id}' with payload: {volume_payload}")
             nomad.volume.create_csi_volume(volume_id, volume_payload)
             should_reevaluate = True
     if should_reevaluate:
-        print(f"Triggering re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'")
+        print(f"{_now()} Triggering re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'")
         nomad.job.evaluate_job(data["job"], True, data["namespace"])
 
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]
     if job["ParentID"]:
-        print(f"Skipping child job '{job["Name"]}'")
+        print(f"{_now()} Skipping child job '{job["Name"]}'")
         return
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
@@ -221,7 +225,7 @@ def _reevaluate_jobs_with_csi_plugins(data: dict[str, Any]) -> None:
         job_data: dict[str, Any] = nomad.job.get_job(job["ID"], job["Namespace"])
         if job_data["Stable"]:
             continue
-        print(f"Triggering re-evaluation of job '{job_data['ID']}' in namespace '{job['Namespace']}'")
+        print(f"{_now()} Triggering re-evaluation of job '{job_data['ID']}' in namespace '{job['Namespace']}'")
         nomad.job.evaluate_job(job_data["ID"], True, job["Namespace"])
 
 def _process_csi_plugin_event(event: dict[str, Any]) -> None:
@@ -258,13 +262,11 @@ def start() -> None:
             if _is_var(STATE_VAR_PATH):
                 state_var_index, state_value = _get_var(STATE_VAR_PATH)
                 last_event_value = int(state_value["last_event"])
-            print(
-                f"INDEX: {events['Index']} vs LAST EVENT: {last_event_value}",
-                flush = True
-            )
+            print(f"{_now()} INDEX: {events['Index']} vs LAST EVENT: {last_event_value}")
             for event in events["Events"]:
+                job = event.get("Payload", {}).get("Job", {})
                 print(
-                    "EVENT SUMMARY:",
+                    f"{_now()} EVENT SUMMARY:",
                     dumps(
                         {
                             "index": event.get("Index"),
@@ -272,18 +274,22 @@ def start() -> None:
                             "type": event.get("Type"),
                             "key": event.get("Key"),
                             "namespace": event.get("Namespace"),
+                            "deleted": event.get("Payload", {}).get("Deleted"),
+                            "job_id": job.get("ID"),
+                            "job_status": job.get("Status"),
+                            "job_stop": job.get("Stop"),
+                            "job_create_index": job.get("CreateIndex"),
+                            "job_modify_index": job.get("ModifyIndex"),
+                            "job_version": job.get("Version"),
                         },
-                        indent = 2,
-                    ),
-                    flush = True,
+                        indent=2,
+                        default=str,
+                    )
                 )
             if SHOULD_STOP.is_set():
                 break
             if events["Index"] <= last_event_value:
-                print(
-                    f"SKIPPING EVENT BATCH: {events['Index']} <= {last_event_value}",
-                    flush = True,
-                )
+                print(f"{_now()} SKIPPING EVENT BATCH: {events['Index']} <= {last_event_value}")
                 continue
             for event in events["Events"]:
                 try:
@@ -303,7 +309,7 @@ def start() -> None:
                 state_var_index
             )
         except Exception as exception:
-            print(exception, flush = True)
+            print(exception)
             sleep(5)
         finally:
             events_queue.task_done()
