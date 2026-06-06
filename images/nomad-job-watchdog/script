@@ -185,7 +185,6 @@ def _process_job_event(event: dict[str, Any]) -> None:
     if job["ParentID"]:
         print(f"Skipping child job '{job["Name"]}'")
         return
-    print("JOB EVENT RECEIVED:", dumps(event, indent = 2), flush = True)
     data: dict[str, Any] = {
         "namespace": job["Namespace"],
         "job": job["Name"],
@@ -264,6 +263,7 @@ def start() -> None:
             continue
         try:
             for event in events["Events"]:
+                print("EVENT RECEIVED:", dumps(event, indent = 2), flush = True)
                 try:
                     match event["Topic"]:
                         case "Job":
