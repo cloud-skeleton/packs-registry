@@ -15,7 +15,7 @@ from threading import Thread, Event
 from time import monotonic, sleep
 from typing import cast, Any
 
-STREAM_IDLE_TIMEOUT: int = 120
+STREAM_IDLE_TIMEOUT: int = 300
 SHOULD_STOP: Event = Event()
 
 def STOP() -> None:
@@ -139,8 +139,11 @@ def _attach_acl(data: dict[str, Any]) -> None:
 def _remove_acl(data: dict[str, Any]) -> None:
     print(f"{_now()} Deleting ACL policy for {data['job']} job...")
     policy_id: str = f"AUTOACL-{data['job']}".replace("_", "-")
-    nomad.acl.delete_policy(policy_id)
-    print(f"{_now()} Deleted ACL policy for {data['job']} job!")
+    try:
+        nomad.acl.delete_policy(policy_id)
+        print(f"{_now()} Deleted ACL policy for {data['job']} job!")
+    except URLNotFoundNomadException:
+        print(f"{_now()} ACL policy for {data['job']} job was already absent!")
 
 def _create_variables(data: dict[str, Any]) -> None:
     param_vars: dict[str, dict[str, str]] = {}
