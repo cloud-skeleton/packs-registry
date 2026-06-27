@@ -5,5 +5,5 @@ app {
 pack {
     name        = "metrics_collector"
     description = "Grafana, InfluxDB and Telegraf metrics collector for Nomad clusters."
-    version     = "26.6.3"
+    version     = "26.6.27"
 }

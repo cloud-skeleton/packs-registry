@@ -287,12 +287,13 @@ def start() -> None:
         except Empty:
             if SHOULD_STOP.is_set():
                 break
-            stream_exit.set()
-            stream.join(timeout = 1)
-            _, last_event_value = _get_last_event()
-            stream, stream_exit, events_queue = _open_event_stream(
-                last_event_value + 1 if last_event_value else 0
-            )
+            if not stream.is_alive():
+                stream_exit.set()
+                stream.join(timeout = 1)
+                _, last_event_value = _get_last_event()
+                stream, stream_exit, events_queue = _open_event_stream(
+                    last_event_value + 1 if last_event_value else 0
+                )
             continue
         try:
             state_var_index, last_event_value = _get_last_event()
