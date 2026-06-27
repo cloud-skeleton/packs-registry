@@ -5,5 +5,5 @@ app {
 pack {
     name        = "job_watchdog"
     description = "Nomad watchdog that auto-provisions job variables, ACL policies and CSI volumes."
-    version     = "26.6.25"
+    version     = "26.6.27"
 }
