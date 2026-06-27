@@ -15,7 +15,7 @@ from threading import Thread, Event
 from time import monotonic, sleep
 from typing import cast, Any
 
-STREAM_IDLE_TIMEOUT: int = 30
+STREAM_IDLE_TIMEOUT: int = 120
 SHOULD_STOP: Event = Event()
 
 def STOP() -> None:
@@ -49,10 +49,6 @@ VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
 
 def _new_nomad_client() -> Nomad:
     return Nomad(address = NOMAD_SOCKET)
-
-def _reset_nomad_client() -> None:
-    global nomad
-    nomad = _new_nomad_client()
 
 nomad: Nomad = _new_nomad_client()
 
@@ -269,7 +265,10 @@ def _get_last_event() -> tuple[int, int]:
         last_event_value = int(state_value["last_event"])
     return state_var_index, last_event_value
 
-def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
+def _open_event_stream(
+    index: int = 0,
+    events_queue: Queue | None = None
+) -> tuple[Thread, Event, Queue]:
     stream, stream_exit, events_queue = cast(
         tuple[Thread, Event, Queue],
         nomad.event.stream.get_stream(
@@ -278,7 +277,8 @@ def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
             topic = {
                 "Job": "*",
                 "CSIPlugin": "*"
-            }
+            },
+            event_queue = events_queue
         )
     )
     stream.start()
@@ -286,8 +286,10 @@ def _open_event_stream(index: int = 0) -> tuple[Thread, Event, Queue]:
 
 def start() -> None:
     _, last_event_value = _get_last_event()
-    stream, stream_exit, events_queue = _open_event_stream(
-        last_event_value + 1 if last_event_value else 0
+    events_queue: Queue = Queue()
+    stream, stream_exit, _ = _open_event_stream(
+        last_event_value + 1 if last_event_value else 0,
+        events_queue
     )
     last_received_at: float = monotonic()
     while True:
@@ -301,10 +303,10 @@ def start() -> None:
                 print(f"{_now()} Event stream is stale or dead; reconnecting...")
                 stream_exit.set()
                 stream.join(timeout = 1)
-                _reset_nomad_client()
                 _, last_event_value = _get_last_event()
-                stream, stream_exit, events_queue = _open_event_stream(
-                    last_event_value + 1 if last_event_value else 0
+                stream, stream_exit, _ = _open_event_stream(
+                    last_event_value + 1 if last_event_value else 0,
+                    events_queue
                 )
                 last_received_at = monotonic()
             continue
