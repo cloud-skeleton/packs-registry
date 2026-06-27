@@ -195,11 +195,10 @@ def _create_volumes(data: dict[str, Any]) -> None:
         print(f"{_now()} Triggered re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'!")
 
 def _remove_volumes(data: dict[str, Any]) -> None:
-    volume_ids: set[str] = {
-        volume_key.split(".", 1)[0]
-        for volume_key in data["volumes"]
-    }
-    for volume_id in volume_ids:
+    for volume_key in data["volumes"]:
+        if not volume_key.endswith(".id"):
+            continue
+        volume_id: str = volume_key.split(".", 1)[0]
         try:
             print(f"{_now()} Deregistering CSI volume '{volume_id}' for {data['job']} job...")
             nomad.volume.deregister_csi_volume(volume_id, data["namespace"], True)
