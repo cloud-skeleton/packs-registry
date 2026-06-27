@@ -194,6 +194,18 @@ def _create_volumes(data: dict[str, Any]) -> None:
         nomad.job.evaluate_job(data["job"], True, data["namespace"])
         print(f"{_now()} Triggered re-evaluation of job '{data['job']}' in namespace '{data['namespace']}'!")
 
+def _remove_volumes(data: dict[str, Any]) -> None:
+    for volume_key in data["volumes"]:
+        if not volume_key.endswith(".id"):
+            continue
+        volume_id: str = volume_key.split(".", 1)[0]
+        try:
+            print(f"{_now()} Deregistering CSI volume '{volume_id}' for {data['job']} job...")
+            nomad.volume.deregister_csi_volume(volume_id, data["namespace"], True)
+            print(f"{_now()} Deregistered CSI volume '{volume_id}' for {data['job']} job!")
+        except URLNotFoundNomadException:
+            print(f"{_now()} CSI volume '{volume_id}' for {data['job']} job was already absent!")
+
 def _process_job_event(event: dict[str, Any]) -> None:
     job: dict[str, Any] = event["Payload"]["Job"]
     if job["ParentID"]:
@@ -220,6 +232,7 @@ def _process_job_event(event: dict[str, Any]) -> None:
             _create_volumes(data)
         case "JobDeregistered":
             if event.get("Payload", {}).get("Deleted") is True:
+                _remove_volumes(data)
                 _remove_acl(data)
             else:
                 print(
