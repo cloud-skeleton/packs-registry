@@ -125,10 +125,10 @@ packs/metrics_collector/
 
 ## Storage
 
-| Volume Name                 | Access Mode | Type | Description                                                               |
-|-----------------------------|-------------|------|---------------------------------------------------------------------------|
-| `metrics_collector/ui_data` | Read-write  | CSI  | Persistent **[Grafana][grafana]** data.                                   |
-| `metrics_collector/db_data` | Read-write  | CSI  | Persistent **[InfluxDB][influxdb]** data, metadata, WAL and engine files. |
+| Volume    | Access Mode | Type | Description                                                               |
+|-----------|-------------|------|---------------------------------------------------------------------------|
+| `db_data` | Read-write  | CSI  | Persistent **[InfluxDB][influxdb]** data, metadata, WAL and engine files. |
+| `ui_data` | Read-write  | CSI  | Persistent **[Grafana][grafana]** data.                                   |
 
 ## Contributing
 
