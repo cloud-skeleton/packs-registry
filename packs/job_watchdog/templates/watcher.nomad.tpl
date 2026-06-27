@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             resources {
                 cpu    = 50
-                memory = 32
+                memory = 48
             }
 
             template {
