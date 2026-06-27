@@ -47,7 +47,14 @@ VOLUME_DEFAULT_CONFIG: dict[str, Any] = {
     }
 }
 
-nomad: Nomad = Nomad(address = NOMAD_SOCKET)
+def _new_nomad_client() -> Nomad:
+    return Nomad(address = NOMAD_SOCKET)
+
+def _reset_nomad_client() -> None:
+    global nomad
+    nomad = _new_nomad_client()
+
+nomad: Nomad = _new_nomad_client()
 
 def _snake_to_pascal(name: str) -> str:
     return "".join(
@@ -294,6 +301,7 @@ def start() -> None:
                 print(f"{_now()} Event stream is stale or dead; reconnecting...")
                 stream_exit.set()
                 stream.join(timeout = 1)
+                _reset_nomad_client()
                 _, last_event_value = _get_last_event()
                 stream, stream_exit, events_queue = _open_event_stream(
                     last_event_value + 1 if last_event_value else 0
