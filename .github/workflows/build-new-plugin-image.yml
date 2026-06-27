@@ -88,3 +88,4 @@ on:
       - main
     paths:
       - "images/**"
+  workflow_dispatch:
