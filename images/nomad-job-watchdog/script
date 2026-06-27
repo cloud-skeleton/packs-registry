@@ -15,8 +15,6 @@ from threading import Thread, Event
 from time import sleep
 from typing import cast, Any
 
-# t
-
 SHOULD_STOP: Event = Event()
 
 def STOP() -> None:
