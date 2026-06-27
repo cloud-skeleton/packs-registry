@@ -12,9 +12,10 @@ from os import getenv
 from queue import Queue, Empty
 from signal import signal, SIGINT
 from threading import Thread, Event
-from time import sleep
+from time import monotonic, sleep
 from typing import cast, Any
 
+STREAM_IDLE_TIMEOUT: int = 30
 SHOULD_STOP: Event = Event()
 
 def STOP() -> None:
@@ -281,19 +282,23 @@ def start() -> None:
     stream, stream_exit, events_queue = _open_event_stream(
         last_event_value + 1 if last_event_value else 0
     )
+    last_received_at: float = monotonic()
     while True:
         try:
             events: dict[str, Any] = events_queue.get(timeout = 5)
+            last_received_at = monotonic()
         except Empty:
             if SHOULD_STOP.is_set():
                 break
-            if not stream.is_alive():
+            if not stream.is_alive() or monotonic() - last_received_at > STREAM_IDLE_TIMEOUT:
+                print(f"{_now()} Event stream is stale or dead; reconnecting...")
                 stream_exit.set()
                 stream.join(timeout = 1)
                 _, last_event_value = _get_last_event()
                 stream, stream_exit, events_queue = _open_event_stream(
                     last_event_value + 1 if last_event_value else 0
                 )
+                last_received_at = monotonic()
             continue
         try:
             state_var_index, last_event_value = _get_last_event()
