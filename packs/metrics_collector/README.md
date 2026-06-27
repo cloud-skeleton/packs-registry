@@ -49,34 +49,34 @@ A compact monitoring stack that uses **[Telegraf][telegraf]** to collect metrics
 
 ### Pack Variables
 
-| Variable         | Type                                                                                                       | Default | Required | Description                                                                                           |
-|------------------|------------------------------------------------------------------------------------------------------------|---------|----------|-------------------------------------------------------------------------------------------------------|
-| `db_data_volume` | object({<br>&nbsp;&nbsp;id = string,<br>&nbsp;&nbsp;name = string,<br>&nbsp;&nbsp;plugin_id = string<br>}) |         | ✅       | CSI volume configuration for persistent **[InfluxDB][influxdb]** data (ingester files, WAL, indexes). |
-| `hostname`       | string                                                                                                     |         | ✅       | The hostname (FQDN) used to access the **[Grafana][grafana]** monitoring UI.                          |
-| `id`             | string                                                                                                     |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables.     |
-| `ui_data_volume` | object({<br>&nbsp;&nbsp;id = string,<br>&nbsp;&nbsp;name = string,<br>&nbsp;&nbsp;plugin_id = string<br>}) |         | ✅       | CSI volume configuration for persistent **[Grafana][grafana]** data.                                  |
+| Variable   | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Default | Required | Description                                                                                       |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|----------|---------------------------------------------------------------------------------------------------|
+| `hostname` | string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |         | ✅       | The hostname (FQDN) used to access the **[Grafana][grafana]** monitoring UI.                      |
+| `id`       | string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables. |
+| `volumes`  | object({<br>&nbsp;&nbsp;db_data&nbsp;=&nbsp;object({<br>&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;plugin_id&nbsp;=&nbsp;string<br>&nbsp;&nbsp;})<br>&nbsp;&nbsp;ui_data&nbsp;=&nbsp;object({<br>&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;plugin_id&nbsp;=&nbsp;string<br>&nbsp;&nbsp;})<br>}) |         | ✅       | CSI volume configuration for persistent data.                                                     |
 
 #### Example `vars.hcl`
 
 ```hcl
-# CSI volume configuration for persistent InfluxDB data (ingester files, WAL, indexes).
-db_data_volume = {
-  id        = "metrics_collector-db_data"
-  name      = "metrics_collector/db_data"
-  plugin_id = "main"
-}
-
 # The hostname (FQDN) used to access the Grafana monitoring UI.
 hostname = "metrics.cluster.domain.com"
 
 # Unique identifier used to distinguish multiple deployments of this pack with different variables.
 id = "main"
 
-# CSI volume configuration for persistent Grafana data.
-ui_data_volume = {
-  id        = "metrics_collector-ui_data"
-  name      = "metrics_collector/ui_data"
-  plugin_id = "main"
+# CSI volume configuration for persistent data.
+volumes = {
+  db_data = {
+    id        = "metrics_collector-db_data"
+    name      = "metrics_collector/db_data"
+    plugin_id = "main"
+  }
+
+  ui_data = {
+    id        = "metrics_collector-ui_data"
+    name      = "metrics_collector/ui_data"
+    plugin_id = "main"
+  }
 }
 ```
 

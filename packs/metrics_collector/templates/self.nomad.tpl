@@ -222,7 +222,7 @@ job "[[ template "job_name" (list . "self") ]]" {
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
       read_only       = false
-      source          = "[[ var "ui_data_volume.id" . ]]"
+      source          = "[[ var "volumes.ui_data.id" . ]]"
       type            = "csi"
     }
   }
@@ -401,7 +401,7 @@ job "[[ template "job_name" (list . "self") ]]" {
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
       read_only       = false
-      source          = "[[ var "db_data_volume.id" . ]]"
+      source          = "[[ var "volumes.db_data.id" . ]]"
       type            = "csi"
     }
   }
@@ -520,12 +520,12 @@ job "[[ template "job_name" (list . "self") ]]" {
     "params.images.telegraf"           = "1.39-alpine"
 
     // Volumes
-    "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"
-    "volumes.[[ var "db_data_volume.id" . ]].name"      = "[[ var "db_data_volume.name" . ]]"
-    "volumes.[[ var "db_data_volume.id" . ]].plugin_id" = "[[ var "db_data_volume.plugin_id" . ]]"
-    "volumes.[[ var "ui_data_volume.id" . ]].id"        = "[[ var "ui_data_volume.id" . ]]"
-    "volumes.[[ var "ui_data_volume.id" . ]].name"      = "[[ var "ui_data_volume.name" . ]]"
-    "volumes.[[ var "ui_data_volume.id" . ]].plugin_id" = "[[ var "ui_data_volume.plugin_id" . ]]"
+    "volumes.[[ var "volumes.db_data.id" . ]].id"        = "[[ var "volumes.db_data.id" . ]]"
+    "volumes.[[ var "volumes.db_data.id" . ]].name"      = "[[ var "volumes.db_data.name" . ]]"
+    "volumes.[[ var "volumes.db_data.id" . ]].plugin_id" = "[[ var "volumes.db_data.plugin_id" . ]]"
+    "volumes.[[ var "volumes.ui_data.id" . ]].id"        = "[[ var "volumes.ui_data.id" . ]]"
+    "volumes.[[ var "volumes.ui_data.id" . ]].name"      = "[[ var "volumes.ui_data.name" . ]]"
+    "volumes.[[ var "volumes.ui_data.id" . ]].plugin_id" = "[[ var "volumes.ui_data.plugin_id" . ]]"
   }
 
   namespace = "system"
