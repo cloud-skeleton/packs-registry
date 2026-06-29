@@ -49,7 +49,7 @@ set_organization() {
         curl -fso /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" -H 'Content-Type: application/json' \
             -X PUT "${GF_SERVER_ROOT_URL}/api/org" \
             -d "$(jq -nc --arg name "${GRAFANA_ORGANIZATION}" '{name: $name}')"
-        echo "Organization name has been changed."
+        echo 'Organization name has been changed.'
     fi
 }
 
