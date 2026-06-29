@@ -44,8 +44,13 @@ set_credentials() {
 }
 
 set_organization() {
-    curl -fso /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" -H 'Content-Type: application/json' \
-        -X PUT "${GF_SERVER_ROOT_URL}/api/org" -d "$(jq -nc --arg name "${GRAFANA_ORGANIZATION}" '{name: $name}')"
+    CURRENT_ORGANIZATION="$(curl -fsu "${GRAFANA_USER}:${GRAFANA_PASSWORD}" "${GF_SERVER_ROOT_URL}/api/org" | jq -r '.name')"
+    if [ "${CURRENT_ORGANIZATION}" != "${GRAFANA_ORGANIZATION}" ]; then
+        curl -fso /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" -H 'Content-Type: application/json' \
+            -X PUT "${GF_SERVER_ROOT_URL}/api/org" \
+            -d "$(jq -nc --arg name "${GRAFANA_ORGANIZATION}" '{name: $name}')"
+        echo "Organization name has been changed."
+    fi
 }
 
 wait_for_app() {
