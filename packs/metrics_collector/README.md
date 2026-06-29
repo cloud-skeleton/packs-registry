@@ -21,6 +21,7 @@ A compact monitoring stack that uses **[Telegraf][telegraf]** to collect metrics
 - [Configuration](#configuration)
   - [Pack Variables](#pack-variables)
   - [Example `vars.hcl`](#example-varshcl)
+  - [Nomad Variables (Parameters)](#nomad-variables-parameters)
 - [Pack Layout](#pack-layout)
 - [Services & Ports](#services--ports)
 - [Storage](#storage)
@@ -118,10 +119,10 @@ packs/metrics_collector/
 
 ## Services & Ports
 
-| Service Name                       | Port Name  | Host Port | Task Port | Description                                                                                             |
-|------------------------------------|------------|-----------|-----------|---------------------------------------------------------------------------------------------------------|
-| `metrics-collector-http-${id}`     | `http`     | *dynamic* | `443`     | **[Grafana][grafana]** HTTPS endpoint exposed through the mTLS tunnel and reverse proxy.                |
-| `metrics-collector-influxdb-${id}` | `influxdb` | *dynamic* | `8086`    | Internal **[InfluxDB][influxdb]** HTTP API used by **[Grafana][grafana]** and **[Telegraf][telegraf]**. |
+| Service Name                            | Port Name  | Host Port | Task Port | Description                                                                                             |
+|-----------------------------------------|------------|-----------|-----------|---------------------------------------------------------------------------------------------------------|
+| `metrics-collector-self-http-${id}`     | `http`     | *dynamic* | `443`     | **[Grafana][grafana]** HTTPS endpoint exposed through the mTLS tunnel and reverse proxy.                |
+| `metrics-collector-self-influxdb-${id}` | `influxdb` | *dynamic* | `8086`    | Internal **[InfluxDB][influxdb]** HTTP API used by **[Grafana][grafana]** and **[Telegraf][telegraf]**. |
 
 ## Storage
 
