@@ -85,6 +85,7 @@ volumes = {
 
 | Job      | Variable  | Key                          | Default          | Description                                                                                                                                    |
 |----------|-----------|------------------------------|------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| **self** | `config`  | `grafana.organization_name`  | `Cloud Skeleton` | **[Grafana][grafana]** organization name.                                                                                                      |
 | **self** | `config`  | `influxdb.data_retention`    | `604800`         | Retention period, in seconds, for the **[InfluxDB][influxdb]** `nomad` bucket. Default is 7 days.                                              |
 | **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of **[Nomad][hashicorp-nomad]** node DNS names or IP addresses that **[Telegraf][telegraf]** will scrape over HTTPS on port `4646`. |
 | **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | **[InfluxDB][influxdb]** organization name used for the `nomad` bucket and generated service tokens.                                           |

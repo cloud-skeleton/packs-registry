@@ -43,6 +43,11 @@ set_credentials() {
     fi
 }
 
+set_organization() {
+    curl -fso /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" -H 'Content-Type: application/json' \
+        -X PUT "${GF_SERVER_ROOT_URL}/api/org" -d "$(jq -nc --arg name "${GRAFANA_ORGANIZATION}" '{name: $name}')"
+}
+
 wait_for_app() {
     while ! curl -fso /dev/null "${GF_SERVER_ROOT_URL}/api/health"; do
         sleep 5
@@ -58,6 +63,7 @@ wait_for_app
 if initialize; then
     set_credentials
 fi
+set_organization
 
 (( GOT_TERM )) && exit 0
 sleep infinity & SLEEP_PID=$!

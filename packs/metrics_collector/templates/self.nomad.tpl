@@ -198,6 +198,9 @@ job "[[ template "job_name" (list . "self") ]]" {
         GRAFANA_USER="{{ index . "grafana.admin_user" }}"
         GRAFANA_PASSWORD="{{ index . "grafana.admin_password" }}"
         {{- end }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/config" }}
+        GRAFANA_ORGANIZATION="{{ index . "grafana.organization_name" }}"
+        {{- end }}
         EOF
         destination = "secrets/env"
         env         = true
@@ -509,6 +512,7 @@ job "[[ template "job_name" (list . "self") ]]" {
     [[- template "extra_pack_meta" . ]]
 
     // Dynamic configuration
+    "params.config.grafana.organization_name"  = "Cloud Skeleton"
     "params.config.influxdb.data_retention"    = "604800"
     "params.config.influxdb.nomad_nodes"       = "[]"
     "params.config.influxdb.organization_name" = "cloud-skeleton"
