@@ -33,7 +33,7 @@ job "[[ template "job_name" (list . "self") ]]" {
         interval = "30s"
         path     = "/api/health"
         port     = 3000
-        timeout  = "2s"
+        timeout  = "5s"
         type     = "http"
       }
 
@@ -217,8 +217,8 @@ job "[[ template "job_name" (list . "self") ]]" {
 [[ template "tunnel_mtls" (list . "self" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "12m"
-      progress_deadline = "25m"
+      healthy_deadline  = "18m"
+      progress_deadline = "36m"
     }
 
     volume "ui_data" {
@@ -256,7 +256,7 @@ job "[[ template "job_name" (list . "self") ]]" {
         interval = "30s"
         path     = "/health"
         port     = "influxdb"
-        timeout  = "2s"
+        timeout  = "5s"
         type     = "http"
       }
 
@@ -396,8 +396,8 @@ job "[[ template "job_name" (list . "self") ]]" {
     }
 
     update {
-      healthy_deadline  = "7m"
-      progress_deadline = "15m"
+      healthy_deadline  = "12m"
+      progress_deadline = "24m"
     }
 
     volume "db_data" {
@@ -503,8 +503,8 @@ job "[[ template "job_name" (list . "self") ]]" {
     // start, initialization, or one failed/restarted InfluxDB attempt.
     update {
       health_check      = "task_states"
-      healthy_deadline  = "12m"
-      progress_deadline = "25m"
+      healthy_deadline  = "18m"
+      progress_deadline = "36m"
     }
   }
 
