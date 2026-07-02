@@ -1,12 +1,3 @@
-variable "db_data_volume" {
-  description = "CSI volume configuration for persistent InfluxDB data (ingester files, WAL, indexes)."
-  type        = object({
-    id        = string
-    name      = string
-    plugin_id = string
-  })
-}
-
 variable "hostname" {
   description = "The hostname (FQDN) used to access the Grafana monitoring UI."
   type        = string
@@ -17,11 +8,18 @@ variable "id" {
   type        = string
 }
 
-variable "ui_data_volume" {
-  description = "CSI volume configuration for persistent Grafana data."
+variable "volumes" {
+  description = "CSI volume configuration for persistent data."
   type        = object({
-    id        = string
-    name      = string
-    plugin_id = string
+    db_data = object({
+      id        = string
+      name      = string
+      plugin_id = string
+    })
+    ui_data = object({
+      id        = string
+      name      = string
+      plugin_id = string
+    })
   })
 }

@@ -26,7 +26,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
 
             resources {
                 cpu    = 50
-                memory = 32
+                memory = 48
             }
 
             template {
@@ -54,7 +54,7 @@ job "[[ template "job_name" (list . "watcher") ]]" {
         [[- template "extra_pack_meta" . ]]
 
         // Docker images used in job
-        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.5.2"
+        "params.images.ghcr.io/cloud-skeleton/nomad-job-watchdog" = "v1.5.9"
 
         // Dynamic configuration
         "params.config.certificates_root_path" = "certs"
