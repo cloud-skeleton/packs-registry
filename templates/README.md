@@ -18,6 +18,7 @@
 - [Configuration](#configuration)
   - [Pack Variables](#pack-variables)
   - [Example `vars.hcl`](#example-varshcl)
+  - [Nomad Variables (Parameters)](#nomad-variables-parameters)
 - [Pack Layout](#pack-layout)
 - [Services & Ports](#services--ports)
 - [Storage](#storage)
@@ -35,14 +36,12 @@
 | Node class(es) | {{NODE_CLASSES}}        |
 | CSI volumes    | {{CSI_ENABLED}}         |
 | Ingress        | {{INGRESS_DESC}}        |
-| Variables      | {{NOMAD_VAR_PATHS}}     |
 
 ### Security Requirements
 
-| Component          | Requirement / Note |
-|--------------------|--------------------|
-| Privileged         | {{PRIVILEGED}}     |
-| Extra capabilities | {{CAPS_ADD_LIST}}  |
+| Component  | Requirement / Note |
+|------------|--------------------|
+| Privileged | {{PRIVILEGED}}     |
 
 ## Configuration
 
@@ -57,14 +56,24 @@
 ### Example `vars.hcl`
 
 ```hcl
-# AUTO-GENERATED example based on pack defaults
 {{EXAMPLE_VARS_HCL}}
 ```
+
+### Nomad Variables (Parameters)
+
+<!-- BEGIN_AUTO:NOMAD_VARIABLES_TABLE -->
+| Job      | Variable | Key       | Default | Description |
+|----------|----------|-----------|---------|-------------|
+| **self** | `config` | `{{KEY}}` | `...`   | ...         |
+<!-- END_AUTO:NOMAD_VARIABLES_TABLE -->
 
 ## Pack Layout
 
 ```
 packs/{{PACK_HANDLE}}/
+├─ files/
+│  ├─ {{FILE_1}}
+│  └─ {{FILE_N}}
 ├─ metadata.hcl
 ├─ outputs.tpl
 ├─ README.md
@@ -79,17 +88,17 @@ packs/{{PACK_HANDLE}}/
 ## Services & Ports
 
 <!-- BEGIN_AUTO:SERVICES_TABLE -->
-| Service Name  | Port Var / Static | Target (in-task) | Ingress | Notes |
-|---------------|-------------------|------------------|---------|-------|
-| {{SERVICE_1}} | ...               | ...              | ...     | ...   |
+| Service Name  | Port Name | Host Port | Task Port | Description |
+|---------------|-----------|-----------|-----------|-------------|
+| {{SERVICE_1}} | `...`     | *dynamic* | `...`     | ...         |
 <!-- END_AUTO:SERVICES_TABLE -->
 
 ## Storage
 
 <!-- BEGIN_AUTO:VOLUMES_TABLE -->
-| Volume ID    | Mount Path | Access Mode | Attachment Mode | Notes |
-|--------------|------------|-------------|-----------------|-------|
-| {{VOLUME_1}} | ...        | ...         | ...             | ...   |
+| Volume    | Access Mode | Type | Description |
+|-----------|-------------|------|-------------|
+| `{{VOL}}` | Read-write  | CSI  | ...         |
 <!-- END_AUTO:VOLUMES_TABLE -->
 
 ## Contributing
