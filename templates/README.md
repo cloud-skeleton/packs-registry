@@ -10,6 +10,9 @@
 
 {{PACK_SUMMARY}}
 
+<!-- If the pack contains assets intended for README display, add them immediately after the overview text and before the Table of Contents. Example: ![Description](./assets/image.png) -->
+{{PACK_ASSETS}}
+
 ## Table of Contents
 
 - [Compatibility & Requirements](#compatibility--requirements)
