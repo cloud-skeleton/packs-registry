@@ -29,6 +29,7 @@
 
 ### Generic Requirements
 
+<!-- Keep Markdown table columns padded to the longest cell for source readability. Pad icon/emoji cells by visual column width so table pipes stay aligned in source. -->
 | Component      | Requirement / Note      |
 |----------------|-------------------------|
 | Resources      | **CPU:** {{TOTAL_CPU_MHZ}} MHz <br> **RAM:** {{TOTAL_MEM_MB}} MB |
@@ -39,6 +40,7 @@
 
 ### Security Requirements
 
+<!-- Keep Markdown table columns padded to the longest cell for source readability. Pad icon/emoji cells by visual column width so table pipes stay aligned in source. -->
 | Component  | Requirement / Note |
 |------------|--------------------|
 | Privileged | {{PRIVILEGED}}     |
@@ -48,12 +50,13 @@
 ### Pack Variables
 
 <!-- BEGIN_AUTO:VARIABLES_TABLE -->
+<!-- Keep generated Markdown table columns padded to the longest cell for source readability. For nested object types, use <br> with &nbsp; padding so attribute names and equals signs stay aligned inside the Type cell. Pad icon/emoji cells by visual column width so table pipes stay aligned in source. -->
 | Variable  | Type | Default | Required | Description |
 |-----------|------|---------|----------|-------------|
 | {{VAR_1}} | ...  | ...     | ...      | ...         |
 <!-- END_AUTO:VARIABLES_TABLE -->
 
-### Example `vars.hcl`
+#### Example `vars.hcl`
 
 ```hcl
 {{EXAMPLE_VARS_HCL}}
@@ -62,6 +65,7 @@
 ### Nomad Variables (Parameters)
 
 <!-- BEGIN_AUTO:NOMAD_VARIABLES_TABLE -->
+<!-- Keep generated Markdown table columns padded to the longest cell for source readability. Pad icon/emoji cells by visual column width so table pipes stay aligned in source. -->
 | Job      | Variable | Key       | Default | Description |
 |----------|----------|-----------|---------|-------------|
 | **self** | `config` | `{{KEY}}` | `...`   | ...         |
@@ -88,6 +92,7 @@ packs/{{PACK_HANDLE}}/
 ## Services & Ports
 
 <!-- BEGIN_AUTO:SERVICES_TABLE -->
+<!-- Keep generated Markdown table columns padded to the longest cell for source readability. Pad icon/emoji cells by visual column width so table pipes stay aligned in source. -->
 | Service Name  | Port Name | Host Port | Task Port | Description |
 |---------------|-----------|-----------|-----------|-------------|
 | {{SERVICE_1}} | `...`     | *dynamic* | `...`     | ...         |
@@ -96,6 +101,7 @@ packs/{{PACK_HANDLE}}/
 ## Storage
 
 <!-- BEGIN_AUTO:VOLUMES_TABLE -->
+<!-- Keep generated Markdown table columns padded to the longest cell for source readability. Pad icon/emoji cells by visual column width so table pipes stay aligned in source. -->
 | Volume    | Access Mode | Type | Description |
 |-----------|-------------|------|-------------|
 | `{{VOL}}` | Read-write  | CSI  | ...         |
