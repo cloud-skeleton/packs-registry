@@ -28,24 +28,22 @@ README generation notes:
   not add generic fallback wording such as "or the configured reverse proxy".
 - Keep Markdown tables padded in source after final content is generated so every column pipe
   aligns to the longest raw Markdown source cell in that final table, even when padded rows exceed
-  120 characters. Compute widths from literal Markdown code, not from the rendered view:
-  count markup and inline HTML such as `**[Grafana][grafana]**`, `<br>` and `&nbsp;` as part of
-  the cell length. For each table, compute every column width from all final rows first, including
-  empty cells, emoji cells, bold reference links, long defaults, and final descriptions, then pad
-  every cell with spaces before writing the row. Treat each emoji such as `✅` or `❌` as visual
-  width 2 for table padding, so emoji cells get one fewer trailing space than a one-character text
-  cell. Do not force emoji rows to have the same byte/source-character length if that makes the
-  closing pipe drift one column to the right in the editor. Separator rows must use the same final
-  widths. Do not size columns from headers, first rows,
-  examples, unlinked text, rendered text, or pre-link text. Before finishing generation, re-read the
-  Markdown source and fix any non-table line over 120 characters or visibly misaligned table.
-  As a final table check, every pipe in a column must appear in the same visual column for every row
-  in that table. If any final content row is longer than the header or separator row, including rows
-  with nested object types, recompute the column widths and repad the whole table. For rows without
-  emoji cells, source line lengths in the same table should normally match exactly; emoji-only cells
-  may be one source character shorter per emoji only when that improves visible pipe alignment.
-  Template placeholder widths are schematic only and must never determine final generated table
-  widths.
+  120 characters. For table sizing, a cell segment is the text between two pipe characters. First
+  compute each column's maximum trimmed cell-content width from all final header and body rows,
+  using literal Markdown source rather than rendered text: count markup and inline HTML such as
+  `**[Grafana][grafana]**`, `<br>` and `&nbsp;` as cell content. Treat each emoji such as `✅` or
+  `❌` as visual width 2 for table padding. Then set that column's final segment width to the
+  maximum trimmed content width plus 2, for one leading and one trailing space. Separator segments
+  must contain exactly that many hyphens. Every non-separator segment must be written as one leading
+  space, the final cell content, right padding spaces, and one trailing space, with total visual
+  segment width exactly matching the separator segment. Do not force emoji rows to have the same
+  byte/source-character length if that makes the closing pipe drift one column to the right in the
+  editor. Do not size columns from template placeholder widths, first rows, examples, unlinked text,
+  rendered text, or pre-link text. Before finishing generation, re-read the Markdown source and fix
+  any non-table line over 120 characters or visibly misaligned table. As a final table check, every
+  pipe in a column must appear in the same visual column for every row in that table. If any final
+  content row is longer than the header or separator row, including rows with nested object types,
+  recompute the column widths and repad the whole table.
 - Do not copy template comments, BEGIN_AUTO/END_AUTO markers, or unresolved {{PLACEHOLDERS}} into
   generated pack README files.
 - Preserve fixed template text exactly, including the prerequisite warning block.
