@@ -39,6 +39,11 @@ README generation notes:
   widths. Do not size columns from headers, first rows,
   examples, unlinked text, rendered text, or pre-link text. Before finishing generation, re-read the
   Markdown source and fix any non-table line over 120 characters or visibly misaligned table.
+  As a final table check, every pipe in a column must appear in the same visual column for every row
+  in that table. If any final content row is longer than the header or separator row, including rows
+  with nested object types, recompute the column widths and repad the whole table. For rows without
+  emoji cells, source line lengths in the same table should normally match exactly; emoji-only cells
+  may be one source character shorter per emoji only when that improves visible pipe alignment.
   Template placeholder widths are schematic only and must never determine final generated table
   widths.
 - Do not copy template comments, BEGIN_AUTO/END_AUTO markers, or unresolved {{PLACEHOLDERS}} into
