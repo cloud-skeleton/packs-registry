@@ -46,8 +46,8 @@ This pack deploys **[Grafana][grafana]** for the monitoring UI, **[InfluxDB][inf
 | Component      | Requirement / Note                     |
 |----------------|----------------------------------------|
 | Resources      | **CPU:** 925 MHz <br> **RAM:** 1040 MB |
-| Namespace(s)   | system                                 |
-| Node class(es) | main-worker                            |
+| Namespace(s)   | `system`                               |
+| Node class(es) | `main-worker`                          |
 | CSI volumes    | ✅                                     |
 | Ingress        | ✅                                     |
 
@@ -94,20 +94,20 @@ volumes = {
 
 ### Nomad Variables (Parameters)
 
-| Job      | Variable  | Key                          | Default        | Description                                                                                   |
-|----------|-----------|------------------------------|----------------|-----------------------------------------------------------------------------------------------|
-| **self** | `config`  | `grafana.organization_name`  | Cloud Skeleton | **[Grafana][grafana]** organization name.                                                     |
-| **self** | `config`  | `influxdb.data_retention`    | 604800         | **[InfluxDB][influxdb]** `nomad` bucket retention period in seconds.                          |
-| **self** | `config`  | `influxdb.nomad_nodes`       | []             | JSON list of **[Nomad][hashicorp-nomad]** node hostnames scraped by **[Telegraf][telegraf]**. |
-| **self** | `config`  | `influxdb.organization_name` | cloud-skeleton | **[InfluxDB][influxdb]** organization name.                                                   |
-| **self** | `images`  | `cleanstart/stunnel`         | 5.77           | **[Docker][docker]** image tag for the ingress transport sidecar.                             |
-| **self** | `images`  | `grafana/grafana`            | 13.1           | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                    |
-| **self** | `images`  | `influxdb`                   | 2.9.1-alpine   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                  |
-| **self** | `images`  | `telegraf`                   | 1.39-alpine    | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                  |
-| **self** | `secrets` | `grafana.admin_user`         |                | **[Grafana][grafana]** admin username.                                                        |
-| **self** | `secrets` | `grafana.admin_password`     |                | **[Grafana][grafana]** admin password.                                                        |
-| **self** | `secrets` | `influxdb.admin_user`        |                | **[InfluxDB][influxdb]** admin username.                                                      |
-| **self** | `secrets` | `influxdb.admin_password`    |                | **[InfluxDB][influxdb]** admin password.                                                      |
+| Job      | Variable  | Key                          | Default          | Description                                                                                   |
+|----------|-----------|------------------------------|------------------|-----------------------------------------------------------------------------------------------|
+| **self** | `config`  | `grafana.organization_name`  | `Cloud Skeleton` | **[Grafana][grafana]** organization name.                                                     |
+| **self** | `config`  | `influxdb.data_retention`    | `604800`         | **[InfluxDB][influxdb]** `nomad` bucket retention period in seconds.                          |
+| **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON list of **[Nomad][hashicorp-nomad]** node hostnames scraped by **[Telegraf][telegraf]**. |
+| **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | **[InfluxDB][influxdb]** organization name.                                                   |
+| **self** | `images`  | `cleanstart/stunnel`         | `5.77`           | **[Docker][docker]** image tag for the ingress transport sidecar.                             |
+| **self** | `images`  | `grafana/grafana`            | `13.1`           | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                    |
+| **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                  |
+| **self** | `images`  | `telegraf`                   | `1.39-alpine`    | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                  |
+| **self** | `secrets` | `grafana.admin_user`         |                  | **[Grafana][grafana]** admin username.                                                        |
+| **self** | `secrets` | `grafana.admin_password`     |                  | **[Grafana][grafana]** admin password.                                                        |
+| **self** | `secrets` | `influxdb.admin_user`        |                  | **[InfluxDB][influxdb]** admin username.                                                      |
+| **self** | `secrets` | `influxdb.admin_password`    |                  | **[InfluxDB][influxdb]** admin password.                                                      |
 
 ## Pack Layout
 
@@ -165,8 +165,8 @@ was developed by EU citizens who are strong proponents of the European Federatio
 [cloud-skeleton]: https://github.com/cloud-skeleton/
 [docker]: https://docs.docker.com/
 [grafana]: https://grafana.com/docs/grafana/latest/
-[hashicorp-nomad]: https://developer.hashicorp.com/nomad/tutorials/get-started
 [hashicorp-nomad-packs]: https://developer.hashicorp.com/nomad/tools/nomad-pack
+[hashicorp-nomad]: https://developer.hashicorp.com/nomad/tutorials/get-started
 [influxdb]: https://docs.influxdata.com/influxdb/v2/
 [packs-registry]: https://github.com/cloud-skeleton/packs-registry/
 [prerequisites]: https://github.com/cloud-skeleton/prerequisites

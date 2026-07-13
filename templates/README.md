@@ -13,11 +13,13 @@ README generation notes:
   TLS, mTLS, CSI, JSON, HTTP, HTTPS, TCP, file-system, ingress, proxy, sidecar, bucket,
   database, or API unless they are part of a specific product name. Use `**[Name][reference]**`
   unless the surrounding text is already bold; inside already-bold text, use `[Name][reference]`.
-- Use documentation URLs for reference links when available, not marketing landing pages. Add a
-  reference entry for every product/tool/project link used, for example [cloud-skeleton],
-  [packs-registry], [prerequisites], [grafana], [influxdb], [telegraf], [hashicorp-nomad],
-  [hashicorp-nomad-packs], [traefik] or [docker]. Before finishing generation, verify that every
-  bracket reference used in the README has a matching entry in the Reference section.
+- Use `templates/ref.md` as the canonical reference registry. Before adding any reference link to a
+  generated README, search `templates/ref.md` for an existing matching key and reuse that exact key
+  and URL so links stay consistent across packs. If a needed product/tool/project reference is
+  missing, add it to `templates/ref.md` first with a documentation URL when available, then copy that
+  same reference definition into the generated README. Include only references actually used by that
+  README, and before finishing generation verify that every bracket reference has a matching entry in
+  the Reference section.
 - Avoid implementation-only phrasing such as "applied during post-configuration" unless the
   timing is user-visible configuration behavior. Keep internal Cloud Skeleton transport/proxy
   implementation details out of the overview, including stunnel, mTLS tunnels, sidecar proxy
@@ -104,6 +106,7 @@ For binary capability rows such as CSI volumes and Ingress, use only `âœ…` or `â
 generic component labels such as CSI volumes plain, without reference links. Put detailed volume
 names, ingress routing, proxy, or transport information in Storage or Services sections instead.
 Render Resources as `**CPU:** X MHz <br> **RAM:** Y MB`, but size the column from final content.
+Render namespace and node class values as code-formatted literals, for example `system`.
 -->
 | Component      | Requirement / Note  |
 |----------------|---------------------|
@@ -154,8 +157,9 @@ tool/platform/project names in descriptions, such as Docker, Nomad, Grafana, Inf
 Traefik, unless the cell text is already bold. Leave generic concepts such as CSI, TLS, mTLS, JSON,
 HTTP and HTTPS unlinked. Do not add reference links for implementation-only sidecar products such as
 stunnel; keep those image names literal and describe them generically, e.g. Docker image tag for the
-ingress transport sidecar. Leave the Default cell empty when no explicit default exists. Preserve key
-order from templates/_vars.tpl.
+ingress transport sidecar. Render non-empty Default values as code-formatted literals, for example
+`604800`, `Cloud Skeleton` or `[]`. Leave the Default cell empty when no explicit default exists.
+Preserve key order from templates/_vars.tpl.
 -->
 | Job      | Variable | Key       | Default | Description |
 |----------|----------|-----------|---------|-------------|
@@ -252,6 +256,7 @@ was developed by EU citizens who are strong proponents of the European Federatio
 [packs-registry]: https://github.com/cloud-skeleton/packs-registry/
 [prerequisites]: https://github.com/cloud-skeleton/prerequisites
 <!--
-Add documentation reference links for every product linked in the generated README, for example
-[grafana], [influxdb], [telegraf] or [traefik].
+Reference entries in generated pack README files must be copied from `templates/ref.md`. If a
+required product/tool/project reference is missing there, add it to `templates/ref.md` first, then use
+the same key and URL here. Include only references used by the generated README.
 -->
