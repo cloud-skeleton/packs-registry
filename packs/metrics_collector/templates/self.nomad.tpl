@@ -333,42 +333,6 @@ job "[[ template "job_name" (list . "self") ]]" {
         gid         = 1000
       }
 
-      volume_mount {
-        destination = "/var/lib/influxdb2"
-        volume      = "db_data"
-      }
-    }
-
-    task "influxdb-postconfig" {
-      config {
-        args = [
-          "/local/postconfig_influxdb.sh"
-        ]
-        command        = "bash"
-        cpu_hard_limit = true
-        entrypoint     = []
-        image          = "${DOCKER_IMAGE}"
-      }
-
-      driver = "docker"
-
-      identity {
-        change_mode = "restart"
-        env         = true
-      }
-
-      kill_timeout = "30s"
-
-      lifecycle {
-        hook    = "poststart"
-        sidecar = true
-      }
-
-      resources {
-        cpu    = 25
-        memory = 64
-      }
-
       template {
         data        = <<-EOF
 [[ fileContents "files/postconfig_influxdb.sh" | indent 8 ]]
@@ -377,10 +341,16 @@ job "[[ template "job_name" (list . "self") ]]" {
       }
 
       template {
+        change_mode = "script"
+
+        change_script {
+          command             = "/local/postconfig_influxdb.sh"
+          fail_on_error       = true
+          run_on_first_render = true
+          timeout             = "5m"
+        }
+
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/images" }}
-        DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
-        {{- end }}
         {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/secrets" }}
         INFLUX_USER="{{ index . "influxdb.admin_user" }}"
         INFLUX_PASSWORD="{{ index . "influxdb.admin_password" }}"
@@ -390,8 +360,13 @@ job "[[ template "job_name" (list . "self") ]]" {
         INFLUX_DATA_RETENTION="{{ index . "influxdb.data_retention" }}"
         {{- end }}
         EOF
-        destination = "secrets/env"
+        destination = "secrets/env_settings"
         env         = true
+      }
+
+      volume_mount {
+        destination = "/var/lib/influxdb2"
+        volume      = "db_data"
       }
     }
 
