@@ -86,53 +86,28 @@ job "[[ template "job_name" (list . "self") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/grafana.ini" | indent 8 ]]
+[[ fileContents "files/grafana/grafana.ini" | indent 8 ]]
         EOF
         destination = "../alloc/grafana.ini"
       }
 
       template {
         data        = <<-EOF
-[[ fileContents "files/nomad.json" | indent 8 ]]
+[[ fileContents "files/grafana/nomad-dashboard.json" | indent 8 ]]
         EOF
         destination = "local/dashboards/nomad.json"
       }
 
       template {
         data        = <<-EOF
-        apiVersion: 1
-        providers:
-          - folder: Cloud Skeleton
-            name: builtin_dashboards
-            options:
-              path: /local/dashboards
-              foldersFromFilesStructure: false
+[[ fileContents "files/grafana/dashboards-provider.yml" | indent 8 ]]
         EOF
         destination = "local/dashboards/dashboards.yml"
       }
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/state" }}
-        apiVersion: 1
-        datasources:
-          - access: proxy
-            isDefault: true
-            jsonData:
-              dbName: nomad
-              httpMode: POST
-              product: InfluxDB OSS 2.x
-              version: InfluxQL
-            name: influxdb
-            secureJsonData:
-              password: {{ index . "influxdb.grafana_token" }}
-            type: influxdb
-            user: grafana
-            {{- range nomadService "[[ template "service_name" (list . "self" "influxdb") ]]" }}
-            url: http://{{ .Address }}:{{ .Port }}
-            {{- end }}
-            uid: 0000-0000-0000-0000
-        {{- end }}
+[[ tpl (fileContents "files/grafana/influxdb-datasource.yml.tpl") . | indent 8 ]]
         EOF
         destination = "local/datasources/influxdb.yml"
       }
@@ -184,7 +159,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/postconfig_grafana.sh" | indent 8 ]]
+[[ fileContents "files/grafana/postconfig_grafana.sh" | indent 8 ]]
         EOF
         destination = "local/postconfig_grafana.sh"
       }
@@ -306,27 +281,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
       template {
         data        = <<-EOF
-        ---
-        bolt-path: /var/lib/influxdb2/influxd.bolt
-        engine-path: /var/lib/influxdb2/engine
-        hardening-enabled: true
-        instance-id: "{{ env "NOMAD_ALLOC_ADDR_influxdb" }}"
-        metrics-disabled: true
-        pprof-disabled: true
-        query-concurrency: 2
-        query-initial-memory-bytes: 8388608
-        query-memory-bytes: 16777216
-        query-queue-size: 12
-        reporting-disabled: true
-        storage-cache-max-memory-size: 16777216
-        storage-cache-snapshot-memory-size: 8388608
-        storage-compact-throughput-burst: 8388608
-        storage-max-concurrent-compactions: 1
-        storage-retention-check-interval: 60m0s
-        storage-shard-precreator-check-interval: 30m0s
-        strong-passwords: true
-        ui-disabled: true
-        ...
+[[ fileContents "files/influxdb/influxdb.yml" | indent 8 ]]
         EOF
         destination = "local/config.yml"
         uid         = 1000
@@ -371,7 +326,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/postconfig_influxdb.sh" | indent 8 ]]
+[[ fileContents "files/influxdb/postconfig_influxdb.sh" | indent 8 ]]
         EOF
         destination = "local/postconfig_influxdb.sh"
       }
@@ -461,34 +416,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/config" }}
-        [agent]
-          debug = true
-          omit_hostname = true
-          skip_processors_after_aggregators = true
-
-        {{ range $nomad_node := (index . "influxdb.nomad_nodes").Value | parseJSON -}}
-        [[ "[[" ]]inputs.nomad[[ "]]" ]]
-          url = "https://{{ $nomad_node }}:4646"
-          tls_ca = "/run/secrets/nomad-agent-ca.pem"
-          [inputs.nomad.tags]
-            app_name = "nomad"
-
-        {{ end -}}
-
-        [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
-          bucket_tag = "app_name"
-          exclude_bucket_tag = true
-          organization = "{{ index . "influxdb.organization_name" }}"
-          urls = [
-            {{- range nomadService "[[ template "service_name" (list . "self" "influxdb") ]]" -}}
-            "http://{{ .Address }}:{{ .Port }}"
-            {{- end -}}
-          ]
-          {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/state" }}
-          token = "{{ index . "influxdb.telegraf_token" }}"
-          {{- end }}
-        {{- end }}
+[[ tpl (fileContents "files/telegraf/telegraf.conf.tpl") . | indent 8 ]]
         EOF
         destination = "local/telegraf.conf"
         uid         = 100
@@ -496,11 +424,11 @@ job "[[ template "job_name" (list . "self") ]]" {
       }
     }
 
-    // Telegraf starts quickly once its configuration is rendered, but on a fresh
-    // deployment it depends on InfluxDB post-configuration creating the Telegraf
-    // token and storing it in Nomad Variables. The extended deployment deadlines
-    // allow Telegraf to wait for that dependency during worst-case InfluxDB cold
-    // start, initialization, or one failed/restarted InfluxDB attempt.
+    # Telegraf starts quickly once its configuration is rendered, but on a fresh
+    # deployment it depends on InfluxDB post-configuration creating the Telegraf
+    # token and storing it in Nomad Variables. The extended deployment deadlines
+    # allow Telegraf to wait for that dependency during worst-case InfluxDB cold
+    # start, initialization, or one failed/restarted InfluxDB attempt.
     update {
       health_check      = "task_states"
       healthy_deadline  = "18m"
