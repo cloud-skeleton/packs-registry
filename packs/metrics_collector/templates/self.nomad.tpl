@@ -16,7 +16,8 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
-      interval         = "12m"
+      delay            = "15s"
+      interval         = "25m"
       mode             = "delay"
       render_templates = true
     }
@@ -26,11 +27,11 @@ job "[[ template "job_name" (list . "self") ]]" {
         address_mode = "alloc"
 
         check_restart {
-          grace = "8m"
-          limit = 3
+          grace = "7m"
+          limit = 4
         }
 
-        interval = "30s"
+        interval = "15s"
         path     = "/api/health"
         port     = 3000
         timeout  = "5s"
@@ -192,8 +193,8 @@ job "[[ template "job_name" (list . "self") ]]" {
 [[ template "tunnel_mtls" (list . "self" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "18m"
-      progress_deadline = "36m"
+      healthy_deadline  = "24m30s"
+      progress_deadline = "25m"
     }
 
     volume "ui_data" {
@@ -216,6 +217,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
+      delay            = "15s"
       interval         = "7m"
       mode             = "delay"
       render_templates = true
@@ -224,11 +226,11 @@ job "[[ template "job_name" (list . "self") ]]" {
     service {
       check {
         check_restart {
-          grace = "4m"
-          limit = 3
+          grace = "1m"
+          limit = 4
         }
 
-        interval = "30s"
+        interval = "15s"
         path     = "/health"
         port     = "influxdb"
         timeout  = "5s"
@@ -351,8 +353,8 @@ job "[[ template "job_name" (list . "self") ]]" {
     }
 
     update {
-      healthy_deadline  = "12m"
-      progress_deadline = "24m"
+      healthy_deadline  = "6m30s"
+      progress_deadline = "7m"
     }
 
     volume "db_data" {
@@ -371,7 +373,8 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
-      interval         = "2m"
+      delay            = "15s"
+      interval         = "13m"
       mode             = "delay"
       render_templates = true
     }
@@ -426,13 +429,12 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     # Telegraf starts quickly once its configuration is rendered, but on a fresh
     # deployment it depends on InfluxDB post-configuration creating the Telegraf
-    # token and storing it in Nomad Variables. The extended deployment deadlines
-    # allow Telegraf to wait for that dependency during worst-case InfluxDB cold
-    # start, initialization, or one failed/restarted InfluxDB attempt.
+    # token and storing it in Nomad Variables. These deployment deadlines allow
+    # Telegraf to wait for worst-case InfluxDB cold start and initialization.
     update {
       health_check      = "task_states"
-      healthy_deadline  = "18m"
-      progress_deadline = "36m"
+      healthy_deadline  = "12m30s"
+      progress_deadline = "13m"
     }
   }
 
