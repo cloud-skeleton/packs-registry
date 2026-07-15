@@ -13,16 +13,15 @@
 > meets all the required configurations, dependencies, and security measures necessary for a
 > successful deployment.
 
-**[Grafana][grafana], [InfluxDB][influxdb] and [Telegraf][telegraf] collect and visualize
-[Nomad][hashicorp-nomad] cluster metrics.**
+**[Grafana][grafana], [InfluxDB][influxdb] and [Telegraf][telegraf] metrics collection for
+[HashiCorp Nomad][hashicorp-nomad] clusters.**
 
-The pack deploys one **[Nomad][hashicorp-nomad]** job with **[Grafana][grafana]** dashboards,
-**[InfluxDB][influxdb]** time-series storage and **[Telegraf][telegraf]** collectors for configured
-**[Nomad][hashicorp-nomad]** cluster nodes. **[InfluxDB][influxdb]** and **[Telegraf][telegraf]** stay
-internal, while **[Grafana][grafana]** is exposed through **[Traefik][traefik]** at the configured
-hostname.
+The pack deploys **[Grafana][grafana]** for dashboards, **[InfluxDB][influxdb]** for metrics storage
+and **[Telegraf][telegraf]** for scraping **[HashiCorp Nomad][hashicorp-nomad]** node metrics into a
+`nomad` bucket. **[InfluxDB][influxdb]** stays internal with its UI disabled, while the
+**[Grafana][grafana]** UI is exposed through **[Traefik][traefik]** at the configured hostname.
 
-![Nomad dashboard](./assets/nomad-dashboard.png)
+![Metrics dashboard](./assets/nomad-dashboard.png)
 
 ## Table of Contents
 
@@ -61,11 +60,11 @@ hostname.
 
 ### Pack Variables
 
-| Variable   | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Default | Required | Description                                                                                       |
-|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|----------|---------------------------------------------------------------------------------------------------|
-| `hostname` | string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |         | ✅       | The hostname (FQDN) used to access the **[Grafana][grafana]** monitoring UI.                      |
-| `id`       | string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables. |
-| `volumes`  | object({<br>&nbsp;&nbsp;db_data&nbsp;=&nbsp;object({<br>&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;plugin_id&nbsp;=&nbsp;string<br>&nbsp;&nbsp;})<br>&nbsp;&nbsp;ui_data&nbsp;=&nbsp;object({<br>&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;plugin_id&nbsp;=&nbsp;string<br>&nbsp;&nbsp;})<br>}) |         | ✅       | CSI volume configuration for persistent data.                                                     |
+| Variable   | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Default | Required | Description                                                                                       |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|----------|---------------------------------------------------------------------------------------------------|
+| `hostname` | string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |         | ✅       | The hostname (FQDN) used to access the **[Grafana][grafana]** monitoring UI.                      |
+| `id`       | string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |         | ✅       | Unique identifier used to distinguish multiple deployments of this pack with different variables. |
+| `volumes`  | object({<br>&nbsp;&nbsp;db_data&nbsp;=&nbsp;object({<br>&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;plugin_id&nbsp;=&nbsp;string<br>&nbsp;&nbsp;})<br>&nbsp;&nbsp;ui_data&nbsp;=&nbsp;object({<br>&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;string<br>&nbsp;&nbsp;&nbsp;&nbsp;plugin_id&nbsp;=&nbsp;string<br>&nbsp;&nbsp;})<br>}) |         | ✅       | CSI volume configuration for persistent **[Grafana][grafana]** and **[InfluxDB][influxdb]** data. |
 
 #### Example `vars.hcl`
 
@@ -94,20 +93,20 @@ volumes = {
 
 ### Nomad Variables (Parameters)
 
-| Job      | Variable  | Key                          | Default          | Description                                                                                           |
-|----------|-----------|------------------------------|------------------|-------------------------------------------------------------------------------------------------------|
-| **self** | `config`  | `grafana.organization_name`  | `Cloud Skeleton` | **[Grafana][grafana]** organization name.                                                             |
-| **self** | `config`  | `influxdb.data_retention`    | `604800`         | **[InfluxDB][influxdb]** `nomad` bucket retention in seconds.                                         |
-| **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON list of **[Nomad][hashicorp-nomad]** cluster node DNS names scraped by **[Telegraf][telegraf]**. |
-| **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | **[InfluxDB][influxdb]** organization name.                                                           |
-| **self** | `images`  | `cleanstart/stunnel`         | `5.77`           | **[Docker][docker]** image tag for the ingress transport sidecar.                                     |
-| **self** | `images`  | `grafana/grafana`            | `13.1`           | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                            |
-| **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                          |
-| **self** | `images`  | `telegraf`                   | `1.39-alpine`    | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                          |
-| **self** | `secrets` | `grafana.admin_user`         |                  | Admin username for **[Grafana][grafana]**.                                                            |
-| **self** | `secrets` | `grafana.admin_password`     |                  | Admin password for **[Grafana][grafana]**.                                                            |
-| **self** | `secrets` | `influxdb.admin_user`        |                  | Admin username for **[InfluxDB][influxdb]**.                                                          |
-| **self** | `secrets` | `influxdb.admin_password`    |                  | Admin password for **[InfluxDB][influxdb]**.                                                          |
+| Job      | Variable  | Key                          | Default          | Description                                                                                                         |
+|----------|-----------|------------------------------|------------------|---------------------------------------------------------------------------------------------------------------------|
+| **self** | `config`  | `grafana.organization_name`  | `Cloud Skeleton` | Organization name configured in **[Grafana][grafana]**.                                                             |
+| **self** | `config`  | `influxdb.data_retention`    | `604800`         | Retention period, in seconds, for the **[InfluxDB][influxdb]** `nomad` bucket.                                      |
+| **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of node names whose **[HashiCorp Nomad][hashicorp-nomad]** APIs are scraped by **[Telegraf][telegraf]**. |
+| **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | Organization name configured in **[InfluxDB][influxdb]**.                                                           |
+| **self** | `images`  | `cleanstart/stunnel`         | `5.77`           | **[Docker][docker]** image tag for the ingress transport sidecar.                                                   |
+| **self** | `images`  | `grafana/grafana`            | `13.1`           | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                                          |
+| **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                                        |
+| **self** | `images`  | `telegraf`                   | `1.39-alpine`    | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                                        |
+| **self** | `secrets` | `grafana.admin_user`         |                  | Administrator username for **[Grafana][grafana]**.                                                                  |
+| **self** | `secrets` | `grafana.admin_password`     |                  | Administrator password for **[Grafana][grafana]**.                                                                  |
+| **self** | `secrets` | `influxdb.admin_user`        |                  | Administrator username for **[InfluxDB][influxdb]**.                                                                |
+| **self** | `secrets` | `influxdb.admin_password`    |                  | Administrator password for **[InfluxDB][influxdb]**.                                                                |
 
 ## Pack Layout
 
@@ -116,10 +115,17 @@ packs/metrics_collector/
 ├─ assets/
 │  └─ nomad-dashboard.png
 ├─ files/
-│  ├─ grafana.ini
-│  ├─ nomad.json
-│  ├─ postconfig_grafana.sh
-│  └─ postconfig_influxdb.sh
+│  ├─ grafana/
+│  │  ├─ dashboards-provider.yml
+│  │  ├─ grafana.ini
+│  │  ├─ influxdb-datasource.yml.tpl
+│  │  ├─ nomad-dashboard.json
+│  │  └─ postconfig_grafana.sh
+│  ├─ influxdb/
+│  │  ├─ influxdb.yml
+│  │  └─ postconfig_influxdb.sh
+│  └─ telegraf/
+│     └─ telegraf.conf.tpl
 ├─ metadata.hcl
 ├─ outputs.tpl
 ├─ README.md
@@ -133,17 +139,17 @@ packs/metrics_collector/
 
 ## Services & Ports
 
-| Service Name                            | Port Name  | Host Port | Task Port | Description                                                                                  |
-|-----------------------------------------|------------|-----------|-----------|----------------------------------------------------------------------------------------------|
-| `metrics-collector-self-http-${id}`     | `http`     | *dynamic* | `3000`    | **[Grafana][grafana]** UI exposed through **[Traefik][traefik]** at the configured hostname. |
-| `metrics-collector-self-influxdb-${id}` | `influxdb` | *dynamic* | `8086`    | **[InfluxDB][influxdb]** API.                                                                |
+| Service Name                            | Port Name  | Host Port | Task Port | Description                                                                                      |
+|-----------------------------------------|------------|-----------|-----------|--------------------------------------------------------------------------------------------------|
+| `metrics-collector-self-http-${id}`     | `http`     | *dynamic* | `3000`    | **[Grafana][grafana]** web UI exposed through **[Traefik][traefik]** at the configured hostname. |
+| `metrics-collector-self-influxdb-${id}` | `influxdb` | *dynamic* | `8086`    | **[InfluxDB][influxdb]** API.                                                                    |
 
 ## Storage
 
-| Volume    | Access Mode               | Type              | Description                                 |
-|-----------|---------------------------|-------------------|---------------------------------------------|
-| `db_data` | `multi-node-multi-writer` | `csi file-system` | **[InfluxDB][influxdb]** data and metadata. |
-| `ui_data` | `multi-node-multi-writer` | `csi file-system` | **[Grafana][grafana]** data and plugins.    |
+| Volume    | Access Mode               | Type              | Description                                                                 |
+|-----------|---------------------------|-------------------|-----------------------------------------------------------------------------|
+| `db_data` | `multi-node-multi-writer` | `csi file-system` | Persists **[InfluxDB][influxdb]** database data under `/var/lib/influxdb2`. |
+| `ui_data` | `multi-node-multi-writer` | `csi file-system` | Persists **[Grafana][grafana]** application data under `/var/lib/grafana`.  |
 
 ## Contributing
 
@@ -165,8 +171,8 @@ was developed by EU citizens who are strong proponents of the European Federatio
 [cloud-skeleton]: https://github.com/cloud-skeleton/
 [docker]: https://docs.docker.com/
 [grafana]: https://grafana.com/docs/grafana/latest/
-[hashicorp-nomad-packs]: https://developer.hashicorp.com/nomad/tools/nomad-pack
 [hashicorp-nomad]: https://developer.hashicorp.com/nomad/tutorials/get-started
+[hashicorp-nomad-packs]: https://developer.hashicorp.com/nomad/tools/nomad-pack
 [influxdb]: https://docs.influxdata.com/influxdb/v2/
 [packs-registry]: https://github.com/cloud-skeleton/packs-registry/
 [prerequisites]: https://github.com/cloud-skeleton/prerequisites
