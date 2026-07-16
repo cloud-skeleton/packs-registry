@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 JOB_MIN_HEALTHY_TIME=30
+JOB_UPDATE_PROGRESS_DEADLINE=0
 JOB_GROUP_RESTART_ATTEMPTS=2
 JOB_GROUP_SERVICE_CHECK_INTERVAL=15
 JOB_GROUP_SERVICE_CHECK_CHECK_RESTART_LIMIT=4
+NOMAD_DEFAULT_RESTART_DELAY=15
 
 APP_COLD_START=${1:-}
 
@@ -11,26 +13,21 @@ if [[ -z ${APP_COLD_START} ]]; then
     read -r -p "Enter expected app cold start time (in seconds): " APP_COLD_START
 fi
 
-# Keep restart.delay equal to the check interval. Nomad adds up to 25% jitter,
-# so use the rounded-up maximum only for worst-case recovery calculations.
-JOB_GROUP_RESTART_DELAY=${JOB_GROUP_SERVICE_CHECK_INTERVAL}
-JOB_GROUP_RESTART_DELAY_MAX=$(( (JOB_GROUP_RESTART_DELAY * 125 + 99) / 100 ))
+# Nomad's default restart delay has up to 25% jitter. Use its rounded-up maximum
+# only for worst-case recovery calculations.
+NOMAD_DEFAULT_RESTART_DELAY_MAX=$(( (NOMAD_DEFAULT_RESTART_DELAY * 125 + 99) / 100 ))
 
 JOB_GROUP_SERVICE_CHECK_CHECK_RESTART_GRACE=${APP_COLD_START}
 JOB_GROUP_RESTART_CYCLE=$((
     JOB_GROUP_SERVICE_CHECK_CHECK_RESTART_GRACE +
     JOB_GROUP_SERVICE_CHECK_INTERVAL * JOB_GROUP_SERVICE_CHECK_CHECK_RESTART_LIMIT +
-    JOB_GROUP_RESTART_DELAY_MAX
+    NOMAD_DEFAULT_RESTART_DELAY_MAX
 ))
 JOB_GROUP_UPDATE_HEALTHY_DEADLINE=$((
     JOB_GROUP_RESTART_ATTEMPTS * JOB_GROUP_RESTART_CYCLE +
     APP_COLD_START +
     JOB_GROUP_SERVICE_CHECK_INTERVAL +
     JOB_MIN_HEALTHY_TIME
-))
-JOB_GROUP_UPDATE_PROGRESS_DEADLINE=$((
-    JOB_GROUP_UPDATE_HEALTHY_DEADLINE +
-    2 * JOB_GROUP_SERVICE_CHECK_INTERVAL
 ))
 JOB_GROUP_RESTART_INTERVAL=$((
     (JOB_GROUP_RESTART_ATTEMPTS + 1) * JOB_GROUP_RESTART_CYCLE
@@ -60,8 +57,6 @@ JOB_GROUP_SERVICE_CHECK_CHECK_RESTART_GRACE=$(ceil_to_check_interval \
     "${JOB_GROUP_SERVICE_CHECK_CHECK_RESTART_GRACE}")
 JOB_GROUP_UPDATE_HEALTHY_DEADLINE=$(ceil_to_check_interval \
     "${JOB_GROUP_UPDATE_HEALTHY_DEADLINE}")
-JOB_GROUP_UPDATE_PROGRESS_DEADLINE=$(ceil_to_check_interval \
-    "${JOB_GROUP_UPDATE_PROGRESS_DEADLINE}")
 JOB_GROUP_RESTART_INTERVAL=$(ceil_to_check_interval \
     "${JOB_GROUP_RESTART_INTERVAL}")
 
@@ -70,7 +65,6 @@ job "" {
   group "" {
     restart {
       attempts = ${JOB_GROUP_RESTART_ATTEMPTS}
-      delay    = "$(format_nomad_duration "${JOB_GROUP_RESTART_DELAY}")"
       interval = "$(format_nomad_duration "${JOB_GROUP_RESTART_INTERVAL}")"
     }
 
@@ -86,13 +80,13 @@ job "" {
     }
 
     update {
-      healthy_deadline  = "$(format_nomad_duration "${JOB_GROUP_UPDATE_HEALTHY_DEADLINE}")"
-      progress_deadline = "$(format_nomad_duration "${JOB_GROUP_UPDATE_PROGRESS_DEADLINE}")"
+      healthy_deadline = "$(format_nomad_duration "${JOB_GROUP_UPDATE_HEALTHY_DEADLINE}")"
     }
   }
 
   update {
-    min_healthy_time = "$(format_nomad_duration "${JOB_MIN_HEALTHY_TIME}")"
+    min_healthy_time  = "$(format_nomad_duration "${JOB_MIN_HEALTHY_TIME}")"
+    progress_deadline = "${JOB_UPDATE_PROGRESS_DEADLINE}"
   }
 }
 EOF

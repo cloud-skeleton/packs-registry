@@ -16,7 +16,6 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
-      delay            = "15s"
       interval         = "25m"
       mode             = "delay"
       render_templates = true
@@ -193,8 +192,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 [[ template "tunnel_mtls" (list . "self" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "24m30s"
-      progress_deadline = "25m"
+      healthy_deadline = "24m30s"
     }
 
     volume "ui_data" {
@@ -217,7 +215,6 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
-      delay            = "15s"
       interval         = "7m"
       mode             = "delay"
       render_templates = true
@@ -353,8 +350,7 @@ job "[[ template "job_name" (list . "self") ]]" {
     }
 
     update {
-      healthy_deadline  = "6m30s"
-      progress_deadline = "7m"
+      healthy_deadline = "6m30s"
     }
 
     volume "db_data" {
@@ -373,7 +369,6 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     restart {
       attempts         = 2
-      delay            = "15s"
       interval         = "13m"
       mode             = "delay"
       render_templates = true
@@ -432,9 +427,8 @@ job "[[ template "job_name" (list . "self") ]]" {
     # token and storing it in Nomad Variables. These deployment deadlines allow
     # Telegraf to wait for worst-case InfluxDB cold start and initialization.
     update {
-      health_check      = "task_states"
-      healthy_deadline  = "12m30s"
-      progress_deadline = "13m"
+      health_check     = "task_states"
+      healthy_deadline = "12m30s"
     }
   }
 
@@ -467,5 +461,6 @@ job "[[ template "job_name" (list . "self") ]]" {
   update {
     auto_revert       = true
     min_healthy_time  = "30s"
+    progress_deadline = "0"
   }
 }
