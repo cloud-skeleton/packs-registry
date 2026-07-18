@@ -1,1 +1,1 @@
-../../../shared/_vars.tpl
+../../../templates/_vars.tpl
