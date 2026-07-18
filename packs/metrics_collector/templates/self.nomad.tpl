@@ -442,10 +442,10 @@ job "[[ template "job_name" (list . "self") ]]" {
     "params.config.influxdb.organization_name" = "cloud-skeleton"
 
     // Docker images used in job
-    "params.images.cleanstart/stunnel" = "5.77"
+    "params.images.cleanstart/stunnel" = "5.79"
     "params.images.grafana/grafana"    = "13.1"
     "params.images.influxdb"           = "2.9.1-alpine"
-    "params.images.telegraf"           = "1.39-alpine"
+    "params.images.telegraf"           = "1.39.1-alpine"
 
     // Volumes
     "volumes.[[ var "volumes.db_data.id" . ]].id"        = "[[ var "volumes.db_data.id" . ]]"

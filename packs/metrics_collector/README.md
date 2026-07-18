@@ -99,10 +99,10 @@ volumes = {
 | **self** | `config`  | `influxdb.data_retention`    | `604800`         | Retention period, in seconds, for the **[InfluxDB][influxdb]** `nomad` bucket.                                      |
 | **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of node names whose **[HashiCorp Nomad][hashicorp-nomad]** APIs are scraped by **[Telegraf][telegraf]**. |
 | **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | Organization name configured in **[InfluxDB][influxdb]**.                                                           |
-| **self** | `images`  | `cleanstart/stunnel`         | `5.77`           | **[Docker][docker]** image tag for the ingress transport sidecar.                                                   |
+| **self** | `images`  | `cleanstart/stunnel`         | `5.79`           | **[Docker][docker]** image tag for the ingress transport sidecar.                                                   |
 | **self** | `images`  | `grafana/grafana`            | `13.1`           | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                                          |
 | **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                                        |
-| **self** | `images`  | `telegraf`                   | `1.39-alpine`    | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                                        |
+| **self** | `images`  | `telegraf`                   | `1.39.1-alpine`  | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                                        |
 | **self** | `secrets` | `grafana.admin_user`         |                  | Administrator username for **[Grafana][grafana]**.                                                                  |
 | **self** | `secrets` | `grafana.admin_password`     |                  | Administrator password for **[Grafana][grafana]**.                                                                  |
 | **self** | `secrets` | `influxdb.admin_user`        |                  | Administrator username for **[InfluxDB][influxdb]**.                                                                |
@@ -122,7 +122,7 @@ packs/metrics_collector/
 │  │  ├─ nomad-dashboard.json
 │  │  └─ postconfig_grafana.sh
 │  ├─ influxdb/
-│  │  ├─ influxdb.yml
+│  │  ├─ influxdb.yml.tpl
 │  │  └─ postconfig_influxdb.sh
 │  └─ telegraf/
 │     └─ telegraf.conf.tpl
