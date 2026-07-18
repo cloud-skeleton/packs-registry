@@ -280,7 +280,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/influxdb/influxdb.yml" | indent 8 ]]
+[[ fileContents "files/influxdb/influxdb.yml.tpl" | indent 8 ]]
         EOF
         destination = "local/config.yml"
         uid         = 1000
