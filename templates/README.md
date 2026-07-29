@@ -52,7 +52,7 @@ README generation notes:
 -->
 ![Cloud Skeleton](../../assets/logo.jpg)
 
-[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](../../LICENSE)
 [![Tool: Nomad Pack](https://img.shields.io/badge/Tool-Nomad_Pack-green)]()
 
 # **[Cloud Skeleton][cloud-skeleton]** ► **[Packs Registry][packs-registry]**  ► **{{PACK_HANDLE}}**
@@ -245,7 +245,7 @@ Contributions and improvements to this installation script are welcome!
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0](LICENSE).
+This project is licensed under the [GNU General Public License v3.0](../../LICENSE).
 
 ---
 

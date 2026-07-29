@@ -1,6 +1,6 @@
 ![Cloud Skeleton](../../assets/logo.jpg)
 
-[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](../../LICENSE)
 [![Tool: Nomad Pack](https://img.shields.io/badge/Tool-Nomad_Pack-green)]()
 
 # **[Cloud Skeleton][cloud-skeleton]** ► **[Packs Registry][packs-registry]**  ► **metrics_collector**
@@ -100,9 +100,9 @@ volumes = {
 | **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of node names whose **[HashiCorp Nomad][hashicorp-nomad]** APIs are scraped by **[Telegraf][telegraf]**. |
 | **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | Organization name configured in **[InfluxDB][influxdb]**.                                                           |
 | **self** | `images`  | `cleanstart/stunnel`         | `5.79`           | **[Docker][docker]** image tag for the ingress transport sidecar.                                                   |
-| **self** | `images`  | `grafana/grafana`            | `13.1`           | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                                          |
+| **self** | `images`  | `grafana/grafana`            | `13.1.1`         | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                                          |
 | **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                                        |
-| **self** | `images`  | `telegraf`                   | `1.39.1-alpine`  | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                                        |
+| **self** | `images`  | `telegraf`                   | `1.39.2-alpine`  | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                                        |
 | **self** | `secrets` | `grafana.admin_user`         |                  | Administrator username for **[Grafana][grafana]**.                                                                  |
 | **self** | `secrets` | `grafana.admin_password`     |                  | Administrator password for **[Grafana][grafana]**.                                                                  |
 | **self** | `secrets` | `influxdb.admin_user`        |                  | Administrator username for **[InfluxDB][influxdb]**.                                                                |
@@ -160,7 +160,7 @@ Contributions and improvements to this installation script are welcome!
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0](LICENSE).
+This project is licensed under the [GNU General Public License v3.0](../../LICENSE).
 
 ---
 
