@@ -77,7 +77,7 @@ Follow these steps to discover, inspect, and deploy **[Nomad Packs][hashicorp-no
     Apply
 
     ```bash
-    nomad-pack destroy <PACK_NAME> -f <VARIABLES_FILE>
+    nomad-pack destroy <PACK_NAME> -f <VARIABLES_FILE> --detach
     ```
 
 ---

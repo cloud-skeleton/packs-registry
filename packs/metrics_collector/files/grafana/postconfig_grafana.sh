@@ -43,6 +43,16 @@ set_credentials() {
     fi
 }
 
+set_organization() {
+    CURRENT_ORGANIZATION="$(curl -fsu "${GRAFANA_USER}:${GRAFANA_PASSWORD}" "${GF_SERVER_ROOT_URL}/api/org" | jq -r '.name')"
+    if [ "${CURRENT_ORGANIZATION}" != "${GRAFANA_ORGANIZATION}" ]; then
+        curl -fso /dev/null -u "${GRAFANA_USER}:${GRAFANA_PASSWORD}" -H 'Content-Type: application/json' \
+            -X PUT "${GF_SERVER_ROOT_URL}/api/org" \
+            -d "$(jq -nc --arg name "${GRAFANA_ORGANIZATION}" '{name: $name}')"
+        echo 'Organization name has been changed.'
+    fi
+}
+
 wait_for_app() {
     while ! curl -fso /dev/null "${GF_SERVER_ROOT_URL}/api/health"; do
         sleep 5
@@ -58,6 +68,7 @@ wait_for_app
 if initialize; then
     set_credentials
 fi
+set_organization
 
 (( GOT_TERM )) && exit 0
 sleep infinity & SLEEP_PID=$!
