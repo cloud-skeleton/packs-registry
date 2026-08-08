@@ -54,6 +54,16 @@ README generation notes:
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](../../LICENSE)
 [![Tool: Nomad Pack](https://img.shields.io/badge/Tool-Nomad_Pack-green)]()
+<!--
+Add an Apps badge directly after the Nomad Pack badge. Derive its application names from the pack's
+primary workload tasks, preserving their user-facing product names and deployment order. Exclude
+implementation-only tasks and sidecars, including tunnels, proxies, post-configuration tasks, and
+other replaceable Cloud Skeleton plumbing. Use the exact format below: comma-and-space separators in
+the alt text and comma-underscore separators in the Shields URL. For example, Grafana, InfluxDB and
+Telegraf render as `[![Apps: Grafana, InfluxDB, Telegraf](https://img.shields.io/badge/Apps-
+Grafana,_InfluxDB,_Telegraf-violet)]()`.
+-->
+{{APPS_BADGE}}
 
 # **[Cloud Skeleton][cloud-skeleton]** ► **[Packs Registry][packs-registry]**  ► **{{PACK_HANDLE}}**
 

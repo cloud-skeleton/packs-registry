@@ -2,6 +2,7 @@
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](../../LICENSE)
 [![Tool: Nomad Pack](https://img.shields.io/badge/Tool-Nomad_Pack-green)]()
+[![Apps: Grafana, InfluxDB, Telegraf](https://img.shields.io/badge/Apps-Grafana,_InfluxDB,_Telegraf-violet)]()
 
 # **[Cloud Skeleton][cloud-skeleton]** ► **[Packs Registry][packs-registry]**  ► **metrics_collector**
 
