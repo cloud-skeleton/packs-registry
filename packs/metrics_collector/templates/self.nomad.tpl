@@ -443,7 +443,7 @@ job "[[ template "job_name" (list . "self") ]]" {
 
     // Docker images used in job
     "params.images.cleanstart/stunnel" = "5.79"
-    "params.images.grafana/grafana"    = "13.1.1"
+    "params.images.grafana/grafana"    = "13.1.3"
     "params.images.influxdb"           = "2.9.1-alpine"
     "params.images.telegraf"           = "1.39.2-alpine"
 

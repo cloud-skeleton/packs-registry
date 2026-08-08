@@ -100,7 +100,7 @@ volumes = {
 | **self** | `config`  | `influxdb.nomad_nodes`       | `[]`             | JSON array of node names whose **[HashiCorp Nomad][hashicorp-nomad]** APIs are scraped by **[Telegraf][telegraf]**. |
 | **self** | `config`  | `influxdb.organization_name` | `cloud-skeleton` | Organization name configured in **[InfluxDB][influxdb]**.                                                           |
 | **self** | `images`  | `cleanstart/stunnel`         | `5.79`           | **[Docker][docker]** image tag for the ingress transport sidecar.                                                   |
-| **self** | `images`  | `grafana/grafana`            | `13.1.1`         | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                                          |
+| **self** | `images`  | `grafana/grafana`            | `13.1.3`         | **[Docker][docker]** image tag for **[Grafana][grafana]**.                                                          |
 | **self** | `images`  | `influxdb`                   | `2.9.1-alpine`   | **[Docker][docker]** image tag for **[InfluxDB][influxdb]**.                                                        |
 | **self** | `images`  | `telegraf`                   | `1.39.2-alpine`  | **[Docker][docker]** image tag for **[Telegraf][telegraf]**.                                                        |
 | **self** | `secrets` | `grafana.admin_user`         |                  | Administrator username for **[Grafana][grafana]**.                                                                  |
