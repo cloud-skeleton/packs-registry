@@ -26,24 +26,17 @@ README generation notes:
   tools, and other replaceable ingress plumbing, unless the user configures that component
   directly. If the pack has Traefik labels, say it is exposed through **[Traefik][traefik]**; do
   not add generic fallback wording such as "or the configured reverse proxy".
-- Keep Markdown tables padded in source after final content is generated so every column pipe
-  aligns to the longest raw Markdown source cell in that final table, even when padded rows exceed
-  120 characters. For table sizing, a cell segment is the text between two pipe characters. First
-  compute each column's maximum trimmed cell-content width from all final header and body rows,
-  using literal Markdown source rather than rendered text: count markup and inline HTML such as
-  `**[Grafana][grafana]**`, `<br>` and `&nbsp;` as cell content. Treat each emoji such as `✅` or
-  `❌` as visual width 2 for table padding. Then set that column's final segment width to the
-  maximum trimmed content width plus 2, for one leading and one trailing space. Separator segments
-  must contain exactly that many hyphens. Every non-separator segment must be written as one leading
-  space, the final cell content, right padding spaces, and one trailing space, with total visual
-  segment width exactly matching the separator segment. Do not force emoji rows to have the same
-  byte/source-character length if that makes the closing pipe drift one column to the right in the
-  editor. Do not size columns from template placeholder widths, first rows, examples, unlinked text,
-  rendered text, or pre-link text. Before finishing generation, re-read the Markdown source and fix
-  any non-table line over 120 characters or visibly misaligned table. As a final table check, every
-  pipe in a column must appear in the same visual column for every row in that table. If any final
-  content row is longer than the header or separator row, including rows with nested object types,
-  recompute the column widths and repad the whole table.
+- Pad Markdown tables only after all final content is known; table rows may exceed 120 characters.
+  A cell is the text between two pipes. For each column, find the maximum trimmed width among its
+  final header and body cells, using literal Markdown source: markup, `<br>`, and `&nbsp;` count.
+  Treat `✅` and `❌` as visual width 2. Set the separator to exactly that maximum plus 2 hyphens.
+  Then give every content cell exactly one leading space, its content, and only enough right padding
+  for its segment to match the separator. This is exact, never a minimum: no fixed widths, margins,
+  placeholder widths, safety padding, or retained outer whitespace are allowed. Before finishing,
+  reject and repad any column whose separator is not exactly `max(final_cell_widths) + 2`; every
+  pipe in that column must align visually. Do not size columns from rendered text, examples,
+  pre-link text, or a first row. Re-read the Markdown source and fix any non-table line over 120
+  characters.
 - Do not copy template comments, BEGIN_AUTO/END_AUTO markers, or unresolved {{PLACEHOLDERS}} into
   generated pack README files.
 - Preserve fixed template text exactly, including the prerequisite warning block.
@@ -119,6 +112,9 @@ For binary capability rows such as CSI volumes and Ingress, use only `✅` or `�
 generic component labels such as CSI volumes plain, without reference links. Put detailed volume
 names, ingress routing, proxy, or transport information in Storage or Services sections instead.
 Render Resources as `**CPU:** X MHz <br> **RAM:** Y MB`, but size the column from final content.
+Calculate CPU and RAM by summing every explicit `resources` block that can run concurrently in the
+pack, including lifecycle and post-configuration tasks plus tasks expanded from shared templates or
+symlinked template files. Do not omit sidecars or substitute rounded application-only estimates.
 Render namespace and node class values as code-formatted literals, for example `system`.
 -->
 | Component      | Requirement / Note  |
@@ -145,8 +141,20 @@ append explanatory text for simple yes/no values; put any needed detail in a sep
 
 <!-- BEGIN_AUTO:VARIABLES_TABLE -->
 <!--
-Use raw HCL type names such as string/object(...), not italicized types. For nested object types, use
-<br> with &nbsp; padding so attribute names and equals signs stay aligned inside the Type cell.
+Use raw HCL type names such as string/object(...), not italicized types. Copy nested type delimiters
+exactly from variables.hcl: `object({` must retain its opening `{`, and closing `})` must be present.
+Preserve the source punctuation and line structure exactly; do not add optional commas, alter
+separators, or otherwise normalize HCL formatting while converting lines to `<br>`.
+Remove only the source indentation that precedes the type expression. Preserve all indentation inside
+that expression exactly: a source member indented by two spaces after `object({` must use exactly two
+`&nbsp;` entities, not four.
+For nested object types, use <br> with &nbsp; padding so attribute names and equals signs stay aligned
+inside the Type cell. Encode every indentation and alignment space as `&nbsp;`, including spaces
+before and after `=`. Never use ordinary spaces for alignment because HTML collapses them. For
+example, render `object({` as `object({<br>` rather than `object(<br>`, and render an assignment as
+`&nbsp;&nbsp;db_data&nbsp;=&nbsp;object({`.
+Calculate every table column independently. A wide Type value must not add padding to the Default,
+Required, or Description columns; each uses only its own longest final cell plus two spaces.
 -->
 | Variable  | Type | Default | Required | Description |
 |-----------|------|---------|----------|-------------|
@@ -182,9 +190,12 @@ Preserve key order from templates/_vars.tpl.
 ## Pack Layout
 
 <!--
-Keep Pack Layout limited to tracked/distributable pack files. Omit ignored/local-only files such as
-debug.var.hcl. Sort entries alphabetically inside each directory. If assets/ exists and should be
-documented, render it through {{ASSETS_LAYOUT}} directly under packs/{{PACK_HANDLE}}/.
+Keep Pack Layout limited to tracked/distributable pack files, including symlinks. Omit
+ignored/local-only files such as debug.var.hcl. A symlink in the pack directory is part of the pack:
+list the symlink's own name at its location, even when its target is a shared template outside the
+pack, for example `templates/_vars.tpl`. Sort entries alphabetically inside each directory. If
+assets/ exists and should be documented, render it through {{ASSETS_LAYOUT}} directly under
+packs/{{PACK_HANDLE}}/.
 -->
 
 ```
@@ -224,6 +235,9 @@ including Nomad, Traefik, Grafana, InfluxDB and Telegraf, unless the cell text i
 generic concepts such as TLS, mTLS, HTTP, HTTPS, ingress, proxy and sidecar unlinked. Preserve Nomad
 interpolation syntax exactly, for example `${id}`, instead of replacing it with `<id>`. Do not invent
 interpolation for pack variables in prose unless that exact string appears in the pack template.
+In the Service Name column, render the actual value produced by each `service.name` expression, not
+the task name or product name. When the shared `service_name` helper is used, preserve its generated
+pattern and `${id}` interpolation exactly, for example `metrics-collector-self-http-${id}`.
 -->
 | Service Name  | Port Name | Host Port | Task Port | Description |
 |---------------|-----------|-----------|-----------|-------------|
@@ -240,6 +254,9 @@ storage products, databases and application names, unless the cell text is alrea
 storage concepts such as CSI, file-system, bucket, volume, database and engine unlinked. Preserve
 Nomad volume values exactly: use the job's `access_mode` value, and combine `type` plus
 `attachment_mode` for Type, for example `csi file-system`.
+In the Volume column, use the literal label declared by `volume "..."`, for example `db_data`, rather
+than its `source` expression, pack variable path, or resolved variable value.
+Sort volume rows alphanumerically by their literal Volume column labels.
 -->
 | Volume    | Access Mode | Type              | Description |
 |-----------|-------------|-------------------|-------------|
@@ -271,5 +288,6 @@ was developed by EU citizens who are strong proponents of the European Federatio
 <!--
 Reference entries in generated pack README files must be copied from `templates/ref.md`. If a
 required product/tool/project reference is missing there, add it to `templates/ref.md` first, then use
-the same key and URL here. Include only references used by the generated README.
+the same key and URL here. Include only references used by the generated README, sorted
+alphanumerically by reference key.
 -->
