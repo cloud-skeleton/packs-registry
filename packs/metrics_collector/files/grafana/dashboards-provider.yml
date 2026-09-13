@@ -1,0 +1,9 @@
+---
+apiVersion: 1
+providers:
+  - folder: Cloud Skeleton
+    name: builtin_dashboards
+    options:
+      foldersFromFilesStructure: false
+      path: /local/dashboards
+...

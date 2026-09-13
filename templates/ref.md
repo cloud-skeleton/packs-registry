@@ -1,0 +1,12 @@
+[cloud-skeleton]: https://github.com/cloud-skeleton/
+[docker]: https://docs.docker.com/
+[grafana]: https://grafana.com/docs/grafana/latest/
+[hashicorp-nomad-packs]: https://developer.hashicorp.com/nomad/tools/nomad-pack
+[hashicorp-nomad]: https://developer.hashicorp.com/nomad/tutorials/get-started
+[influxdb]: https://docs.influxdata.com/influxdb/v2/
+[lets-encrypt]: https://letsencrypt.org/getting-started/
+[packs-registry]: https://github.com/cloud-skeleton/packs-registry/
+[prerequisites]: https://github.com/cloud-skeleton/prerequisites
+[ssl-labs]: https://www.ssllabs.com/ssltest/
+[telegraf]: https://docs.influxdata.com/telegraf/v1/
+[traefik]: https://doc.traefik.io/traefik/

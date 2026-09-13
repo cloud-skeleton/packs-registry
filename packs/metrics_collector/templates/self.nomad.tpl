@@ -1,4 +1,4 @@
-job "[[ template "job_name" (list . "ingester") ]]" {
+job "[[ template "job_name" (list . "self") ]]" {
   constraint {
     attribute = "${node.class}"
     operator  = "="
@@ -16,7 +16,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     restart {
       attempts         = 2
-      interval         = "2m"
+      interval         = "25m"
       mode             = "delay"
       render_templates = true
     }
@@ -26,25 +26,25 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         address_mode = "alloc"
 
         check_restart {
-          grace = "13m"
-          limit = 3
+          grace = "7m"
+          limit = 4
         }
 
-        interval = "30s"
+        interval = "15s"
         path     = "/api/health"
         port     = 3000
-        timeout  = "2s"
+        timeout  = "5s"
         type     = "http"
       }
 
-      name     = "[[ template "service_name" (list . "ingester" "http") ]]"
+      name     = "[[ template "service_name" (list . "self" "http") ]]"
       port     = "http"
       provider = "nomad"
       tags = [
         "traefik.enable=true",
         "traefik.hostname=[[ var "hostname" . ]]",
-        "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.serversTransport=mtls@file",
-        "traefik.http.services.[[ template "service_name" (list . "ingester" "http") ]].loadbalancer.server.scheme=https"
+        "traefik.http.services.[[ template "service_name" (list . "self" "http") ]].loadbalancer.serversTransport=mtls@file",
+        "traefik.http.services.[[ template "service_name" (list . "self" "http") ]].loadbalancer.server.scheme=https"
       ]
       task = "tunnel"
     }
@@ -73,10 +73,10 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/images" }}
         DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/state" }}
         GF_SECURITY_SECRET_KEY="{{ index . "grafana.secret_key" }}"
         {{- end }}
         EOF
@@ -86,53 +86,28 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/grafana.ini" | indent 8 ]]
+[[ fileContents "files/grafana/grafana.ini" | indent 8 ]]
         EOF
         destination = "../alloc/grafana.ini"
       }
 
       template {
         data        = <<-EOF
-[[ fileContents "files/nomad.json" | indent 8 ]]
+[[ fileContents "files/grafana/nomad-dashboard.json" | indent 8 ]]
         EOF
         destination = "local/dashboards/nomad.json"
       }
 
       template {
         data        = <<-EOF
-        apiVersion: 1
-        providers:
-          - folder: Cloud Skeleton
-            name: builtin_dashboards
-            options:
-              path: /local/dashboards
-              foldersFromFilesStructure: false
+[[ fileContents "files/grafana/dashboards-provider.yml" | indent 8 ]]
         EOF
         destination = "local/dashboards/dashboards.yml"
       }
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
-        apiVersion: 1
-        datasources:
-          - access: proxy
-            isDefault: true
-            jsonData:
-              dbName: nomad
-              httpMode: POST
-              product: InfluxDB OSS 2.x
-              version: InfluxQL
-            name: influxdb
-            secureJsonData:
-              password: {{ index . "influxdb.grafana_token" }}
-            type: influxdb
-            user: grafana
-            {{- range nomadService "[[ template "service_name" (list . "ingester" "influxdb") ]]" }}
-            url: http://{{ .Address }}:{{ .Port }}
-            {{- end }}
-            uid: 0000-0000-0000-0000
-        {{- end }}
+[[ tpl (fileContents "files/grafana/influxdb-datasource.yml.tpl") . | indent 8 ]]
         EOF
         destination = "local/datasources/influxdb.yml"
       }
@@ -184,19 +159,22 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/postconfig_grafana.sh" | indent 8 ]]
+[[ fileContents "files/grafana/postconfig_grafana.sh" | indent 8 ]]
         EOF
         destination = "local/postconfig_grafana.sh"
       }
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/images" }}
         DOCKER_IMAGE="grafana/grafana:{{ index . "grafana/grafana" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/secrets" }}
         GRAFANA_USER="{{ index . "grafana.admin_user" }}"
         GRAFANA_PASSWORD="{{ index . "grafana.admin_password" }}"
+        {{- end }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/config" }}
+        GRAFANA_ORGANIZATION="{{ index . "grafana.organization_name" }}"
         {{- end }}
         EOF
         destination = "secrets/env"
@@ -211,18 +189,17 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
-[[ template "tunnel_mtls" (list . "ingester" (dict "http" 3000)) ]]
+[[ template "tunnel_mtls" (list . "self" (dict "http" 3000)) ]]
 
     update {
-      healthy_deadline  = "15m"
-      progress_deadline = "31m"
+      healthy_deadline = "24m30s"
     }
 
     volume "ui_data" {
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
       read_only       = false
-      source          = "[[ var "ui_data_volume.id" . ]]"
+      source          = "[[ var "volumes.ui_data.id" . ]]"
       type            = "csi"
     }
   }
@@ -238,7 +215,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     restart {
       attempts         = 2
-      interval         = "2m"
+      interval         = "7m"
       mode             = "delay"
       render_templates = true
     }
@@ -247,17 +224,17 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       check {
         check_restart {
           grace = "1m"
-          limit = 3
+          limit = 4
         }
 
-        interval = "30s"
+        interval = "15s"
         path     = "/health"
         port     = "influxdb"
-        timeout  = "2s"
+        timeout  = "5s"
         type     = "http"
       }
 
-      name     = "[[ template "service_name" (list . "ingester" "influxdb") ]]"
+      name     = "[[ template "service_name" (list . "self" "influxdb") ]]"
       port     = "influxdb"
       provider = "nomad"
       task     = "influxdb"
@@ -289,9 +266,11 @@ job "[[ template "job_name" (list . "ingester") ]]" {
         memory = 256
       }
 
+      shutdown_delay = "5s"
+
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/images" }}
         DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
         {{- end }}
         EOF
@@ -301,27 +280,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        ---
-        bolt-path: /var/lib/influxdb2/influxd.bolt
-        engine-path: /var/lib/influxdb2/engine
-        hardening-enabled: true
-        instance-id: "{{ env "NOMAD_ALLOC_ADDR_influxdb" }}"
-        metrics-disabled: true
-        pprof-disabled: true
-        query-concurrency: 2
-        query-initial-memory-bytes: 8388608
-        query-memory-bytes: 16777216
-        query-queue-size: 12
-        reporting-disabled: true
-        storage-cache-max-memory-size: 16777216
-        storage-cache-snapshot-memory-size: 8388608
-        storage-compact-throughput-burst: 8388608
-        storage-max-concurrent-compactions: 1
-        storage-retention-check-interval: 60m0s
-        storage-shard-precreator-check-interval: 30m0s
-        strong-passwords: true
-        ui-disabled: true
-        ...
+[[ fileContents "files/influxdb/influxdb.yml.tpl" | indent 8 ]]
         EOF
         destination = "local/config.yml"
         uid         = 1000
@@ -366,21 +325,21 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-[[ fileContents "files/postconfig_influxdb.sh" | indent 8 ]]
+[[ fileContents "files/influxdb/postconfig_influxdb.sh" | indent 8 ]]
         EOF
         destination = "local/postconfig_influxdb.sh"
       }
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/images" }}
         DOCKER_IMAGE="influxdb:{{ index . "influxdb" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/secrets" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/secrets" }}
         INFLUX_USER="{{ index . "influxdb.admin_user" }}"
         INFLUX_PASSWORD="{{ index . "influxdb.admin_password" }}"
         {{- end }}
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/config" }}
         INFLUX_ORGANIZATION="{{ index . "influxdb.organization_name" }}"
         INFLUX_DATA_RETENTION="{{ index . "influxdb.data_retention" }}"
         {{- end }}
@@ -391,15 +350,14 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     }
 
     update {
-      healthy_deadline  = "5m"
-      progress_deadline = "11m"
+      healthy_deadline = "6m30s"
     }
 
     volume "db_data" {
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
       read_only       = false
-      source          = "[[ var "db_data_volume.id" . ]]"
+      source          = "[[ var "volumes.db_data.id" . ]]"
       type            = "csi"
     }
   }
@@ -411,7 +369,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
     restart {
       attempts         = 2
-      interval         = "2m"
+      interval         = "13m"
       mode             = "delay"
       render_templates = true
     }
@@ -446,7 +404,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/images" }}
+        {{- with nomadVar "params/[[ template "job_name" (list . "self") ]]/images" }}
         DOCKER_IMAGE="telegraf:{{ index . "telegraf" }}"
         {{- end }}
         EOF
@@ -456,34 +414,7 @@ job "[[ template "job_name" (list . "ingester") ]]" {
 
       template {
         data        = <<-EOF
-        {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/config" }}
-        [agent]
-          debug = true
-          omit_hostname = true
-          skip_processors_after_aggregators = true
-
-        {{ range $nomad_node := (index . "influxdb.nomad_nodes").Value | parseJSON -}}
-        [[ "[[" ]]inputs.nomad[[ "]]" ]]
-          url = "https://{{ $nomad_node }}:4646"
-          tls_ca = "/run/secrets/nomad-agent-ca.pem"
-          [inputs.nomad.tags]
-            app_name = "nomad"
-
-        {{ end -}}
-
-        [[ "[[" ]]outputs.influxdb_v2[[ "]]" ]]
-          bucket_tag = "app_name"
-          exclude_bucket_tag = true
-          organization = "{{ index . "influxdb.organization_name" }}"
-          urls = [
-            {{- range nomadService "[[ template "service_name" (list . "ingester" "influxdb") ]]" -}}
-            "http://{{ .Address }}:{{ .Port }}"
-            {{- end -}}
-          ]
-          {{- with nomadVar "params/[[ template "job_name" (list . "ingester") ]]/state" }}
-          token = "{{ index . "influxdb.telegraf_token" }}"
-          {{- end }}
-        {{- end }}
+[[ tpl (fileContents "files/telegraf/telegraf.conf.tpl") . | indent 8 ]]
         EOF
         destination = "local/telegraf.conf"
         uid         = 100
@@ -491,10 +422,13 @@ job "[[ template "job_name" (list . "ingester") ]]" {
       }
     }
 
+    # Telegraf starts quickly once its configuration is rendered, but on a fresh
+    # deployment it depends on InfluxDB post-configuration creating the Telegraf
+    # token and storing it in Nomad Variables. These deployment deadlines allow
+    # Telegraf to wait for worst-case InfluxDB cold start and initialization.
     update {
-      health_check      = "task_states"
-      healthy_deadline  = "5m"
-      progress_deadline = "11m"
+      health_check     = "task_states"
+      healthy_deadline = "12m30s"
     }
   }
 
@@ -502,29 +436,31 @@ job "[[ template "job_name" (list . "ingester") ]]" {
     [[- template "extra_pack_meta" . ]]
 
     // Dynamic configuration
+    "params.config.grafana.organization_name"  = "Cloud Skeleton"
     "params.config.influxdb.data_retention"    = "604800"
     "params.config.influxdb.nomad_nodes"       = "[]"
     "params.config.influxdb.organization_name" = "cloud-skeleton"
 
     // Docker images used in job
-    "params.images.cleanstart/stunnel" = "5.77"
-    "params.images.grafana/grafana"    = "13.0.1"
+    "params.images.cleanstart/stunnel" = "5.79"
+    "params.images.grafana/grafana"    = "13.1.3"
     "params.images.influxdb"           = "2.9.1-alpine"
-    "params.images.telegraf"           = "1.38.4-alpine"
+    "params.images.telegraf"           = "1.39.2-alpine"
 
     // Volumes
-    "volumes.[[ var "db_data_volume.id" . ]].id"        = "[[ var "db_data_volume.id" . ]]"
-    "volumes.[[ var "db_data_volume.id" . ]].name"      = "[[ var "db_data_volume.name" . ]]"
-    "volumes.[[ var "db_data_volume.id" . ]].plugin_id" = "[[ var "db_data_volume.plugin_id" . ]]"
-    "volumes.[[ var "ui_data_volume.id" . ]].id"        = "[[ var "ui_data_volume.id" . ]]"
-    "volumes.[[ var "ui_data_volume.id" . ]].name"      = "[[ var "ui_data_volume.name" . ]]"
-    "volumes.[[ var "ui_data_volume.id" . ]].plugin_id" = "[[ var "ui_data_volume.plugin_id" . ]]"
+    "volumes.[[ var "volumes.db_data.id" . ]].id"        = "[[ var "volumes.db_data.id" . ]]"
+    "volumes.[[ var "volumes.db_data.id" . ]].name"      = "[[ var "volumes.db_data.name" . ]]"
+    "volumes.[[ var "volumes.db_data.id" . ]].plugin_id" = "[[ var "volumes.db_data.plugin_id" . ]]"
+    "volumes.[[ var "volumes.ui_data.id" . ]].id"        = "[[ var "volumes.ui_data.id" . ]]"
+    "volumes.[[ var "volumes.ui_data.id" . ]].name"      = "[[ var "volumes.ui_data.name" . ]]"
+    "volumes.[[ var "volumes.ui_data.id" . ]].plugin_id" = "[[ var "volumes.ui_data.plugin_id" . ]]"
   }
 
   namespace = "system"
 
   update {
     auto_revert       = true
-    min_healthy_time  = "2m"
+    min_healthy_time  = "30s"
+    progress_deadline = "0"
   }
 }
